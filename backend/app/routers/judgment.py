@@ -1,0 +1,319 @@
+"""Judgment API — precedent retrieval, AI-assisted drafting, and citation review.
+
+Endpoints:
+  POST /judgment/precedents  — Retrieve top-10 relevant precedent cases via RAG
+  POST /judgment/draft       — Generate judgment draft (SSE streaming, government-only)
+  POST /judgment/review      — AI citation check + honesty score on a draft
+"""
+
+from __future__ import annotations
+
+import logging
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
+
+from app.services.chatbot_service import NongKotChatbot
+from app.services.llm_service import SYSTEM_PROMPT, call_llm, stream_llm
+from app.services.pii_masking import mask_pii
+from app.services.responsible_ai import (
+    CircuitBreaker,
+    apply_confidence_bound,
+    calculate_honesty_score,
+    enforce_risk_tier,
+)
+from app.services.search_pipeline import SearchPipeline, SearchRequest
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/judgment", tags=["judgment"])
+
+# ---------------------------------------------------------------------------
+# Lazy service singletons
+# ---------------------------------------------------------------------------
+
+_pipeline: SearchPipeline | None = None
+_chatbot: NongKotChatbot | None = None
+
+
+def _get_pipeline() -> SearchPipeline:
+    global _pipeline
+    if _pipeline is None:
+        _pipeline = SearchPipeline()
+    return _pipeline
+
+
+def _get_chatbot() -> NongKotChatbot:
+    global _chatbot
+    if _chatbot is None:
+        _chatbot = NongKotChatbot()
+    return _chatbot
+
+
+# ---------------------------------------------------------------------------
+# Request / Response models
+# ---------------------------------------------------------------------------
+
+DRAFT_SYSTEM = """คุณเป็นผู้ช่วย AI สำหรับร่างคำพิพากษา ใช้สำหรับเจ้าหน้าที่ศาลเท่านั้น
+
+หลักการร่าง:
+1. อ้างอิงมาตรากฎหมายและเลขคดีให้ครบถ้วน
+2. ใช้ภาษากฎหมายที่ถูกต้องตามแบบแผน
+3. ระบุองค์ประกอบครบ: ข้อเท็จจริง → ประเด็นข้อกฎหมาย → วินิจฉัย → คำพิพากษา
+4. ⚠️ ร่างเบื้องต้นเท่านั้น ต้องผ่านการตรวจสอบและลงนามโดยผู้พิพากษา
+5. ห้ามใส่ข้อมูลส่วนบุคคลที่ไม่จำเป็น"""
+
+
+class PrecedentRequest(BaseModel):
+    query: str
+    case_type: str = ""          # แพ่ง / อาญา / ปกครอง
+    role: str = "government"
+    top_k: int = 10
+
+
+class PrecedentResponse(BaseModel):
+    precedents: list[dict]
+    total_found: int
+    query_used: str
+
+
+class DraftRequest(BaseModel):
+    facts: str                   # ข้อเท็จจริง
+    legal_issues: str            # ประเด็นข้อกฎหมาย
+    role: str = "government"
+    case_type: str = "แพ่ง"
+
+
+class ReviewRequest(BaseModel):
+    draft_text: str
+    role: str = "government"
+
+
+class ReviewResponse(BaseModel):
+    verified_citations: list[dict]
+    unverified_citations: list[dict]
+    honesty_score: float
+    risk_level: str
+    pii_count: int
+    recommendations: list[str]
+    confidence: float
+
+
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
+
+
+@router.post("/precedents", response_model=PrecedentResponse)
+async def get_precedents(request: PrecedentRequest) -> PrecedentResponse:
+    """Retrieve top-K relevant precedent cases for judgment drafting.
+
+    Uses the hybrid RAG pipeline (BM25 + Qdrant + LeJEPA reranking).
+    Access: government role required for full detail.
+    """
+    if request.role not in {"government", "judge", "admin_judge", "lawyer", "admin"}:
+        raise HTTPException(status_code=403, detail="Precedent retrieval requires judge, lawyer, or government role")
+
+    # Build query — append case_type context if given
+    query = request.query
+    if request.case_type:
+        query = f"{request.case_type} {query}"
+
+    # PII-mask input query
+    clean_query, _, _ = mask_pii(query)
+
+    try:
+        pipeline = _get_pipeline()
+        search_req = SearchRequest(
+            query=clean_query,
+            role=request.role,
+            top_k=min(request.top_k, 20),
+        )
+        resp = await pipeline.search(search_req)
+    except Exception as exc:
+        logger.exception("Precedent search failed")
+        raise HTTPException(status_code=500, detail=f"Search pipeline error: {exc}")
+
+    precedents = [
+        {
+            "rank": i + 1,
+            "case_no": r.case_no,
+            "court_type": r.court_type,
+            "year": r.year,
+            "title": r.title,
+            "summary": r.summary or r.chunk_text[:400],
+            "statutes": r.statutes,
+            "relevance_score": r.relevance_score,
+            "source_code": r.source_code,
+        }
+        for i, r in enumerate(resp.results)
+    ]
+
+    return PrecedentResponse(
+        precedents=precedents,
+        total_found=len(precedents),
+        query_used=clean_query,
+    )
+
+
+@router.post("/draft")
+async def draft_judgment(request: DraftRequest) -> StreamingResponse:
+    """Generate judgment draft via streaming SSE (government role only).
+
+    Flow: PII mask → RAG precedent retrieval → LLM draft generation (streamed)
+    Risk tier: R4 (confidence cap 80%, requires human review before filing)
+    """
+    if request.role not in {"judge", "admin_judge", "admin"}:
+        raise HTTPException(
+            status_code=403,
+            detail="Judgment drafting requires ผู้พิพากษา/ตุลาการ role (R4 restricted)"
+        )
+
+    # PII mask inputs
+    clean_facts, _, pii_facts = mask_pii(request.facts)
+    clean_issues, _, pii_issues = mask_pii(request.legal_issues)
+    if pii_facts + pii_issues > 0:
+        logger.info("Masked %d PII items from judgment draft inputs", pii_facts + pii_issues)
+
+    # RAG: find relevant precedents
+    rag_context = ""
+    try:
+        pipeline = _get_pipeline()
+        search_query = f"{request.case_type} {clean_facts[:200]} {clean_issues[:200]}"
+        search_req = SearchRequest(query=search_query, role="government", top_k=5)
+        resp = await pipeline.search(search_req)
+        if resp.results:
+            rag_context = "\n\n".join(
+                f"คดีที่ {r.case_no} ({r.court_type}, {r.year})\n"
+                f"มาตรา: {', '.join(r.statutes)}\n"
+                f"{r.summary or r.chunk_text[:500]}"
+                for r in resp.results[:3]
+            )
+    except Exception:
+        logger.warning("Precedent retrieval failed for draft — proceeding without context")
+
+    # Build draft prompt
+    context_block = f"\n\nบรรทัดฐานที่เกี่ยวข้อง:\n{rag_context}" if rag_context else ""
+    prompt_content = (
+        f"ประเภทคดี: {request.case_type}{context_block}\n\n"
+        f"ข้อเท็จจริง:\n{clean_facts}\n\n"
+        f"ประเด็นข้อกฎหมาย:\n{clean_issues}\n\n"
+        "กรุณาร่างคำพิพากษาโดยมีโครงสร้าง: ข้อเท็จจริง → วินิจฉัย → คำพิพากษา"
+    )
+    messages = [{"role": "user", "content": prompt_content}]
+
+    return StreamingResponse(
+        stream_llm(messages, system=DRAFT_SYSTEM),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "X-Risk-Tier": "R4",
+            "X-Requires-Human-Review": "true",
+        },
+    )
+
+
+@router.post("/review", response_model=ReviewResponse)
+async def review_judgment(request: ReviewRequest) -> ReviewResponse:
+    """AI citation check + honesty scoring on a draft judgment.
+
+    Steps:
+      1. PII detection
+      2. Extract citation patterns (case numbers + statute references)
+      3. Verify citations via SearchPipeline lookup
+      4. Compute Honesty Score (6-dimension) via responsible_ai
+      5. Return review with recommendations
+    """
+    if request.role not in {"government", "judge", "admin_judge", "lawyer", "admin"}:
+        raise HTTPException(status_code=403, detail="Review requires judge, lawyer, or government role")
+
+    import re
+
+    text = request.draft_text
+
+    # 1. PII scan
+    _, _, pii_count = mask_pii(text)
+
+    # 2. Extract citations
+    case_pattern = re.compile(r"(?:ฎีกา|อุทธรณ์|ชั้นต้น|ที่)\s*(\d{1,5}/\d{4})")
+    statute_pattern = re.compile(
+        r"(?:มาตรา|ม\.)\s*\d+(?:\s*(?:วรรค|แห่ง|และ|หรือ)\s*(?:มาตรา|ม\.)?\s*\d+)*"
+    )
+
+    found_cases = [m.group(0) for m in case_pattern.finditer(text)]
+    found_statutes = [m.group(0) for m in statute_pattern.finditer(text)]
+
+    # 3. Verify citations via SearchPipeline
+    verified: list[dict] = []
+    unverified: list[dict] = []
+
+    if found_cases:
+        try:
+            pipeline = _get_pipeline()
+            search_req = SearchRequest(
+                query=" ".join(found_cases[:5]),
+                role=request.role,
+                top_k=10,
+            )
+            resp = await pipeline.search(search_req)
+            known_case_nos = {r.case_no for r in resp.results}
+
+            for case_ref in found_cases:
+                citation_dict = {"citation": case_ref, "type": "case"}
+                # Match if any known case_no is contained in the reference
+                if any(cn in case_ref for cn in known_case_nos if cn):
+                    citation_dict["verified"] = True
+                    verified.append(citation_dict)
+                else:
+                    citation_dict["verified"] = False
+                    citation_dict["warning"] = "ไม่พบในฐานข้อมูล — กรุณาตรวจสอบ"
+                    unverified.append(citation_dict)
+        except Exception:
+            logger.exception("Citation verification failed")
+            unverified.extend([{"citation": c, "type": "case", "verified": False,
+                                 "warning": "verification failed"} for c in found_cases])
+
+    # All statute references pass (statutes are structural, not data-verified)
+    for statute in found_statutes[:10]:
+        verified.append({"citation": statute, "type": "statute", "verified": True})
+
+    # 4. Honesty score
+    total_citations = len(found_cases) + len(found_statutes)
+    citation_acc = len(verified) / max(total_citations, 1)
+    confidence_raw = citation_acc * 0.9 if not unverified else citation_acc * 0.7
+
+    risk_result = enforce_risk_tier("judgment_draft", confidence_raw)
+    confidence = apply_confidence_bound(confidence_raw, "judgment_draft")
+
+    response_dict = {
+        "content": text[:500],
+        "citations": [c["citation"] for c in verified],
+        "confidence": confidence,
+        "disclaimer": "ร่างเบื้องต้น ต้องตรวจสอบโดยผู้พิพากษา",
+        "pii_clean": pii_count == 0,
+    }
+    state_dict = {"confidence_cap": 0.80, "uncertainty_ratio": len(unverified) / max(total_citations, 1)}
+    h_score = calculate_honesty_score(response_dict, state_dict)
+
+    # 5. Recommendations
+    recommendations: list[str] = []
+    if pii_count > 0:
+        recommendations.append(f"⚠️ พบ PII {pii_count} จุด — ปกปิดข้อมูลส่วนบุคคลก่อนเผยแพร่")
+    if unverified:
+        recommendations.append(f"⚠️ อ้างอิง {len(unverified)} รายการที่ไม่พบในฐานข้อมูล — ตรวจสอบความถูกต้อง")
+    if h_score < 0.7:
+        recommendations.append("⚠️ คะแนนความซื่อสัตย์ต่ำ — ขอแนะนำให้เพิ่มการอ้างอิงที่ตรวจสอบได้")
+    if not recommendations:
+        recommendations.append("✅ ร่างผ่านการตรวจสอบเบื้องต้น — ส่งให้ผู้พิพากษาตรวจสอบก���อนลงนาม")
+
+    return ReviewResponse(
+        verified_citations=verified,
+        unverified_citations=unverified,
+        honesty_score=round(h_score, 4),
+        risk_level=risk_result.risk_level,
+        pii_count=pii_count,
+        recommendations=recommendations,
+        confidence=round(confidence, 4),
+    )

@@ -1,0 +1,63 @@
+"""Tests for CAL-130 audit log service."""
+import hashlib
+from app.services.audit_service import AuditService, _sha256
+
+
+def _make_service(n: int = 3) -> AuditService:
+    svc = AuditService()
+    for i in range(n):
+        svc.log_entry(query=f"query {i}", action="search", result_count=i)
+    return svc
+
+
+class TestLogEntry:
+    def test_first_entry_genesis(self):
+        svc = AuditService()
+        e = svc.log_entry(query="hello", action="search")
+        assert e.prev_hash == "genesis"
+        assert e.entry_hash != ""
+
+    def test_chain_links(self):
+        svc = AuditService()
+        first = svc.log_entry(query="q1", action="search")
+        second = svc.log_entry(query="q2", action="chat")
+        assert second.prev_hash == first.entry_hash
+
+    def test_query_hash_sha256(self):
+        svc = AuditService()
+        e = svc.log_entry(query="test", action="search")
+        assert e.query_hash == hashlib.sha256(b"test").hexdigest()
+
+    def test_preview_truncated(self):
+        svc = AuditService()
+        e = svc.log_entry(query="x" * 500, action="search")
+        assert len(e.query_preview) == 200
+
+
+class TestChainIntegrity:
+    def test_valid(self):
+        svc = _make_service(5)
+        assert svc.verify_chain_integrity()["valid"] is True
+
+    def test_broken(self):
+        svc = _make_service(4)
+        svc._entries[2].entry_hash = "tampered"
+        r = svc.verify_chain_integrity()
+        assert r["valid"] is False
+        assert r["broken_at"] == 1
+
+    def test_empty_valid(self):
+        assert AuditService().verify_chain_integrity()["valid"] is True
+
+
+class TestStats:
+    def test_total(self):
+        assert _make_service(3).get_stats()["total"] == 3
+
+    def test_by_action(self):
+        svc = AuditService()
+        svc.log_entry(query="a", action="search")
+        svc.log_entry(query="b", action="chat")
+        s = svc.get_stats()
+        assert s["by_action"]["search"] == 1
+        assert s["by_action"]["chat"] == 1

@@ -1,0 +1,26 @@
+# Traccar Geocoder — self-hosted reverse geocoding from OpenStreetMap
+# ข้อมูลไม่ออกนอก VPC → ตอบโจทย์ PDPA data sovereignty
+#
+# Usage:
+#   docker compose -f docker-compose.geocoder.yml up -d
+#   curl "http://localhost:3000/reverse?lat=13.7563&lon=100.5018&key=YOUR_KEY"
+
+services:
+  geocoder:
+    image: traccar/traccar-geocoder
+    container_name: legalguard-geocoder
+    environment:
+      # Thailand OSM data (~300MB PBF, ~1GB index)
+      - PBF_URLS=https://download.geofabrik.de/asia/thailand-latest.osm.pbf
+    ports:
+      - "3001:3000"
+    volumes:
+      - geocoder-data:/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+volumes:
+  geocoder-data:

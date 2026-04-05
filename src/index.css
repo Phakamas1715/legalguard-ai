@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    /* Luxury Judicial Palette — Deep Navy, Institutional Gold, & Serene Backgrounds */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221 83% 24%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 20% 40%;
+
+    --accent: 38 80% 42%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 24%;
+
+    --radius: 1rem;
+
+    /* Professional Brand Tokens */
+    --navy: 221 83% 24%;
+    --navy-deep: 222 47% 11%;
+    --gold: 38 75% 50%;
+    --gold-light: 38 75% 96%;
+    --teal: 174 60% 34%;
+    --teal-light: 174 50% 95%;
+    
+    /* Performance & Confidence Metrics */
+    --confidence-high: 142 71% 38%;
+    --confidence-medium: 38 80% 42%;
+    --confidence-low: 0 84% 50%;
+
+    /* Sophisticated Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(221 83% 24%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(38 75% 50%) 0%, hsl(42 80% 60%) 100%);
+    --gradient-glass: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+
+    /* Premium Shadows */
+    --shadow-sm: 0 2px 4px 0 rgba(0,0,0,0.02);
+    --shadow-md: 0 4px 20px -2px rgba(12, 44, 78, 0.08);
+    --shadow-lg: 0 20px 40px -12px rgba(12, 44, 78, 0.15);
+    --shadow-gold: 0 8px 30px rgba(133, 79, 11, 0.15);
+
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 221 83% 24%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 221 83% 24%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 221 83% 24%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Sans Thai', 'Sarabun', sans-serif;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  /* Elderly-friendly: larger base, better focus rings */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
+  }
+
+  ::selection {
+    background: hsl(var(--gold) / 0.25);
+  }
+}
+
+@layer components {
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-card-hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .confidence-badge-high {
+    @apply text-sm font-semibold px-3 py-1 rounded-full;
+    background: hsl(var(--confidence-high) / 0.12);
+    color: hsl(var(--confidence-high));
+  }
+
+  .confidence-badge-medium {
+    @apply text-sm font-semibold px-3 py-1 rounded-full;
+    background: hsl(var(--confidence-medium) / 0.12);
+    color: hsl(var(--confidence-medium));
+  }
+
+  .confidence-badge-low {
+    @apply text-sm font-semibold px-3 py-1 rounded-full;
+    background: hsl(var(--confidence-low) / 0.12);
+    color: hsl(var(--confidence-low));
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

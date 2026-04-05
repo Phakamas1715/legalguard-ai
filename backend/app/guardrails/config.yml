@@ -1,0 +1,36 @@
+# NeMo Guardrails Configuration for LegalGuard AI
+# Prevents hallucination, PII leakage, and harmful content in legal domain
+
+models:
+  - type: main
+    engine: bedrock
+    model: anthropic.claude-3-5-sonnet-20241022-v2:0
+
+rails:
+  input:
+    flows:
+      - check harmful content thai
+      - check pii in input
+      - check prompt injection
+      - check jailbreak attempt
+
+  output:
+    flows:
+      - check hallucination
+      - check pii in output
+      - add legal disclaimer
+      - enforce confidence bound
+
+  config:
+    # Anti-hallucination: block responses without citations
+    hallucination_threshold: 0.5
+
+    # PII: block any PII in output
+    pii_detection: true
+    pii_entities:
+      - thai_national_id
+      - phone_number
+      - email
+      - address
+      - person_name
+      - bank_account

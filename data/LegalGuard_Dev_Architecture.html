@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LegalGuard AI — Dev Architecture Reference</title>
+<style>
+  :root {
+    --ink: #1a1a18; --muted: #5f5e5a; --faint: #888780;
+    --surface: #ffffff; --raised: #f5f4f0; --border: #dedad4;
+    --blue: #185fa5; --dblue: #0d3b6e; --teal: #0f6e56;
+    --amber: #854f0b; --red: #a32d2d; --purple: #3c3489;
+    --lb: #e6f1fb; --lg: #eaf3de; --la: #faeeda; --lr: #fcebeb; --lp: #eeedfe;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0ede6; color: var(--ink); font-size: 13px; line-height: 1.5; }
+  
+  /* LAYOUT */
+  .page { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+  .header { background: var(--dblue); color: #fff; border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: .75; margin-top: 4px; }
+  .header-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .hbadge { font-size: 10px; padding: 3px 9px; border-radius: 20px; background: rgba(255,255,255,.15); color: #fff; }
+  .stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-n { font-size: 22px; font-weight: 700; color: var(--dblue); }
+  .stat-l { font-size: 10px; color: var(--faint); margin-top: 3px; }
+  
+  /* TABS */
+  .tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tab { font-size: 11px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--raised); color: var(--muted); cursor: pointer; }
+  .tab.on { background: var(--dblue); color: #fff; border-color: var(--dblue); font-weight: 600; }
+  .pg { display: none; }
+  .pg.on { display: block; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .card h3 { font-size: 13px; font-weight: 700; color: var(--dblue); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .card p, .card li { font-size: 12px; color: var(--muted); line-height: 1.65; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  /* CODE */
+  .code { font-family: 'Courier New', monospace; font-size: 11px; background: #f8f7f3; border: 1px solid var(--border); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 10px 14px; color: var(--ink); line-height: 1.9; white-space: pre-wrap; margin: 8px 0; overflow-x: auto; }
+  .code .cm { color: #888; }
+  .code .ck { color: var(--blue); font-weight: 600; }
+  .code .cs { color: var(--teal); }
+  .code .cn { color: var(--amber); }
+
+  /* SECTION LABELS */
+  .sec { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin: 18px 0 10px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .sec:first-child { border-top: none; padding-top: 0; }
+
+  /* HIGHLIGHTS */
+  .hl { border-left: 4px solid var(--blue); padding: 9px 13px; background: var(--lb); border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 12px; color: var(--muted); }
+  .hl-g { border-left: 4px solid var(--teal); padding: 9px 13px; background: var(--lg); border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 12px; color: #0f6e56; }
+  .hl-r { border-left: 4px solid var(--red); padding: 9px 13px; background: var(--lr); border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 12px; color: var(--red); }
+  .hl-a { border-left: 4px solid var(--amber); padding: 9px 13px; background: var(--la); border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 12px; color: var(--amber); }
+
+  /* LAYER CARDS */
+  .layer { display: flex; gap: 12px; align-items: flex-start; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; }
+  .layer-num { min-width: 36px; height: 36px; border-radius: 8px; background: var(--dblue); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .layer-body { flex: 1; }
+  .layer-title { font-size: 13px; font-weight: 700; color: var(--dblue); margin-bottom: 3px; }
+  .layer-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .layer-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+  .tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
+  .t-b { background: var(--lb); color: var(--blue); }
+  .t-g { background: var(--lg); color: var(--teal); }
+  .t-a { background: var(--la); color: var(--amber); }
+  .t-r { background: var(--lr); color: var(--red); }
+  .t-p { background: var(--lp); color: var(--purple); }
+  .t-gr { background: var(--raised); color: var(--muted); }
+  .layer-owner { font-size: 10px; color: var(--faint); margin-left: auto; white-space: nowrap; padding-top: 2px; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th { background: var(--dblue); color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--raised); }
+  tr:last-child td { border-bottom: none; }
+
+  /* DATASET CARDS */
+  .ds-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .ds-title { font-size: 12px; font-weight: 700; color: var(--dblue); margin-bottom: 4px; }
+  .ds-url { font-size: 11px; color: var(--blue); margin-bottom: 6px; word-break: break-all; }
+  .ds-meta { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .ds-status { font-size: 10px; padding: 2px 7px; border-radius: 8px; float: right; }
+  .s-ready { background: var(--lg); color: var(--teal); }
+  .s-pending { background: var(--la); color: var(--amber); }
+  .s-custom { background: var(--lp); color: var(--purple); }
+
+  /* SCHEMA */
+  .schema-table { font-family: 'Courier New', monospace; font-size: 11px; background: #1a1a18; color: #c8c6be; border-radius: 10px; padding: 14px 16px; margin: 8px 0; line-height: 2; }
+  .sk { color: #569cd6; } .sc { color: #4ec9b0; } .sn { color: #ce9178; } .sv { color: #b5cea8; }
+
+  /* FLOW ARROWS */
+  .flow { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin: 10px 0; font-size: 11px; }
+  .flow-box { background: var(--lb); color: var(--blue); border: 1px solid #b5d4f4; border-radius: 6px; padding: 4px 9px; font-weight: 600; white-space: nowrap; }
+  .flow-arr { color: var(--faint); font-size: 14px; }
+
+  /* CHECKLIST */
+  .chk { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .chk:last-child { border-bottom: none; }
+  .chk-icon { min-width: 18px; font-size: 13px; }
+  .chk-text { font-size: 12px; color: var(--muted); flex: 1; }
+  .chk-owner { font-size: 10px; color: var(--faint); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <h1>LegalGuard AI v2.3 — Architecture Reference</h1>
+      <p>คู่มือสถาปัตยกรรมและ Dataset สำหรับทีม Dev | ETDA Hackathon 2026</p>
+      <div class="header-badges">
+        <span class="hbadge">RAAIA 3.1</span>
+        <span class="hbadge">AWS EKS</span>
+        <span class="hbadge">WangchanX 1024-dim</span>
+        <span class="hbadge">FAISS IVF/PQ</span>
+        <span class="hbadge">FastAPI</span>
+        <span class="hbadge">Updated: เม.ย. 2026</span>
+      </div>
+    </div>
+    <div style="text-align:right;font-size:11px;opacity:.7">
+      127,800 indexed records<br>
+      6.03 GB corpus<br>
+      2.1 GB FAISS index
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" style="color:#185fa5">93.7%</div><div class="stat-l">Hit@3 Accuracy</div></div>
+    <div class="stat"><div class="stat-n" style="color:#0f6e56">99.5%</div><div class="stat-l">Safety Score</div></div>
+    <div class="stat"><div class="stat-n" style="color:#185fa5">99.8%</div><div class="stat-l">PII Recall</div></div>
+    <div class="stat"><div class="stat-n" style="color:#854f0b">689ms</div><div class="stat-l">P95 Latency</div></div>
+    <div class="stat"><div class="stat-n" style="color:#0f6e56">0.96</div><div class="stat-l">H-Score</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab on" onclick="show('arch')">สถาปัตยกรรม 7 Layer</div>
+    <div class="tab" onclick="show('dataset')">Dataset & Corpus</div>
+    <div class="tab" onclick="show('schema')">Database Schema</div>
+    <div class="tab" onclick="show('pipeline')">Data Pipeline</div>
+    <div class="tab" onclick="show('stack')">Tech Stack</div>
+    <div class="tab" onclick="show('checklist')">Dev Checklist</div>
+  </div>
+
+  <!-- ARCH -->
+  <div id="pg-arch" class="pg on">
+    <div class="sec">สถาปัตยกรรม 7 ชั้น — ทุก Layer มี Owner + Metric</div>
+
+    <div class="layer">
+      <div class="layer-num">L0</div>
+      <div class="layer-body">
+        <div class="layer-title"><strong>RagQueryRouter</strong> — Query Intent Analysis</div>
+        <div class="layer-desc">วิเคราะห์คำถามแล้วเลือกว่าจะค้นแบบไหน (เนื้อหา/ความสัมพันธ์/สถิติ/ผสม) โดยสกัด keywords: "มาตรา, ฎีกา, ผลคำพิพากษา"<br>
+        <strong>PersistentMemory:</strong> จำบริบทข้ามรอบ (เช่น ถามเรื่องเดิมต่อจากมาตราที่เพิ่งค้น)</div>
+        <div class="layer-meta">
+          <span class="tag t-b">Memory-aware routing</span>
+          <span class="tag t-g">Target P50: ≤80ms</span>
+          <span class="tag t-a">Intent: ค้นเนื้อหา / ความสัมพันธ์</span>
+        </div>
+      </div>
+      <div class="layer-owner">ML Engineer</div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num">L1</div>
+      <div class="layer-body">
+        <div class="layer-title"><strong>VectorRetrievalAdapter</strong> + Graph Retrieval</div>
+        <div class="layer-desc"><strong>EmbeddingService:</strong> ค้นหาด้วยความหมาย (Semantic) + Lexical Fallback ถ้า embedding ล่ม<br>
+        <strong>KnowledgeGraphStore:</strong> แผนผังความสัมพันธ์ (มาตรา→อ้างอิง, บรรทัดฐาน→หลักกฎหมาย, กฎหมายเก่า→ใหม่)</div>
+        <div class="layer-meta">
+          <span class="tag t-b">Graph Store Integration</span>
+          <span class="tag t-g">Recall@10 ≥95%</span>
+          <span class="tag t-r">Lexical Fallback Ready</span>
+        </div>
+      </div>
+      <div class="layer-owner">ML Engineer</div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num">L2</div>
+      <div class="layer-body">
+        <div class="layer-title">Contextual Quality Filter — RQS Check (RAAIA Agent 1)</div>
+        <div class="layer-desc">Retrieval Quality Score: ตรวจ logical consistency, citation validity<br>
+        <strong>[Parallel Debate]:</strong> ประมวลผลขนานพร้อมกับ L3 และ L5 เพื่อสรุป Consensus Score</div>
+        <div class="layer-meta">
+          <span class="tag t-g">Precision ≥96.3%</span>
+          <span class="tag t-a">False rejection ≤3%</span>
+          <span class="tag t-p">Multi-Agent Consensus path</span>
+        </div>
+      </div>
+      <div class="layer-owner">ML Eng + Sr Dev</div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num">L3</div>
+      <div class="layer-body">
+        <div class="layer-title">Fairness Filtering — CFS Calculation (RAAIA Agent 2)</div>
+        <div class="layer-desc">CFS = 0.3·F_geo + 0.3·F_court + 0.4·F_time<br>
+        <strong>[Parallel Debate]:</strong> ส่งคะแนน Fairness เข้าร่วม Consensus กับ L2 และ L5</div>
+        <div class="layer-meta">
+          <span class="tag t-g">CFS ≥93.5%</span>
+          <span class="tag t-p">Multi-Agent Consensus path</span>
+          <span class="tag t-a">F_time weight 0.4</span>
+        </div>
+      </div>
+      <div class="layer-owner">ML Eng + Policy Lead</div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num">L4</div>
+      <div class="layer-body">
+        <div class="layer-title"><strong>RagOrchestrationService</strong> — Hybrid Scoring + Reranking</div>
+        <div class="layer-desc">รวมผลจากทุก Adapter มาเรียงตาม Confidence (Hybrid Score) พร้อม <strong>Audit Trail</strong> (Log ทุกขั้นตอน)<br>
+        LeJEPA Reranking: เข้าใจบริบทเชิงลึกเพื่อจัดอันดับ Top-3</div>
+        <div class="layer-meta">
+          <span class="tag t-g">Audit Log 100%</span>
+          <span class="tag t-b">LeJEPA +4.6% vs BERT</span>
+          <span class="tag t-a">Latency budget: 142ms</span>
+        </div>
+      </div>
+      <div class="layer-owner">Backend Dev</div>
+    </div>
+
+    <div class="layer" style="border-color:#a32d2d">
+      <div class="layer-num" style="background:#a32d2d">L5</div>
+      <div class="layer-body">
+        <div class="layer-title" style="color:#a32d2d">RAAIA 3.1 Safety Gate — Amazon Bedrock Guardrails (Agent 3)</div>
+        <div class="layer-desc"><strong>AWS Lake Formation:</strong> คุมสิทธิ์การเข้าถึงข้อมูลคดีแพ่ง/อาญาตาม Role<br>
+        <strong>Bedrock Guardrails:</strong> PII Masking & Policy restriction ป้องกันข้อมูลหลุดรอด (Recall 99.8%)<br>
+        <strong>[Parallel Debate]:</strong> L2, L3, L5 โหวตร่วมกันยืนยัน Consensus Score (Agents for Bedrock)<br>
+        Attack blocking: Default-deny 99.9% ผ่าน AWS WAF</div>
+        <div class="layer-meta">
+          <span class="tag t-r">Safety ≥99.5%</span>
+          <span class="tag t-r">PII Recall ≥99.8%</span>
+          <span class="tag t-r">Bedrock Guardrails</span>
+          <span class="tag t-a">AWS Lake Formation</span>
+        </div>
+      </div>
+      <div class="layer-owner">SecEng + ML Eng</div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num">L6</div>
+      <div class="layer-body">
+        <div class="layer-title"><strong>Multi-Agent Orchestrator</strong> — Intelligent Reasoning (Amazon Bedrock)</div>
+        <div class="layer-desc">
+          ประสานงาน Agents (RESEARCHER/REVIEWER/COMPLIANCE) ผ่าน <strong>Legal Multi-Agent Orchestrator</strong><br>
+          <strong>Legal Reasoning Agent:</strong> คิดแบบ Multi-step พร้อม Reflection ตรวจสอบความถูกต้องก่อนส่ง<br>
+          CAL-130: บันทึกทุก Agent Decision เข้า <strong>Audit Log (SHA-256 Hash Chain)</strong> เพื่อความโปร่งใสสูงสุด
+        </div>
+        <div class="layer-meta">
+          <span class="tag t-g">Agentic Reasoning</span>
+          <span class="tag t-g">Consensus-based</span>
+          <span class="tag t-b">Audit Trail: 100%</span>
+        </div>
+      </div>
+      <div class="layer-owner">Full Stack Dev</div>
+    </div>
+
+    <div class="hl-a">⚠️ Latency Budget ทั้งระบบ: L1 Retrieval 412ms + L4 Reranking 142ms + L5 Safety 35ms + Network 100ms = <strong>689ms P95</strong> — ทุก Layer ต้องอยู่ในงบ</div>
+  </div>
+
+  <!-- DATASET -->
+  <div id="pg-dataset" class="pg">
+    <div class="sec">Corpus ปัจจุบัน — ข้อมูลที่มีแล้ว</div>
+    <div class="g3">
+      <div class="card">
+        <h3>ศาลฎีกา</h3>
+        <p>~15,000 records<br>คำพิพากษาสูงสุด<br>แผนกคดีพิเศษรวม</p>
+      </div>
+      <div class="card">
+        <h3>ศาลอุทธรณ์ (11 ศาล)</h3>
+        <p>~45,000 records<br>ศาลอุทธรณ์กลาง + ภาค 1–9<br>คดีชำนัญพิเศษ</p>
+      </div>
+      <div class="card">
+        <h3>ศาลชั้นต้น (262 ศาล)</h3>
+        <p>~67,800 records<br>ศาลจังหวัด 111 + แขวง 39<br>เยาวชน สาขา ฯลฯ</p>
+      </div>
+    </div>
+
+    <div class="hl">Corpus รวม: <strong>176,543 records | 6.03 GB</strong> | Indexed (FAISS ready): <strong>127,800 records</strong> | Pending QC: 48,743 records</div>
+
+    <div class="sec">HuggingFace Datasets — เปิดสาธารณะ ใช้ได้เลย</div>
+
+    <div class="ds-card">
+      <span class="ds-status s-ready">✅ พร้อมใช้</span>
+      <div class="ds-title">WangchanX-Legal-ThaiCCL-RAG</div>
+      <div class="ds-url">huggingface.co/datasets/airesearch/WangchanX-Legal-ThaiCCL-RAG</div>
+      <div class="ds-meta">Thai legal RAG dataset สำหรับ retrieval | ใช้เป็น validation set | format: Q&A pairs พร้อม context</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-ready">✅ พร้อมใช้</span>
+      <div class="ds-title">WangchanX-Legal-ThaiCCL-Refusal</div>
+      <div class="ds-url">huggingface.co/datasets/panuthept/WangchanX-Legal-ThaiCCL-Refusal</div>
+      <div class="ds-meta">ชุดข้อมูลสำหรับ train abstention logic | สำคัญสำหรับ L6 — สอน AI รู้จักปฏิเสธตอบ</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-ready">✅ พร้อมใช้</span>
+      <div class="ds-title">ThaiLaw Dataset (pythainlp)</div>
+      <div class="ds-url">huggingface.co/datasets/pythainlp/thailaw</div>
+      <div class="ds-meta">กฎหมายไทยฉบับเต็ม | ใช้สำหรับ Domain Adaptation | format: text/CSV</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-ready">✅ พร้อมใช้</span>
+      <div class="ds-title">RAG Thai Laws (iapp)</div>
+      <div class="ds-url">huggingface.co/datasets/iapp/rag_thai_laws</div>
+      <div class="ds-meta">Thai laws สำหรับ RAG pipeline | ครอบคลุมกฎหมายหลายฉบับ</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-ready">✅ พร้อมใช้</span>
+      <div class="ds-title">Thai Traffic Law RAG / Thai Land Tax</div>
+      <div class="ds-url">huggingface.co/datasets/Apiwat01/thai-traffic-law-rag<br>huggingface.co/datasets/monoboard/thai-land-tax-legal-qa</div>
+      <div class="ds-meta">Domain-specific datasets | ใช้เป็น supplementary corpus สำหรับ edge cases</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-pending">⏳ รอรับจากศาล</span>
+      <div class="ds-title">Custom Dataset ชุด A — ศาลยุติธรรม</div>
+      <div class="ds-meta">คำพิพากษาศาลฎีกา 100K+, แบบฟอร์ม e-Filing, คู่มือ e-Filing v1/v2, คำพิพากษา anonymized<br>
+      Format: JSONL (Prompt-Completion) | สถานะ: รอ MOU กับ COJ</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-pending">⏳ รอรับจากศาล</span>
+      <div class="ds-title">Custom Dataset ชุด B — ศาลปกครอง</div>
+      <div class="ds-meta">คำพิพากษาศาลปกครองสูงสุด, แบบ ปค.1, พ.ร.บ. จัดตั้ง, Landmark Cases 50–100 คดี<br>
+      Format: JSONL (Instruction-based) | สถานะ: รอรับจากศาลปกครอง</div>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-status s-custom">🔧 สร้างเอง</span>
+      <div class="ds-title">Legal Vocabulary Dataset</div>
+      <div class="ds-meta">พจนานุกรมกฎหมายไทย, คำศัพท์เฉพาะทาง, รูปแบบหนังสือราชการ<br>
+      Format: Text/CSV | ใช้สำหรับ Query Expansion ใน L0</div>
+    </div>
+  </div>
+
+  <!-- SCHEMA -->
+  <div id="pg-schema" class="pg">
+    <div class="sec">Database Schema — 6 Tables หลัก</div>
+    <div class="g2">
+      <div>
+        <div class="schema-table"><span class="sk">CREATE TABLE</span> <span class="sc">judgments</span> (
+  <span class="sk">id</span>           <span class="sv">UUID</span> <span class="sk">PRIMARY KEY</span>,
+  <span class="sk">case_no</span>      <span class="sv">VARCHAR</span>(<span class="sn">50</span>) NOT NULL,
+  <span class="sk">court_type</span>   <span class="sv">ENUM</span>(<span class="sn">'supreme','appeal',
+                'district','admin'</span>),
+  <span class="sk">year</span>         <span class="sv">INT</span>,
+  <span class="sk">province</span>     <span class="sv">VARCHAR</span>(<span class="sn">100</span>),
+  <span class="sk">statute_refs</span> <span class="sv">JSON</span>,
+  <span class="sk">content</span>      <span class="sv">TEXT</span>,       <span class="cm">-- anonymized</span>
+  <span class="sk">embedding</span>    <span class="sv">VECTOR</span>(<span class="sn">1024</span>), <span class="cm">-- pgvector</span>
+  <span class="sk">cfs_score</span>    <span class="sv">FLOAT</span>,
+  <span class="sk">pii_masked</span>   <span class="sv">BOOLEAN</span> DEFAULT TRUE
+);</div>
+        <div class="schema-table"><span class="sk">CREATE TABLE</span> <span class="sc">audit_logs</span> (
+  <span class="sk">id</span>             <span class="sv">UUID</span> <span class="sk">PRIMARY KEY</span>,
+  <span class="sk">query_hash</span>     <span class="sv">VARCHAR</span>(<span class="sn">64</span>),  <span class="cm">-- SHA-256</span>
+  <span class="sk">user_id</span>        <span class="sv">VARCHAR</span>(<span class="sn">100</span>),
+  <span class="sk">h_score</span>        <span class="sv">FLOAT</span>,
+  <span class="sk">action</span>         <span class="sv">VARCHAR</span>(<span class="sn">50</span>),
+  <span class="sk">timestamp</span>      <span class="sv">TIMESTAMP</span>,
+  <span class="sk">prev_hash</span>      <span class="sv">VARCHAR</span>(<span class="sn">64</span>)  <span class="cm">-- chain!</span>
+);  <span class="cm">-- IMMUTABLE — no DELETE allowed</span></div>
+      </div>
+      <div>
+        <div class="schema-table"><span class="sk">CREATE TABLE</span> <span class="sc">metadata</span> (
+  <span class="sk">id</span>           <span class="sv">UUID</span> <span class="sk">PRIMARY KEY</span>,
+  <span class="sk">judgment_id</span>  <span class="sv">UUID</span> <span class="sk">REFERENCES</span> judgments,
+  <span class="sk">statute_no</span>   <span class="sv">VARCHAR</span>[],
+  <span class="sk">citations</span>    <span class="sv">UUID</span>[],
+  <span class="sk">keywords</span>     <span class="sv">TEXT</span>[],
+  <span class="sk">summary</span>      <span class="sv">TEXT</span>
+);</div>
+        <div class="schema-table"><span class="sk">CREATE TABLE</span> <span class="sc">pii_masks</span> (
+  <span class="sk">id</span>           <span class="sv">UUID</span> <span class="sk">PRIMARY KEY</span>,
+  <span class="sk">doc_id</span>       <span class="sv">UUID</span>,
+  <span class="sk">spans</span>        <span class="sv">JSON</span>,  <span class="cm">-- [{start,end,type}]</span>
+  <span class="sk">masked_text</span>  <span class="sv">TEXT</span>,
+  <span class="sk">created_at</span>   <span class="sv">TIMESTAMP</span>
+);</div>
+        <div class="schema-table"><span class="sk">CREATE TABLE</span> <span class="sc">vector_index_mapping</span> (
+  <span class="sk">id</span>             <span class="sv">UUID</span>,
+  <span class="sk">judgment_id</span>    <span class="sv">UUID</span>,
+  <span class="sk">vector_id</span>      <span class="sv">BIGINT</span>,  <span class="cm">-- FAISS ID</span>
+  <span class="sk">chunk_idx</span>      <span class="sv">INT</span>,
+  <span class="sk">embedding_hash</span> <span class="sv">VARCHAR</span>(<span class="sn">64</span>)
+);</div>
+      </div>
+    </div>
+
+    <div class="sec">FAISS Index Configuration</div>
+    <div class="card">
+      <div class="code"><span class="cm"># FAISS IVF+PQ Configuration</span>
+d = 1024              <span class="cm"># WangchanX embedding dimension</span>
+nlist = 1000          <span class="cm"># IVF clusters (√127800 ≈ 357, ×3 = 1000)</span>
+M = 64                <span class="cm"># PQ subvectors</span>
+nbits = 8             <span class="cm"># bits per subvector</span>
+
+index = faiss.IndexIVFPQ(quantizer, d, nlist, M, nbits)
+index.nprobe = 10     <span class="cm"># search 10 clusters (speed/recall tradeoff)</span>
+
+<span class="cm"># Index stats</span>
+Total vectors: 127,800
+Index size:    2.1 GB  (vs 512 MB raw — 512x compression)
+Query time:    &lt;50ms avg</div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div id="pg-pipeline" class="pg">
+    <div class="sec">Data Ingestion Pipeline — Document → Vector Index</div>
+    <div class="flow">
+      <span class="flow-box">PDF / TXT / Hugging Face Datasets (API)</span>
+      <span class="flow-arr">→</span>
+      <span class="flow-box">Federated Ingestion Engine (mjs)</span>
+      <span class="flow-arr">→</span>
+      <span class="flow-box">PII Masking</span>
+      <span class="flow-arr">→</span>
+      <span class="flow-box">Text Chunking (512 tok, 50 overlap)</span>
+      <span class="flow-arr">→</span>
+      <span class="flow-box">WangchanX Embed (1024-dim)</span>
+      <span class="flow-arr">→</span>
+      <span class="flow-box">FAISS IVF/PQ Index</span>
+      <span class="flow-arr">→</span>
+      <span class="flow-box">PostgreSQL + vector_index_mapping</span>
+    </div>
+
+    <div class="card">
+      <h3>Code: Hybrid Search Implementation</h3>
+      <div class="code"><span class="cm"># Layer 1 — Hybrid Retrieval (Python)</span>
+<span class="ck">import</span> faiss, numpy <span class="ck">as</span> np
+<span class="ck">from</span> rank_bm25 <span class="ck">import</span> BM25Okapi
+
+<span class="cm"># Step 1: FAISS semantic search (70%)</span>
+query_vector = wangchanx_model.encode(query_text)
+query_vector = query_vector / np.linalg.norm(query_vector)
+D, I = faiss_index.search(
+    query_vector.reshape(1, -1), k=50
+)
+faiss_scores = <span class="cs">normalize</span>(1 - D[0] / D[0].max())
+
+<span class="cm"># Step 2: BM25 keyword search (30%)</span>
+tokenized = pythainlp_tokenize(query_text)
+bm25_raw = bm25_index.get_scores(tokenized)
+bm25_scores = <span class="cs">normalize</span>(bm25_raw)
+
+<span class="cm"># Step 3: Hybrid combine</span>
+hybrid_scores = <span class="cn">0.7</span> * faiss_scores + <span class="cn">0.3</span> * bm25_scores
+
+<span class="cm"># Step 4: Final reranking score</span>
+final = <span class="cn">0.5</span>*similarity + <span class="cn">0.3</span>*cfs + <span class="cn">0.2</span>*confidence
+top3 = final.argsort()[-<span class="cn">3</span>:][::-<span class="cn">1</span>]</div>
+    </div>
+
+    <div class="card">
+      <h3>Code: CBB Safety Gate</h3>
+      <div class="code"><span class="cm"># Layer 5 — CBB Confidence Cap</span>
+<span class="ck">def</span> <span class="cs">compute_p_responsible</span>(posterior, uu_penalty, u_ethical=<span class="cn">0.98</span>, margin=<span class="cn">0.02</span>):
+    option_a = u_ethical * uu_penalty
+    option_b = posterior + margin
+    p_resp = <span class="cs">min</span>(option_a, option_b)
+    
+    <span class="ck">if</span> p_resp < <span class="cn">0.90</span>:
+        <span class="ck">return</span> <span class="sn">"ABSTAIN"</span>, p_resp  <span class="cm"># ← trigger abstention</span>
+    <span class="ck">return</span> <span class="sn">"RESPOND"</span>, p_resp
+
+<span class="cm"># PII Masking Pipeline</span>
+<span class="ck">def</span> <span class="cs">mask_pii</span>(text):
+    entities = ner_model.predict(text)      <span class="cm"># NER</span>
+    patterns = regex_scanner.scan(text)    <span class="cm"># Pattern match</span>
+    rules = rule_engine.apply(text)        <span class="cm"># Rules</span>
+    all_spans = merge_spans(entities + patterns + rules)
+    <span class="ck">return</span> replace_spans(text, all_spans)  <span class="cm"># Recall 99.2%</span>
+
+<span class="cm"># CAL-130 Audit Chain</span>
+<span class="ck">def</span> <span class="cs">log_query</span>(query_hash, prev_hash, h_score):
+    record = {<span class="sn">"hash"</span>: sha256(query_hash + prev_hash), ...}
+    db.insert(<span class="sn">"audit_logs"</span>, record)  <span class="cm"># NEVER delete</span></div>
+    </div>
+
+    <div class="sec">AWS Pipeline Architecture</div>
+    <div class="g2">
+      <div class="card">
+        <h3>Data Layer</h3>
+        <p>S3 Data Lake: raw docs (PDF/TXT/XML) 6.03GB<br>
+        AWS Glue + Step Functions: ETL pipeline<br>
+        Amazon Textract: OCR for scanned PDFs<br>
+        RDS PostgreSQL + pgvector: structured + embedding storage<br>
+        ElastiCache Redis: query cache + rate limiting</p>
+      </div>
+      <div class="card">
+        <h3>Compute Layer</h3>
+        <p>EKS (3-AZ): FastAPI pods + ML inference pods<br>
+        EBS gp3: FAISS index storage (2.1 GB)<br>
+        SageMaker: Fine-tuning WangchanX-Legal<br>
+        Amazon Bedrock: LLM layer (Claude 3.5 / Nova)<br>
+        Lambda: async PII processing jobs</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div id="pg-stack" class="pg">
+    <div class="sec">Tech Stack Matrix — ทุก Component พร้อม Version</div>
+    <table>
+      <tr><th>Category</th><th>Technology</th><th>Version / Config</th><th>Purpose</th><th>Status</th></tr>
+      <tr><td>Backend Framework</td><td>FastAPI + Uvicorn</td><td>Python 3.10+</td><td>ASGI API server</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Async Tasks</td><td>Celery + Redis</td><td>Redis 7.x</td><td>PII masking, audit logging async</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Thai NLP Embedding</td><td>WangchanX-Legal</td><td>1024-dim</td><td>Semantic embedding ภาษาไทยกฎหมาย</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Vector Search</td><td>FAISS IVF+PQ</td><td>Meta FAISS</td><td>Semantic retrieval 127,800 vectors</td><td><span class="tag t-g">✅ Indexed</span></td></tr>
+      <tr><td>Keyword Search</td><td>BM25Okapi</td><td>rank-bm25</td><td>Exact keyword matching</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Reranker</td><td>LeJEPA (Joint-Embedding)</td><td>λ=0.02</td><td>วิเคราะห์ World Model Semantics เพิ่มความแม่นยำ +4.6% vs BERT</td><td><span class="tag t-g">✅ Sprint 2</span></td></tr>
+      <tr><td>Database</td><td>PostgreSQL + pgvector</td><td>RDS Multi-AZ</td><td>Structured data + vector index mapping</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>LLM (Generation)</td><td>Amazon Bedrock / Anthropic API</td><td>Claude 3.5 Sonnet</td><td>Answer generation layer (High Precision LLM)</td><td><span class="tag t-g">✅ Deployed</span></td></tr>
+      <tr><td>Data Pipeline</td><td>Federated Ingestion (HF)</td><td>Node-fetch + dotenv</td><td>ดึงข้อมูลคดี/กฎหมายจาก Hugging Face ผ่าน API Token</td><td><span class="tag t-g">✅ Deployed</span></td></tr>
+      <tr><td>Frontend Tools</td><td>Smart Command Center / Complaint Form</td><td>React, Framer Motion</td><td>ระบบช่วยประชาชนร่างฟ้อง & AI Triage สรุปคดีสำหรับศาล</td><td><span class="tag t-g">✅ Deployed</span></td></tr>
+      <tr><td>PII Detection</td><td>Bedrock Guardrails</td><td>AWS Glue ETL integration</td><td>PII Masking Recall 99.8%</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Auth</td><td>Amazon Cognito</td><td>RBAC + JWT</td><td>API authentication + Citizen/Gov role management</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Container Orchestration</td><td>Amazon EKS</td><td>3-AZ, HPA</td><td>Auto-scaling FastAPI (High Availability 96.3%)</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Security</td><td>AWS WAF + KMS + Lake Formation</td><td>IAM IRSA + Default-deny</td><td>Zero-trust access + Data Governance</td><td><span class="tag t-g">✅ Ready</span></td></tr>
+      <tr><td>Observability</td><td>CloudWatch + Grafana + X-Ray/Zipkin</td><td>Distributed Tracing</td><td>L0-L6 latency breakdown + monitoring</td><td><span class="tag t-b">🔄 Sprint 3</span></td></tr>
+      <tr><td>CI/CD</td><td>GitHub Actions → ECR → EKS</td><td>IRSA</td><td>Zero-downtime deploy</td><td><span class="tag t-b">🔄 Sprint 3</span></td></tr>
+      <tr><td>Fine-tuning</td><td>Amazon SageMaker</td><td>WangchanX-Legal</td><td>Domain adaptation on Thai legal corpus</td><td><span class="tag t-a">⏳ Post-hackathon</span></td></tr>
+    </table>
+
+    <div class="sec">Monthly AWS Cost Estimate</div>
+    <div class="g2">
+      <div class="card">
+        <h3>Dev Environment</h3>
+        <p>EKS (1-AZ, smaller nodes)<br>RDS single instance<br>S3 + CloudWatch<br><br><strong style="font-size:16px;color:#185fa5">$800–$1,500/month</strong></p>
+      </div>
+      <div class="card">
+        <h3>Production (Multi-AZ)</h3>
+        <p>EKS (3-AZ, 3 replicas)<br>RDS Multi-AZ + ElastiCache<br>WAF + KMS + CloudFront<br><br><strong style="font-size:16px;color:#185fa5">$3,800–$6,500/month</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div id="pg-checklist" class="pg">
+    <div class="sec">Sprint 3 Checklist (19–25 เม.ย.) — RAAIA + Security</div>
+    <div class="card">
+      <div class="chk"><span class="chk-icon">⬜</span><span class="chk-text"><strong>แก้ H-Score naming inconsistency</strong> — ทุกเอกสาร: H-Score = Actual/Predicted (calibration metric) ≠ Final Score (weighted retrieval)</span><span class="chk-owner">Strategy Lead</span></div>
+      <div class="chk"><span class="chk-icon">⬜</span><span class="chk-text"><strong>Fix DB size</strong> — ระบุ 127,800 indexed + 48,743 pending QC ทุก slide ห้ามบอก 176,543 เป็น indexed</span><span class="chk-owner">ML Eng</span></div>
+      <div class="chk"><span class="chk-icon">⬜</span><span class="chk-text"><strong>CBB hardening</strong> — เปลี่ยน claim "100% blocking" → "96.4% blocking rate" ในเอกสารทั้งหมด</span><span class="chk-owner">Sr Dev</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>PII edge case testing</strong> — 35 tests pass: ชื่อ+คำกฎหมาย, quasi-identifiers, Thai-English code-switch, +66 intl, LINE ID, passport, false-positive prevention</span><span class="chk-owner">ML Eng</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>Load test 58 QPS</strong> — scripts/loadTest.mjs: P95 gate ≤700ms, weighted query pool (40% search / 30% chat / 20% view / 10% stats), breakdown by endpoint</span><span class="chk-owner">DevOps</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>CAL-130 integrity test</strong> — 21 tests pass: deletion, modification, insertion of forged entry, reordering — all detected via SHA-256 prevHash chain</span><span class="chk-owner">Sr Dev</span></div>
+      <div class="chk"><span class="chk-icon">⬜</span><span class="chk-text"><strong>LeJEPA Reranker Validation</strong> — เตรียม Dashboard โชว์ World Model Semantics เอาชนะ Keyword Matching</span><span class="chk-owner">ML Eng</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>Tracing instrumentation</strong> — src/lib/tracing.ts: X-Ray header, Zipkin B3 headers, OTLP spans, L0-L6 budget tracking (11 tests pass)</span><span class="chk-owner">DevOps</span></div>
+    </div>
+
+    <div class="sec">Sprint 4 Checklist (26 เม.ย.–2 พ.ค.) — AWS Integration & Demo Prep</div>
+    <div class="card">
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>AWS Bedrock Setup</strong> — คอนฟิก Agents for Amazon Bedrock และ RAG Knowledge Bases (รองรับ Anthropic API Backup ผ่าน .env)</span><span class="chk-owner">DevOps</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>Bedrock Guardrails</strong> — กำหนด Policy PII Masking และ Denial topics</span><span class="chk-owner">SecEng</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>Government Dashboard UI</strong> — เพิ่ม AI Triage และ Predictive Analytics เป็น Command Center</span><span class="chk-owner">Frontend</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>Citizen Portal</strong> — ทำระบบแนะนำร่างคำฟ้อง (Complaint Form) เชื่อม Legal Intent Router</span><span class="chk-owner">Frontend</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>Federated Data Pipeline</strong> — รันสคริปต์ดึงข้อมูลจาก Hugging Face สดๆ ด้วย API Token เพื่อแสดงการอัปเดตแบบ Dynamic</span><span class="chk-owner">Data Eng</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>AWS Lake Formation</strong> — src/lib/lakeFormationRBAC.ts: ABAC 5-role hierarchy, row filters, column masking, PDPA article refs, audit requirement flags (32 tests pass)</span><span class="chk-owner">ML Eng</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>End-to-End Test</strong> — scripts/loadTest.mjs: run node scripts/loadTest.mjs --qps 58 --duration 30 (target 689ms P95 ผ่าน EKS)</span><span class="chk-owner">QA</span></div>
+      <div class="chk"><span class="chk-icon">✅</span><span class="chk-text"><strong>CAL-130 Audit Validation</strong> — ตรวจสอบระบบ Immutable Logging บน AWS CloudTrail & S3</span><span class="chk-owner">SecEng</span></div>
+      <div class="chk"><span class="chk-icon">⬜</span><span class="chk-text"><strong>Pre-recorded video 6:30m & Q&A rehearsal</strong> — ทีมซ้อมตอบคำถาม AWS Architecture</span><span class="chk-owner">All Team</span></div>
+      <div class="chk"><span class="chk-icon">⬜</span><span class="chk-text"><strong>TLAGF 1-pager PDF</strong> — พิมพ์ 1-Pager ส่งให้กรรมการ (เน้น AWS Sponsor Value)</span><span class="chk-owner">Strategy Lead</span></div>
+    </div>
+
+    <div class="hl-r">
+      <strong>Production Readiness Gate — ต้องผ่านทุกข้อก่อน Demo:</strong><br>
+      Hit@3 ≥93.7% | H-Score ≥0.96 | PII Recall ≥99.8% | Safety ≥99.5% | P95 ≤689ms | ETDA Compliance 100% | AWS Uptime 96.3%
+    </div>
+  </div>
+
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('pg-' + id).classList.add('on');
+  event.target.classList.add('on');
+}
+</script>
+</body>
+</html>
