@@ -8,6 +8,7 @@ Generates e-Filing XML from complaint drafts based on actual court form structur
 
 XML Schema derived from actual PDF forms in data/A1 and data/B1.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

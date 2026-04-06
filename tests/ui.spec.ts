@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const BASE = "http://localhost:5173";
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:5173";
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ test.describe("Home Page (/)", () => {
     await goto(page, "/");
     // StatsBar shows corpus/latency stats
     const body = await page.textContent("body");
-    expect(body).toMatch(/127,800|ความหน่วง|เรคคอร์ด/);
+    expect(body).toMatch(/160,000\+|OpenLaw Thailand Dataset|PDPA 100%/);
   });
 
   test("footer is visible", async ({ page }) => {
@@ -91,7 +91,7 @@ test.describe("Search Page (/search)", () => {
     await input.fill("ลักทรัพย์");
     await input.press("Enter");
     await page.waitForSelector(".animate-spin", { state: "detached", timeout: 10000 }).catch(() => {});
-    await expect(page.locator("select")).toBeVisible();
+    await expect(page.locator("select").last()).toBeVisible();
   });
 
   test("role=government shows government label", async ({ page }) => {
@@ -101,7 +101,7 @@ test.describe("Search Page (/search)", () => {
 
   test("role=lawyer shows lawyer label", async ({ page }) => {
     await goto(page, "/search?role=lawyer");
-    await expect(page.getByText(/ทนายความ|นักกฎหมาย/)).toBeVisible();
+    await expect(page.getByText("ทนายความ / นักกฎหมาย").first()).toBeVisible();
   });
 
   test("CFS score appears after search", async ({ page }) => {
@@ -240,7 +240,91 @@ test.describe("Government Dashboard (/government)", () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 7. COMPLAINT FORM PAGE
+// 7. ADDITIONAL DASHBOARDS
+// ══════════════════════════════════════════════════════════════════════════════
+
+test.describe("Additional Dashboards", () => {
+  test("citizen dashboard loads key modules", async ({ page }) => {
+    await goto(page, "/citizen");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/ยินดีต้อนรับ|ผู้ช่วยทางกฎหมายอัจฉริยะ|ค้นหาศาล|พยากรณ์ผลคดี/);
+  });
+
+  test("lawyer dashboard route is hidden from public app", async ({ page }) => {
+    await goto(page, "/lawyer");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/Oops! Page not found|404|ไม่พบ/i);
+  });
+
+  test("judge dashboard loads key controls", async ({ page }) => {
+    await goto(page, "/judge");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/แดชบอร์ดตุลาการ|ร่างคำพิพากษา|ตรวจสอบความเป็นธรรม|แม่แบบคำสั่ง AI/);
+  });
+
+  test("IT dashboard loads architecture section", async ({ page }) => {
+    await goto(page, "/it");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/ระบบคัดกรองความปลอดภัย 7 ชั้น|Security Layer|Bedrock|Audit/);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 8. MODULE PAGES
+// ══════════════════════════════════════════════════════════════════════════════
+
+test.describe("Module Pages", () => {
+  test("predict page loads", async ({ page }) => {
+    await goto(page, "/predict");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/พยากรณ์ผลคดี|ผลพยากรณ์อัจฉริยะ|ข้อมูลเบื้องต้นเท่านั้น/);
+  });
+
+  test("glossary page loads", async ({ page }) => {
+    await goto(page, "/glossary");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/พจนานุกรมศัพท์กฎหมาย|ศัพท์กฎหมาย|ฎีกาสำคัญ/);
+  });
+
+  test("prompts page loads", async ({ page }) => {
+    await goto(page, "/prompts");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/คลังคำสั่ง AI มาตรฐานตุลาการ|Prompt Templates|วิธีใช้งาน/);
+  });
+
+  test("graph page loads", async ({ page }) => {
+    await goto(page, "/graph");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/Knowledge Graph|สร้าง Knowledge Graph|สถิติ Knowledge Graph/);
+  });
+
+  test("courts page loads", async ({ page }) => {
+    await goto(page, "/courts");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/ค้นหาศาล|รายชื่อศาลทั้งหมด|ศาลใกล้ฉัน/);
+  });
+
+  test("responsible ai page loads", async ({ page }) => {
+    await goto(page, "/responsible-ai");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/Responsible AI Dashboard|Risk Tier|Release Guard|TLAGF/);
+  });
+
+  test("system demo page loads", async ({ page }) => {
+    await goto(page, "/demo");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/LegalGuard AI Simulator|Real-time System Simulator|System Flow Visualizer/);
+  });
+
+  test("analyze case page loads", async ({ page }) => {
+    await goto(page, "/analyze");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/วิเคราะห์สำนวนคดี|ใส่สำนวนคดี|คำแนะนำ/);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 9. COMPLAINT FORM PAGE
 // ══════════════════════════════════════════════════════════════════════════════
 
 test.describe("Complaint Form (/complaint-form)", () => {
@@ -280,7 +364,7 @@ test.describe("Complaint Form (/complaint-form)", () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 8. 404 NOT FOUND
+// 10. 404 NOT FOUND
 // ══════════════════════════════════════════════════════════════════════════════
 
 test.describe("404 Not Found", () => {
@@ -292,7 +376,7 @@ test.describe("404 Not Found", () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 9. LEGAL CHATBOT (global component)
+// 11. LEGAL CHATBOT (global component)
 // ══════════════════════════════════════════════════════════════════════════════
 
 test.describe("Legal Chatbot (global)", () => {
@@ -309,7 +393,7 @@ test.describe("Legal Chatbot (global)", () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 10. NAVBAR NAVIGATION
+// 12. NAVBAR NAVIGATION
 // ══════════════════════════════════════════════════════════════════════════════
 
 test.describe("Navbar Navigation", () => {
@@ -342,7 +426,7 @@ test.describe("Navbar Navigation", () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 11. ACCESSIBILITY & PERFORMANCE
+// 13. ACCESSIBILITY & PERFORMANCE
 // ══════════════════════════════════════════════════════════════════════════════
 
 test.describe("Accessibility & Core Web", () => {

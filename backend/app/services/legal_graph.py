@@ -9,6 +9,7 @@ Provides:
 
 Uses existing LegalGuard infrastructure: embeddings, PII masking, LLM.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

@@ -7,6 +7,7 @@ Loads Thai legal datasets from HuggingFace for RAG pipeline:
 - RAG Thai Laws (iapp)
 - Thai Traffic Law / Thai Land Tax (domain-specific)
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

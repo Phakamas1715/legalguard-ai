@@ -3,6 +3,7 @@
 ให้ประชาชนติดตามสถานะคดีผ่าน chatbot หรือ API
 รองรับทั้งศาลยุติธรรมและศาลปกครอง
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

@@ -41,6 +41,21 @@ export interface MemoryStats {
   evictionsTotal: number;
 }
 
+export interface MemoryRetentionRule {
+  layer: MemoryLayer;
+  storageKey: string;
+  limit: number;
+  ttlMs: number | null;
+}
+
+export interface MemorySnapshot {
+  version: 1;
+  exportedAt: string;
+  retentionPolicy: MemoryRetentionRule[];
+  stats: MemoryStats;
+  layers: Record<MemoryLayer, MemoryEntry[]>;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STORAGE_KEYS: Record<MemoryLayer, string> = {
@@ -97,6 +112,7 @@ function mkId(): string {
 export class LayeredMemorySystem {
   private static instance: LayeredMemorySystem;
   private evictionsTotal = 0;
+  private retentionIntervalId: number | null = null;
 
   private constructor() {
     this.initPolicyLayer();
@@ -280,12 +296,110 @@ export class LayeredMemorySystem {
     };
   }
 
+  public getRetentionPolicy(): MemoryRetentionRule[] {
+    return (Object.keys(STORAGE_KEYS) as MemoryLayer[]).map((layer) => ({
+      layer,
+      storageKey: STORAGE_KEYS[layer],
+      limit: LAYER_LIMITS[layer],
+      ttlMs: LAYER_TTL_MS[layer],
+    }));
+  }
+
+  public clearLayer(layer: MemoryLayer): void {
+    if (layer === "policy") {
+      return;
+    }
+    save(layer, []);
+  }
+
+  public clearRuntimeLayers(): void {
+    const runtimeLayers: MemoryLayer[] = ["working", "episodic", "semantic", "persistent"];
+    runtimeLayers.forEach((layer) => this.clearLayer(layer));
+  }
+
+  public pruneExpiredEntries(): MemoryStats {
+    const layers: MemoryLayer[] = ["working", "episodic", "semantic", "policy", "persistent"];
+    for (const layer of layers) {
+      this.getValid(layer);
+    }
+    return this.getStats();
+  }
+
+  public startRetentionScheduler(intervalMs = 60_000): void {
+    if (typeof window === "undefined") return;
+    this.pruneExpiredEntries();
+    if (this.retentionIntervalId !== null) {
+      window.clearInterval(this.retentionIntervalId);
+    }
+    this.retentionIntervalId = window.setInterval(() => {
+      this.pruneExpiredEntries();
+    }, intervalMs);
+  }
+
+  public stopRetentionScheduler(): void {
+    if (typeof window === "undefined") return;
+    if (this.retentionIntervalId !== null) {
+      window.clearInterval(this.retentionIntervalId);
+      this.retentionIntervalId = null;
+    }
+  }
+
+  public exportSnapshot(): MemorySnapshot {
+    const layers = (Object.keys(STORAGE_KEYS) as MemoryLayer[]).reduce<Record<MemoryLayer, MemoryEntry[]>>(
+      (accumulator, layer) => {
+        accumulator[layer] = this.getValid(layer);
+        return accumulator;
+      },
+      {
+        working: [],
+        episodic: [],
+        semantic: [],
+        policy: [],
+        persistent: [],
+      },
+    );
+
+    return {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      retentionPolicy: this.getRetentionPolicy(),
+      stats: this.getStats(),
+      layers,
+    };
+  }
+
+  public importSnapshot(snapshot: unknown, mode: "merge" | "replace" = "merge"): MemoryStats {
+    const parsed = this.normalizeSnapshot(snapshot);
+    if (!parsed) {
+      throw new Error("Invalid memory snapshot");
+    }
+
+    const layers: MemoryLayer[] = ["working", "episodic", "semantic", "persistent"];
+    for (const layer of layers) {
+      const importedEntries = parsed.layers[layer] ?? [];
+      if (mode === "replace") {
+        save(layer, this.normalizeEntries(layer, importedEntries));
+        continue;
+      }
+
+      const merged = this.mergeEntries(this.getValid(layer), importedEntries);
+      save(layer, this.normalizeEntries(layer, merged));
+    }
+
+    // Policy layer remains seeded from runtime policy bootstrap.
+    this.initPolicyLayer();
+    return this.getStats();
+  }
+
   // ── Private helpers ───────────────────────────────────────────────────────
 
   private getValid(layer: MemoryLayer): MemoryEntry[] {
     const now = Date.now();
-    const entries = load(layer).filter((e) => !e.expiresAt || e.expiresAt > now);
-    // Persist cleaned-up version only if something was pruned
+    const rawEntries = load(layer);
+    const entries = rawEntries.filter((e) => !e.expiresAt || e.expiresAt > now);
+    if (entries.length !== rawEntries.length) {
+      save(layer, entries);
+    }
     return entries;
   }
 
@@ -312,6 +426,67 @@ export class LayeredMemorySystem {
     const jaccard = overlap / (qTokens.size + eTokens.size - overlap);
     // Boost important entries
     return Math.min(jaccard * (1 + entry.importance * 0.5), 1);
+  }
+
+  private mergeEntries(existing: MemoryEntry[], incoming: MemoryEntry[]): MemoryEntry[] {
+    const byId = new Map<string, MemoryEntry>();
+    [...existing, ...incoming].forEach((entry) => {
+      if (entry.id) {
+        byId.set(entry.id, entry);
+      }
+    });
+    return Array.from(byId.values()).sort((left, right) => right.createdAt - left.createdAt);
+  }
+
+  private normalizeEntries(layer: MemoryLayer, entries: MemoryEntry[]): MemoryEntry[] {
+    const now = Date.now();
+    const sanitized = entries
+      .filter((entry): entry is MemoryEntry => this.isMemoryEntry(entry, layer))
+      .filter((entry) => !entry.expiresAt || entry.expiresAt > now)
+      .sort((left, right) => right.createdAt - left.createdAt)
+      .slice(0, LAYER_LIMITS[layer]);
+
+    return sanitized.map((entry) => ({
+      ...entry,
+      layer,
+    }));
+  }
+
+  private normalizeSnapshot(snapshot: unknown): MemorySnapshot | null {
+    if (!snapshot || typeof snapshot !== "object") return null;
+    const candidate = snapshot as Partial<MemorySnapshot>;
+    if (!candidate.layers || typeof candidate.layers !== "object") return null;
+
+    const layers: Record<MemoryLayer, MemoryEntry[]> = {
+      working: this.normalizeEntries("working", candidate.layers.working ?? []),
+      episodic: this.normalizeEntries("episodic", candidate.layers.episodic ?? []),
+      semantic: this.normalizeEntries("semantic", candidate.layers.semantic ?? []),
+      policy: this.normalizeEntries("policy", candidate.layers.policy ?? []),
+      persistent: this.normalizeEntries("persistent", candidate.layers.persistent ?? []),
+    };
+
+    return {
+      version: 1,
+      exportedAt: typeof candidate.exportedAt === "string" ? candidate.exportedAt : new Date().toISOString(),
+      retentionPolicy: this.getRetentionPolicy(),
+      stats: this.getStats(),
+      layers,
+    };
+  }
+
+  private isMemoryEntry(entry: unknown, layer: MemoryLayer): entry is MemoryEntry {
+    if (!entry || typeof entry !== "object") return false;
+    const candidate = entry as Partial<MemoryEntry>;
+    return (
+      typeof candidate.id === "string"
+      && typeof candidate.content === "string"
+      && typeof candidate.importance === "number"
+      && typeof candidate.createdAt === "number"
+      && (candidate.layer === undefined || candidate.layer === layer)
+      && (candidate.expiresAt === undefined || typeof candidate.expiresAt === "number")
+      && (candidate.concept === undefined || typeof candidate.concept === "string")
+      && typeof candidate.accessCount === "number"
+    );
   }
 }
 

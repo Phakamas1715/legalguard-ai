@@ -1,4 +1,5 @@
 """Qdrant vector database helper service for LegalGuard AI."""
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -37,7 +38,7 @@ class QdrantSettings(BaseSettings):
 class QdrantService:
     """Helper service for Qdrant upsert / search / delete operations."""
 
-    def __init__(self, settings: QdrantSettings | None = None) -> None:
+    def __init__(self, settings: Optional[QdrantSettings] = None) -> None:
         self._settings = settings or QdrantSettings()
         api_key = self._settings.qdrant_api_key or None
         self._client = QdrantClient(
@@ -105,7 +106,7 @@ class QdrantService:
     def search(
         self,
         query_vector: list[float],
-        filters: dict | None = None,
+        filters: Optional[dict] = None,
         top_k: int = 10,
     ) -> list[dict]:
         """Perform a vector similarity search with optional payload filters.

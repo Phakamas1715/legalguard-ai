@@ -3,13 +3,14 @@
 Supports OpenAI, Amazon Bedrock Titan, and Typhoon Embeddings.
 Provides single and batch embedding with retry logic (exponential backoff).
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
 import json
 import logging
 import time
-from typing import Any
+from typing import Optional, Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -41,7 +42,7 @@ class EmbeddingService:
     MAX_RETRIES = 3
     BASE_DELAY = 1.0  # seconds
 
-    def __init__(self, settings: EmbeddingSettings | None = None) -> None:
+    def __init__(self, settings: Optional[EmbeddingSettings] = None) -> None:
         self._settings = settings or EmbeddingSettings()
         self._client: Any = None
 
@@ -73,7 +74,7 @@ class EmbeddingService:
 
     def _embed_batch_with_retry(self, texts: list[str]) -> list[list[float]]:
         """Attempt to embed a batch with exponential backoff (3 attempts)."""
-        last_exc: Exception | None = None
+        last_exc: Optional[Exception] = None
 
         for attempt in range(self.MAX_RETRIES):
             try:
@@ -275,7 +276,7 @@ class EmbeddingService:
 class _RetryableError(Exception):
     """Wraps errors that should trigger a retry (timeout, rate limit, network)."""
 
-    retry_after: float | None = None
+    retry_after: Optional[float] = None
 
 
 class _AuthError(Exception):

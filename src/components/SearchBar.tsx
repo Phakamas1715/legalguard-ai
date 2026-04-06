@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, SlidersHorizontal, X, Scale } from "lucide-react";
+import { Search, SlidersHorizontal, X, Scale, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { UserRole } from "./RoleSelector";
 
@@ -7,6 +7,8 @@ interface SearchBarProps {
   onSearch: (query: string, filters: SearchFilters) => void;
   role: UserRole;
   isLoading?: boolean;
+  initialQuery?: string;
+  initialFilters?: SearchFilters;
 }
 
 export interface SearchFilters {
@@ -32,12 +34,13 @@ const years = [
 ];
 
 const placeholders: Record<UserRole, string> = {
-  citizen: "พิมพ์คำถามของคุณ เช่น \"ถูกฉ้อโกงต้องทำอย่างไร\"",
-  lawyer: "สืบค้น เช่น \"ฉ้อโกง มาตรา 341 ศาลฎีกา\"",
-  government: "ค้นหากฎหมาย ระเบียบ เช่น \"พ.ร.บ. จัดตั้งศาลปกครอง\"",
+  citizen: "พิมพ์คำถามกฎหมายหรือข้อเท็จจริง เช่น \"ถูกฉ้อโกงต้องทำอย่างไร\"",
+  lawyer: "สืบค้นคำพิพากษาและข้อกฎหมาย เช่น \"ฉ้อโกง มาตรา 341 ศาลฎีกา\"",
+  government: "ค้นหากฎหมาย ระเบียบ หรือข้อมูลคำวินิจฉัยที่เกี่ยวข้อง",
+  judge: "ค้นหาคดีคล้ายกัน บทบัญญัติ หรือประเด็นข้อกฎหมายที่เกี่ยวข้อง",
 };
 
-const SearchBar = ({ onSearch, role, isLoading }: SearchBarProps) => {
+const SearchBar = ({ onSearch, role, isLoading, initialQuery = "", initialFilters }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -59,6 +62,15 @@ const SearchBar = ({ onSearch, role, isLoading }: SearchBarProps) => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    if (!initialFilters) return;
+    setFilters(initialFilters);
+  }, [initialFilters]);
 
   const filteredCourts = courtTypes.filter(
     (c) => c.label.includes(courtSearch) || c.value.includes(courtSearch.toLowerCase())
@@ -255,28 +267,46 @@ const SearchBar = ({ onSearch, role, isLoading }: SearchBarProps) => {
       <div className="flex flex-wrap gap-2 mt-4 justify-center">
         {role === "citizen" && (
           <>
-            <QuickTag onClick={() => { setQuery("ถูกฉ้อโกงต้องทำอย่างไร"); }} label="🔍 ฉ้อโกง" />
-            <QuickTag onClick={() => { setQuery("ค่าปรับจราจร"); }} label="🚗 ค่าปรับจราจร" />
-            <QuickTag onClick={() => { setQuery("สิทธิผู้บริโภค"); }} label="🛒 สิทธิผู้บริโภค" />
-            <QuickTag onClick={() => { setQuery("หย่า สิทธิเลี้ยงดูบุตร"); }} label="👨‍👩‍👧 ครอบครัว" />
-            <QuickTag onClick={() => { setQuery("เลิกจ้างไม่เป็นธรรม"); }} label="💼 แรงงาน" />
+            <QuickTag onClick={() => { setQuery("ถูกฉ้อโกงต้องทำอย่างไร"); }} label="ฉ้อโกง" />
+            <QuickTag onClick={() => { setQuery("ค่าปรับจราจร"); }} label="ค่าปรับจราจร" />
+            <QuickTag onClick={() => { setQuery("สิทธิผู้บริโภค"); }} label="สิทธิผู้บริโภค" />
+            <QuickTag onClick={() => { setQuery("หย่า สิทธิเลี้ยงดูบุตร"); }} label="ครอบครัว" />
+            <QuickTag onClick={() => { setQuery("เลิกจ้างไม่เป็นธรรม"); }} label="แรงงาน" />
           </>
         )}
         {role === "lawyer" && (
           <>
-            <QuickTag onClick={() => { setQuery("ฉ้อโกง มาตรา 341"); }} label="⚖️ มาตรา 341" />
-            <QuickTag onClick={() => { setQuery("คดีขับไล่ ศาลฎีกา"); }} label="🏠 คดีขับไล่" />
-            <QuickTag onClick={() => { setQuery("อายุความฉ้อโกง"); }} label="⏰ อายุความ" />
-            <QuickTag onClick={() => { setQuery("ครอบครองปรปักษ์ มาตรา 1382"); }} label="🏗️ ปรปักษ์" />
+            <QuickTag onClick={() => { setQuery("ฉ้อโกง มาตรา 341"); }} label="มาตรา 341" />
+            <QuickTag onClick={() => { setQuery("คดีขับไล่ ศาลฎีกา"); }} label="คดีขับไล่" />
+            <QuickTag onClick={() => { setQuery("อายุความฉ้อโกง"); }} label="อายุความ" />
+            <QuickTag onClick={() => { setQuery("ครอบครองปรปักษ์ มาตรา 1382"); }} label="ครอบครองปรปักษ์" />
           </>
         )}
         {role === "government" && (
           <>
-            <QuickTag onClick={() => { setQuery("พ.ร.บ. จัดตั้งศาลปกครอง"); }} label="🏛️ จัดตั้งศาลปกครอง" />
-            <QuickTag onClick={() => { setQuery("ระเบียบการยื่นฟ้อง"); }} label="📋 ระเบียบยื่นฟ้อง" />
-            <QuickTag onClick={() => { setQuery("สถิติคดี 2568"); }} label="📊 สถิติคดี" />
+            <QuickTag onClick={() => { setQuery("พ.ร.บ. จัดตั้งศาลปกครอง"); }} label="จัดตั้งศาลปกครอง" />
+            <QuickTag onClick={() => { setQuery("ระเบียบการยื่นฟ้อง"); }} label="ระเบียบยื่นฟ้อง" />
+            <QuickTag onClick={() => { setQuery("สถิติคดี 2568"); }} label="สถิติคดี" />
           </>
         )}
+        {role === "judge" && (
+          <>
+            <QuickTag onClick={() => { setQuery("แนววินิจฉัยคดีปกครอง มาตรา 9"); }} label="แนววินิจฉัยคดีปกครอง" />
+            <QuickTag onClick={() => { setQuery("พยานหลักฐานน้ำหนักรับฟังได้"); }} label="น้ำหนักพยานหลักฐาน" />
+            <QuickTag onClick={() => { setQuery("คดีคล้ายกันเกี่ยวกับสัญญาทางปกครอง"); }} label="สัญญาทางปกครอง" />
+          </>
+        )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card/80 px-3 py-1">
+          <ShieldCheck className="h-3.5 w-3.5 text-teal" />
+          แสดงระดับความเชื่อถือของผลลัพธ์
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card/80 px-3 py-1">
+          <Scale className="h-3.5 w-3.5 text-primary" />
+          แสดงแหล่งข้อมูลและคำแนะนำการใช้งาน
+        </span>
       </div>
     </div>
   );

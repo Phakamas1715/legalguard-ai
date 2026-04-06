@@ -1,4 +1,5 @@
 """Legal Glossary API — ศัพท์กฎหมายไทย + ฎีกาสำคัญ สำหรับทนายความ."""
+from __future__ import annotations
 
 from __future__ import annotations
 

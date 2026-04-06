@@ -6,6 +6,7 @@ deduplication → embedding → Qdrant upsert + BM25 index.
 
 Processes files in configurable batch sizes with per-document error logging.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -76,13 +77,13 @@ class IngestionOrchestrator:
 
     def __init__(
         self,
-        pdf_extractor: PDFExtractor | None = None,
-        chunker: ThaiChunker | None = None,
-        metadata_extractor: MetadataExtractor | None = None,
-        embedding_service: EmbeddingService | None = None,
-        dedup_service: DedupService | None = None,
-        bm25_indexer: BM25Indexer | None = None,
-        qdrant_service: QdrantService | None = None,
+        pdf_extractor: Optional[PDFExtractor] = None,
+        chunker: Optional[ThaiChunker] = None,
+        metadata_extractor: Optional[MetadataExtractor] = None,
+        embedding_service: Optional[EmbeddingService] = None,
+        dedup_service: Optional[DedupService] = None,
+        bm25_indexer: Optional[BM25Indexer] = None,
+        qdrant_service: Optional[QdrantService] = None,
     ) -> None:
         self.pdf_extractor = pdf_extractor or PDFExtractor()
         self.chunker = chunker or ThaiChunker()

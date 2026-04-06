@@ -13,6 +13,7 @@ References:
 - Lewis et al. (2020) "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
 - SeaLLMs/SeaLLM-7B-v2: Zhang et al. (2024) "SeaLLMs for Southeast Asia"
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

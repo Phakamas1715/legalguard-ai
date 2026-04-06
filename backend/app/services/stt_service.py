@@ -4,6 +4,7 @@ Transcribes Thai audio to text with speaker diarization,
 PII masking, and low-confidence segment flagging.
 Supports WAV, MP3, M4A, FLAC up to 120 minutes.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

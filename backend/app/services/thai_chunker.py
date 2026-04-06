@@ -5,16 +5,44 @@ into overlapping chunks suitable for embedding and RAG retrieval.
 
 Chunk size: 512 tokens max, 64 token overlap (configurable).
 """
-
 from __future__ import annotations
 
 import logging
+import re
 
 from pydantic import BaseModel
-from pythainlp.tokenize import sent_tokenize, word_tokenize
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Tokenizer with graceful fallback (pycrfsuite may not be available on 3.9)
+# ---------------------------------------------------------------------------
+
+def _sent_tokenize(text: str) -> list[str]:
+    """Sentence tokenizer with fallback to newline/period splitting."""
+    try:
+        from pythainlp.tokenize import sent_tokenize
+        return sent_tokenize(text, engine="whitespace+newline")
+    except Exception:
+        pass
+    try:
+        from pythainlp.tokenize import sent_tokenize
+        return sent_tokenize(text, engine="whitespace")
+    except Exception:
+        pass
+    # Fallback: split on newlines and Thai sentence-end patterns
+    sentences = re.split(r"(?<=[ๆ།।\.\n])\s+|(?<=\n)\n+", text)
+    return [s.strip() for s in sentences if s.strip()]
+
+
+def _word_tokenize(text: str) -> list[str]:
+    """Word tokenizer with fallback to whitespace splitting."""
+    try:
+        from pythainlp.tokenize import word_tokenize
+        return word_tokenize(text, engine="newmm")
+    except Exception:
+        pass
+    return text.split()
 
 class Chunk(BaseModel):
     """A single text chunk with positional metadata."""
@@ -55,13 +83,13 @@ class ThaiChunker:
         if not text or not text.strip():
             return []
 
-        sentences = sent_tokenize(text)
+        sentences = _sent_tokenize(text)
         if not sentences:
             return []
 
         # Pre-compute token counts for every sentence.
         sentence_tokens: list[int] = [
-            len(word_tokenize(s)) for s in sentences
+            len(_word_tokenize(s)) for s in sentences
         ]
 
         chunks: list[Chunk] = []

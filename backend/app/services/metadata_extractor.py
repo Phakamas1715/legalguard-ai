@@ -4,6 +4,7 @@ Extracts structured metadata (case number, court type, year, statutes,
 form number, form category, document type) from raw text using regex patterns.
 Tags each record with its source dataset code (A1.1–A7.4, B1.1–B5.4).
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -164,12 +165,12 @@ class MetadataExtractor:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _extract_case_no(text: str) -> str | None:
+    def _extract_case_no(text: str) -> Optional[str]:
         m = _CASE_NO_RE.search(text)
         return m.group(1).replace(" ", "") if m else None
 
     @staticmethod
-    def _court_type_from_case_no(case_no: str | None) -> str | None:
+    def _court_type_from_case_no(case_no: Optional[str]) -> Optional[str]:
         if not case_no:
             return None
         m = _CASE_PREFIX_RE.match(case_no)
@@ -178,7 +179,7 @@ class MetadataExtractor:
         return None
 
     @staticmethod
-    def _extract_year(text: str, case_no: str | None) -> int | None:
+    def _extract_year(text: str, case_no: Optional[str]) -> Optional[int]:
         # Prefer year from case number (e.g. ฎ.1234/2568 → 2568).
         if case_no:
             parts = case_no.split("/")
@@ -209,7 +210,7 @@ class MetadataExtractor:
         return result
 
     @staticmethod
-    def _extract_form_number(text: str, file_path: str) -> str | None:
+    def _extract_form_number(text: str, file_path: str) -> Optional[str]:
         # Try text first.
         m = _FORM_NUMBER_TEXT_RE.search(text)
         if m:
@@ -223,7 +224,7 @@ class MetadataExtractor:
         return None
 
     @staticmethod
-    def _extract_form_category(text: str, file_path: str) -> str | None:
+    def _extract_form_category(text: str, file_path: str) -> Optional[str]:
         combined = f"{file_path} {text}"
         for category, keywords in _FORM_CATEGORY_KEYWORDS.items():
             for kw in keywords:

@@ -7,6 +7,7 @@ approximation for environments where tantivy is not installed.
 Thai text is pre-tokenized with PyThaiNLP ``word_tokenize`` and joined with
 spaces so that Tantivy's default whitespace tokenizer handles Thai correctly.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -91,7 +92,7 @@ class _InMemoryBM25:
             added += 1
         return added
 
-    def search(self, query: str, top_k: int = 30, filters: dict | None = None) -> list[dict]:
+    def search(self, query: str, top_k: int = 30, filters: Optional[dict] = None) -> list[dict]:
         if not query or not query.strip():
             return []
 
@@ -154,7 +155,7 @@ class _InMemoryBM25:
     # -- helpers ------------------------------------------------------------
 
     @staticmethod
-    def _matches_filters(doc: dict, filters: dict | None) -> bool:
+    def _matches_filters(doc: dict, filters: Optional[dict]) -> bool:
         if not filters:
             return True
         for key, value in filters.items():
@@ -172,8 +173,8 @@ class _TantivyBM25:
 
     def __init__(self, index_path: str) -> None:
         self._index_path = Path(index_path)
-        self._index: tantivy.Index | None = None  # type: ignore[name-defined]
-        self._schema: tantivy.Schema | None = None  # type: ignore[name-defined]
+        self._index: tantivy.Optional[Index] = None  # type: ignore[name-defined]
+        self._schema: tantivy.Optional[Schema] = None  # type: ignore[name-defined]
 
     def ensure_index(self) -> None:
         self._index_path.mkdir(parents=True, exist_ok=True)
@@ -211,7 +212,7 @@ class _TantivyBM25:
         self._index.reload()
         return added
 
-    def search(self, query: str, top_k: int = 30, filters: dict | None = None) -> list[dict]:
+    def search(self, query: str, top_k: int = 30, filters: Optional[dict] = None) -> list[dict]:
         if not query or not query.strip():
             return []
         assert self._index is not None
@@ -267,7 +268,7 @@ class BM25Indexer:
     Counter-based BM25 approximation.
     """
 
-    def __init__(self, settings: BM25Settings | None = None) -> None:
+    def __init__(self, settings: Optional[BM25Settings] = None) -> None:
         self._settings = settings or BM25Settings()
         if _HAS_TANTIVY:
             self._backend: _TantivyBM25 | _InMemoryBM25 = _TantivyBM25(
@@ -289,8 +290,8 @@ class BM25Indexer:
           - ``id``: str
           - ``text``: str
           - ``source_code``: str
-          - ``court_type``: str | None
-          - ``year``: int | None
+          - ``court_type``: Optional[str]
+          - ``year``: Optional[int]
         """
         return self._backend.add_documents(documents)
 
@@ -298,7 +299,7 @@ class BM25Indexer:
         self,
         query: str,
         top_k: int = 30,
-        filters: dict | None = None,
+        filters: Optional[dict] = None,
     ) -> list[dict]:
         """BM25 keyword search.
 

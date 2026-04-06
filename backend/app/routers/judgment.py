@@ -5,6 +5,7 @@ Endpoints:
   POST /judgment/draft       — Generate judgment draft (SSE streaming, government-only)
   POST /judgment/review      — AI citation check + honesty score on a draft
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -33,8 +34,8 @@ router = APIRouter(prefix="/judgment", tags=["judgment"])
 # Lazy service singletons
 # ---------------------------------------------------------------------------
 
-_pipeline: SearchPipeline | None = None
-_chatbot: NongKotChatbot | None = None
+_pipeline: Optional[SearchPipeline] = None
+_chatbot: Optional[NongKotChatbot] = None
 
 
 def _get_pipeline() -> SearchPipeline:

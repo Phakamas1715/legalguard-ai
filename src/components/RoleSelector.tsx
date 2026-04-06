@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Scale, Users, Building2, ArrowRight } from "lucide-react";
 
-export type UserRole = "citizen" | "lawyer" | "government";
+export type UserRole = "citizen" | "lawyer" | "government" | "judge";
 
 interface RoleSelectorProps {
   onSelect: (role: UserRole) => void;
@@ -18,20 +18,20 @@ const roles = [
     color: "teal",
   },
   {
-    id: "lawyer" as UserRole,
-    icon: Scale,
-    title: "ทนายความ / นักกฎหมาย",
-    desc: "สืบค้นคำพิพากษาเชิงลึก วิเคราะห์สำนวน พร้อมอ้างอิงมาตราและแนวฎีกา",
-    features: ["วิเคราะห์สำนวนคดี AI", "พยากรณ์แนวโน้มคดี", "Knowledge Graph", "Prompt Templates", "ส่งออก e-Filing XML"],
-    color: "navy",
-  },
-  {
     id: "government" as UserRole,
     icon: Building2,
-    title: "เจ้าหน้าที่รัฐ / ตุลาการ",
-    desc: "ร่างคำพิพากษา คัดกรองคำฟ้อง ตรวจสอบความเป็นธรรม พร้อม Audit Log",
-    features: ["ร่างคำพิพากษา AI", "PII Masking อัตโนมัติ", "Responsible AI Dashboard", "OpenLaw 160K+ คดี", "Audit Log SHA-256"],
+    title: "เจ้าหน้าที่รัฐ / ธุรการ",
+    desc: "ระบบบริหารจัดการข้อมูลศาล คัดกรองคำฟ้อง และดูรายงานสถิติ",
+    features: ["คัดกรองคำฟ้องด้วย AI", "ถอดความเสียง", "นำเข้าข้อมูล OpenLaw", "ตรวจสอบ Audit Log"],
     color: "accent",
+  },
+  {
+    id: "judge" as UserRole,
+    icon: Scale,
+    title: "ตุลาการ / ผู้พิพากษา",
+    desc: "เครื่องมือช่วยพิจารณาคดี ร่างคำพิพากษา และค้นหาฎีกาประยุกต์",
+    features: ["ร่างคำพิพากษา AI", "ค้นหาฎีกาประยุกต์", "ตรวจความเป็นธรรม (Bias)", "แม่แบบคำสั่ง AI"],
+    color: "primary",
   },
 ];
 
@@ -39,17 +39,19 @@ const colorMap: Record<string, string> = {
   teal: "border-teal bg-teal-light",
   navy: "border-primary bg-secondary",
   accent: "border-accent bg-gold-light",
+  primary: "border-primary bg-primary/5",
 };
 
 const iconColorMap: Record<string, string> = {
   teal: "text-teal bg-teal-light",
   navy: "text-primary bg-secondary",
   accent: "text-accent bg-gold-light",
+  primary: "text-primary bg-primary/10",
 };
 
 const RoleSelector = ({ onSelect, selected }: RoleSelectorProps) => {
   return (
-    <div className="grid md:grid-cols-3 gap-6">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {roles.map((role, i) => {
         const isSelected = selected === role.id;
         return (

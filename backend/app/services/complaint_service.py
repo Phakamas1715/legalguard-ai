@@ -3,6 +3,7 @@
 Keyword-based classification and template-based drafting (placeholder for LLM).
 Supports Justice Court (Set A) and Administrative Court (Set B) workflows.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

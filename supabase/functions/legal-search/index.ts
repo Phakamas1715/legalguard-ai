@@ -9,6 +9,26 @@ const corsHeaders = {
 const BACKEND_URL =
   Deno.env.get("LEGALGUARD_BACKEND_URL") || "http://localhost:8000";
 
+interface BackendSearchResult {
+  id: string;
+  case_no?: string;
+  court_type?: string;
+  year?: number;
+  title?: string;
+  summary?: string;
+  chunk_text?: string;
+  statutes?: string[];
+  relevance_score?: number;
+  source_code?: string;
+}
+
+interface BackendSearchResponse {
+  results?: BackendSearchResult[];
+  suggestions?: string[];
+  cache_hit?: boolean;
+  total_candidates?: number;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS")
     return new Response(null, { headers: corsHeaders });
@@ -40,10 +60,10 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
+    const data: BackendSearchResponse = await response.json();
 
     // Transform backend response to match frontend expected format
-    const results = (data.results ?? []).map((r: any) => ({
+    const results = (data.results ?? []).map((r) => ({
       id: r.id,
       caseNo: r.case_no ?? "",
       courtType: r.court_type ?? "",

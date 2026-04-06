@@ -4,6 +4,7 @@ Deduplicates records by composite key ``(case_no, court_type)``, retaining
 the most recent record per group based on ``ingested_at``.  Records with
 ``case_no is None`` are always treated as unique (no dedup applied).
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -47,7 +48,7 @@ class DedupService:
         * The returned list preserves the original order of the kept records.
         """
         # Map composite key → best (most recent) record seen so far.
-        best: dict[tuple[str, str | None], DedupRecord] = {}
+        best: dict[tuple[str, Optional[str]], DedupRecord] = {}
         # Track removed records for logging.
         removed: list[DedupRecord] = []
 
@@ -107,7 +108,7 @@ def dedup_stats(original: list[DedupRecord], deduped: list[DedupRecord]) -> dict
     removed_count = original_count - deduped_count
 
     # Count groups that had more than one record.
-    groups: dict[tuple[str, str | None], int] = {}
+    groups: dict[tuple[str, Optional[str]], int] = {}
     for rec in original:
         if rec.case_no is not None:
             key = (rec.case_no, rec.court_type)

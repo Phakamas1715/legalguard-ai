@@ -3,6 +3,7 @@
 Endpoint:
   POST /predict/outcome — Analyze case facts, return predicted outcome with confidence
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/predict", tags=["prediction"])
 
-_pipeline: SearchPipeline | None = None
+_pipeline: Optional[SearchPipeline] = None
 
 
 def _get_pipeline() -> SearchPipeline:

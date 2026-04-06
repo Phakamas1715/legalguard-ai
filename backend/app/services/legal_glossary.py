@@ -6,6 +6,7 @@
 - Chatbot: อธิบายศัพท์กฎหมายให้ประชาชน
 - Knowledge Graph: entity type classification
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

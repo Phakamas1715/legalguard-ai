@@ -4,6 +4,7 @@ Provides real-time case statistics from audit log data, bottleneck detection
 (flags when avg processing time > 1.5× standard), CFS fairness scoring
 (ported from src/lib/fairnessScoring.ts), and placeholder PDF report generation.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -41,6 +42,45 @@ class DashboardService:
 
     def __init__(self, audit_service: Optional[AuditService] = None) -> None:
         self.audit = audit_service or AuditService()
+
+    @staticmethod
+    def _serialize_audit_entry(entry) -> dict:
+        return {
+            "id": entry.id,
+            "action": entry.action,
+            "query_preview": entry.query_preview,
+            "result_count": entry.result_count,
+            "confidence": entry.confidence,
+            "agent_role": entry.agent_role,
+            "entry_hash": entry.entry_hash,
+            "prev_hash": entry.prev_hash,
+            "created_at": entry.created_at.isoformat(),
+            "metadata": entry.metadata,
+        }
+
+    def _filtered_audit_entries(
+        self,
+        *,
+        action: Optional[str] = None,
+        agent_role: Optional[str] = None,
+        case_type: Optional[str] = None,
+        query: Optional[str] = None,
+    ) -> list:
+        entries = self.audit.get_entries(limit=100_000)
+        filtered_entries = []
+        query_lower = query.lower() if query else None
+        for entry in entries:
+            metadata = entry.metadata or {}
+            if action and entry.action != action:
+                continue
+            if agent_role and (entry.agent_role or "") != agent_role:
+                continue
+            if case_type and metadata.get("case_type") != case_type:
+                continue
+            if query_lower and query_lower not in (entry.query_preview or "").lower():
+                continue
+            filtered_entries.append(entry)
+        return filtered_entries
 
     # ------------------------------------------------------------------
     # GET /api/v1/dashboard/stats
@@ -221,6 +261,102 @@ class DashboardService:
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "format": "json",
             "note": "PDF generation not yet implemented — returning JSON payload.",
+        }
+
+    # ------------------------------------------------------------------
+    # Recent audit rows for dashboards / admin tooling
+    # ------------------------------------------------------------------
+
+    def get_recent_audit_entries(
+        self,
+        limit: int = 20,
+        *,
+        page: int = 1,
+        page_size: Optional[int] = None,
+        action: Optional[str] = None,
+        agent_role: Optional[str] = None,
+        case_type: Optional[str] = None,
+        query: Optional[str] = None,
+    ) -> dict:
+        """Return recent audit log rows in UI-friendly format."""
+        integrity = self.audit.verify_chain_integrity()
+        resolved_page_size = page_size or limit
+        resolved_page = max(page, 1)
+        filtered_entries = self._filtered_audit_entries(
+            action=action,
+            agent_role=agent_role,
+            case_type=case_type,
+            query=query,
+        )
+        total = len(filtered_entries)
+        total_pages = max(math.ceil(total / resolved_page_size), 1)
+        start = (resolved_page - 1) * resolved_page_size
+        end = start + resolved_page_size
+        paged_entries = filtered_entries[start:end]
+
+        return {
+            "entries": [self._serialize_audit_entry(entry) for entry in paged_entries],
+            "chain_valid": integrity["valid"],
+            "broken_at": integrity["broken_at"],
+            "total": total,
+            "page": resolved_page,
+            "page_size": resolved_page_size,
+            "total_pages": total_pages,
+        }
+
+    def export_audit_entries(
+        self,
+        *,
+        scope: str = "all_filtered",
+        page: int = 1,
+        page_size: int = 20,
+        action: Optional[str] = None,
+        agent_role: Optional[str] = None,
+        case_type: Optional[str] = None,
+        query: Optional[str] = None,
+    ) -> dict:
+        entries = self._filtered_audit_entries(
+            action=action,
+            agent_role=agent_role,
+            case_type=case_type,
+            query=query,
+        )
+        if scope == "current_page":
+            resolved_page = max(page, 1)
+            start = (resolved_page - 1) * page_size
+            end = start + page_size
+            entries = entries[start:end]
+        return {
+            "entries": [self._serialize_audit_entry(entry) for entry in entries],
+            "total": len(entries),
+            "scope": scope,
+        }
+
+    def get_audit_entry_detail(self, entry_id: str) -> Optional[dict]:
+        """Return full metadata for a specific audit entry."""
+        entry = self.audit.get_entry(entry_id)
+        if entry is None:
+            return None
+
+        integrity = self.audit.verify_chain_integrity()
+        return {
+            "entry": {
+                "id": entry.id,
+                "user_id": entry.user_id,
+                "action": entry.action,
+                "query_hash": entry.query_hash,
+                "query_preview": entry.query_preview,
+                "agent_role": entry.agent_role,
+                "result_count": entry.result_count,
+                "confidence": entry.confidence,
+                "metadata": entry.metadata,
+                "prev_hash": entry.prev_hash,
+                "entry_hash": entry.entry_hash,
+                "created_at": entry.created_at.isoformat(),
+                "query_storage": "preview_only",
+            },
+            "chain_valid": integrity["valid"],
+            "broken_at": integrity["broken_at"],
         }
 
     # ------------------------------------------------------------------

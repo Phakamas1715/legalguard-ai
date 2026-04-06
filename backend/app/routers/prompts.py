@@ -2,6 +2,7 @@
 
 สอดคล้องกับหลักธรรมาภิบาลปัญญาประดิษฐ์ในกระบวนการยุติธรรม
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

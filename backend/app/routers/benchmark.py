@@ -6,6 +6,7 @@ Endpoints:
   GET  /benchmark/datasets    — List available HuggingFace datasets
   POST /benchmark/load-hf     — Load benchmark cases from HuggingFace
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

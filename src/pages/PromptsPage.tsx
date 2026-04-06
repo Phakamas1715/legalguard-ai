@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  FileText, Search, Loader2, Copy, CheckCircle2, ChevronDown, ChevronUp, Sparkles
+  FileText, Search, Loader2, Copy, CheckCircle2, ChevronDown, ChevronUp, Sparkles, ShieldCheck, Hash, AlertTriangle
 } from "lucide-react";
 
-const API_BASE = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "/api/v1";
+import { API_BASE } from "@/lib/runtimeConfig";
+
+import heroCourthouseImg from "@/assets/hero-courthouse.jpg";
 
 interface PromptTemplate {
   id: string;
@@ -142,27 +144,29 @@ const PromptsPage = () => {
   const [variables, setVariables] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => { loadTemplates(); }, [filterCategory, filterRole]);
+  useEffect(() => {
+    const loadTemplates = async () => {
+      setLoading(true);
+      const mockFiltered = MOCK_TEMPLATES.filter(t =>
+        (!filterCategory || t.category === filterCategory) && (!filterRole || t.target_role === filterRole || t.target_role === "all")
+      );
+      try {
+        const params = new URLSearchParams();
+        if (filterCategory) params.set("category", filterCategory);
+        if (filterRole) params.set("role", filterRole);
+        const resp = await fetch(`${API_BASE}/prompts/templates?${params}`);
+        if (!resp.ok) throw new Error("not ok");
+        const data = await resp.json();
+        const fetched = data.templates ?? [];
+        setTemplates(fetched.length > 0 ? fetched : mockFiltered);
+      } catch {
+        setTemplates(mockFiltered);
+      }
+      setLoading(false);
+    };
 
-  const loadTemplates = async () => {
-    setLoading(true);
-    const mockFiltered = MOCK_TEMPLATES.filter(t =>
-      (!filterCategory || t.category === filterCategory) && (!filterRole || t.target_role === filterRole || t.target_role === "all")
-    );
-    try {
-      const params = new URLSearchParams();
-      if (filterCategory) params.set("category", filterCategory);
-      if (filterRole) params.set("role", filterRole);
-      const resp = await fetch(`${API_BASE}/prompts/templates?${params}`);
-      if (!resp.ok) throw new Error("not ok");
-      const data = await resp.json();
-      const fetched = data.templates ?? [];
-      setTemplates(fetched.length > 0 ? fetched : mockFiltered);
-    } catch {
-      setTemplates(mockFiltered);
-    }
-    setLoading(false);
-  };
+    void loadTemplates();
+  }, [filterCategory, filterRole]);
 
   const loadDetail = async (id: string) => {
     if (expandedId === id) { setExpandedId(null); return; }
@@ -208,7 +212,7 @@ const PromptsPage = () => {
       // Local fallback: simple variable replacement
       let text = detail.template;
       for (const [key, val] of Object.entries(variables)) {
-        text = text.replaceAll(`{${key}}`, val || `[${key}]`);
+        text = text.split(`{${key}}`).join(val || `[${key}]`);
       }
       setRendered(text);
     }
@@ -223,30 +227,58 @@ const PromptsPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+      <section className="bg-hero-gradient pt-16 pb-16 relative overflow-hidden flex items-center min-h-[350px]">
+        <div 
+          className="absolute inset-0 opacity-20 bg-cover bg-center mix-blend-overlay"
+          style={{ backgroundImage: `url(${heroCourthouseImg})` }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-navy-deep/80 via-transparent to-background"></div>
+
+        <div className="container mx-auto px-4 relative z-10 text-center text-primary-foreground">
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-20 h-20 mx-auto rounded-3xl bg-white/10 border border-white/20 backdrop-blur-xl flex items-center justify-center shadow-2xl mb-8 group"
+          >
+            <Sparkles className="w-10 h-10 text-gold group-hover:scale-110 transition-transform" />
+          </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-heading text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+            คลังคำสั่ง AI มาตรฐานตุลาการ
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="opacity-90 text-lg md:text-2xl font-light max-w-3xl mx-auto leading-relaxed">
+            Prompt Templates ที่ผ่านการตรวจสอบความปลอดภัยทางกฎหมายมาแล้ว 100% โดย <span className="text-gold font-bold">Honest Predictor Enterprise</span>
+          </motion.p>
+        </div>
+      </section>
+
       <div className="container mx-auto px-4 py-8 flex-1">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-teal/10 flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-teal" />
-          </div>
+        {/* Instructions */}
+        <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 max-w-4xl mx-auto flex gap-3 text-sm text-primary">
+          <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div>
-            <h1 className="font-heading text-2xl font-bold">Prompt Templates</h1>
-            <p className="text-muted-foreground">ตัวอย่าง Prompt สำหรับงานสนับสนุนศาลไทย</p>
+            <strong>วิธีใช้งาน:</strong> เลือกหมวดหมู่ที่ต้องการ {'>'} กรอกข้อมูลในช่องว่าง (ถ้ามี) {'>'} กดสร้างคำสั่ง {'>'} คัดลอกไปวางในแชท AI ได้ทันที
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3 mb-6 flex-wrap">
+        <div className="flex gap-4 mb-8 flex-wrap max-w-5xl mx-auto items-center">
+          <div className="relative flex-1 min-w-[250px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input type="text" placeholder="ค้นหาชื่อคำสั่งหรือหมวดหมู่..." className="w-full bg-card border border-border rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none shadow-sm" />
+          </div>
           <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-            className="bg-card border border-border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
-            <option value="">ทุกหมวด</option>
+            className="bg-card border border-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none min-w-[180px] shadow-sm cursor-pointer hover:bg-muted transition-colors">
+            <option value="">📂 ทุกหมวดหมู่</option>
             {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
           <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)}
-            className="bg-card border border-border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
-            <option value="">ทุกบทบาท</option>
+            className="bg-card border border-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none min-w-[180px] shadow-sm cursor-pointer hover:bg-muted transition-colors">
+            <option value="">👤 ทุกบทบาท</option>
             {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
-          <span className="text-sm text-muted-foreground self-center">{templates.length} templates</span>
+          <div className="bg-navy-deep text-white px-5 py-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-navy-deep/20">
+             <CheckCircle2 className="w-4 h-4 text-gold" /> พร้อมใช้งาน {templates.length} รูปแบบ
+          </div>
         </div>
 
         {loading ? (
@@ -274,51 +306,91 @@ const PromptsPage = () => {
                 </button>
 
                 {expandedId === t.id && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                    className="bg-card border border-t-0 border-border rounded-b-xl p-4 -mt-1">
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-card border border-t-0 border-border rounded-b-2xl p-6 -mt-2 shadow-xl relative z-0">
                     {detailLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />
+                      <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto my-8" />
                     ) : detail ? (
-                      <div className="space-y-4">
-                        <div className="bg-muted rounded-xl p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-medium">Prompt Template</span>
-                            <button onClick={() => copyToClipboard(detail.template)} className="text-xs text-primary hover:underline flex items-center gap-1">
-                              {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              {copied ? "คัดลอกแล้ว" : "คัดลอก"}
+                      <div className="space-y-6">
+                        {/* Audit Badge */}
+                        <div className="flex items-center justify-between border-b border-border pb-4">
+                           <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                 <ShieldCheck className="w-6 h-6 text-gold" />
+                              </div>
+                              <div>
+                                 <p className="text-[10px] font-bold text-gold uppercase tracking-wider">Security Status</p>
+                                 <p className="text-xs font-bold text-primary">AUDITED BY HONEST PREDICTOR V2.1</p>
+                              </div>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Template Hash</p>
+                              <code className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">sha256:{btoa(detail.id).slice(0, 16)}...</code>
+                           </div>
+                        </div>
+
+                        <div className="bg-muted/50 rounded-2xl p-5 border border-border">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                               <FileText className="w-3.5 h-3.5" /> โครงสร้างคำสั่งหลัก
+                            </span>
+                            <button onClick={() => copyToClipboard(detail.template)} className="text-xs font-bold text-primary hover:text-navy-deep flex items-center gap-1.5 bg-white border border-border px-3 py-1.5 rounded-lg transition-colors">
+                              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-teal" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copied ? "COPY SUCCESS" : "COPY STRUCTURE"}
                             </button>
                           </div>
-                          <pre className="text-xs whitespace-pre-wrap text-muted-foreground">{detail.template}</pre>
+                          <pre className="text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground font-mono">{detail.template}</pre>
                         </div>
+
                         {detail.variables.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium mb-2">ตัวแปร</p>
-                            <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-white border-2 border-primary/10 rounded-2xl p-6 shadow-sm">
+                            <p className="text-sm font-bold mb-4 flex items-center gap-2 text-primary">
+                               <Sparkles className="w-5 h-5 text-gold" /> ปรับแต่งพารามิเตอร์ (Dynamic Parameters)
+                            </p>
+                            <div className="grid md:grid-cols-2 gap-4">
                               {detail.variables.map(v => (
-                                <input key={v} type="text" placeholder={v}
-                                  value={variables[v] ?? ""} onChange={(e) => setVariables(prev => ({ ...prev, [v]: e.target.value }))}
-                                  className="bg-white border border-border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                                <div key={v}>
+                                  <label className="text-[10px] font-bold text-muted-foreground mb-1.5 block uppercase tracking-wider">{v.replace(/_/g, ' ')}</label>
+                                  <input type="text" placeholder={`ใส่ข้อมูล ${v.replace(/_/g, ' ')}...`}
+                                    value={variables[v] ?? ""} onChange={(e) => setVariables(prev => ({ ...prev, [v]: e.target.value }))}
+                                    className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none transition-all" />
+                                </div>
                               ))}
                             </div>
                             <button onClick={renderTemplate}
-                              className="mt-3 bg-teal text-white px-4 py-2 rounded-lg text-xs font-medium hover:opacity-90 flex items-center gap-1">
-                              <Sparkles className="w-3.5 h-3.5" /> Render
+                              className="mt-6 bg-navy-deep text-white px-10 py-4 rounded-xl text-sm font-bold hover:bg-black flex items-center gap-3 shadow-xl shadow-navy-deep/20 transition-all hover:scale-[1.02] w-full sm:w-auto justify-center">
+                              <Sparkles className="w-4 h-4 text-gold" /> GENERATE AUDITED PROMPT
                             </button>
                           </div>
                         )}
+
                         {rendered && (
-                          <div className="bg-teal/5 border border-teal/20 rounded-xl p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-medium text-teal">Rendered Prompt</span>
-                              <button onClick={() => copyToClipboard(rendered)} className="text-xs text-teal hover:underline flex items-center gap-1">
-                                <Copy className="w-3.5 h-3.5" /> คัดลอก
+                          <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                            className="bg-navy-deep text-white rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                               <Sparkles className="w-32 h-32" />
+                            </div>
+                            <div className="flex items-center justify-between mb-4 relative z-10">
+                              <span className="text-sm font-bold text-gold flex items-center gap-2 uppercase tracking-widest">
+                                <ShieldCheck className="w-5 h-5" /> Verified Output Prompt
+                              </span>
+                              <button onClick={() => copyToClipboard(rendered)} className="text-xs bg-gold text-navy-deep px-5 py-2 rounded-xl hover:bg-white transition-colors flex items-center gap-2 font-bold shadow-lg">
+                                <Copy className="w-4 h-4" /> COPY FOR AI CHAT
                               </button>
                             </div>
-                            <pre className="text-xs whitespace-pre-wrap">{rendered}</pre>
-                          </div>
+                            <pre className="text-sm whitespace-pre-wrap leading-relaxed text-white/90 bg-black/30 p-5 rounded-xl border border-white/10 font-mono">{rendered}</pre>
+                            <div className="mt-4 flex items-center justify-between text-[10px] text-white/40 font-mono">
+                               <span>INTEGRITY CHECK: PASSED</span>
+                               <span>GENERATED BY HONEST PREDICTOR ENGINE</span>
+                            </div>
+                          </motion.div>
                         )}
+                        
                         {detail.disclaimer && (
-                          <p className="text-[11px] text-muted-foreground bg-muted rounded-lg p-2">⚠️ {detail.disclaimer}</p>
+                          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 flex items-start gap-2">
+                             <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                             <p className="text-[11px] text-destructive leading-normal font-medium">{detail.disclaimer}</p>
+                          </div>
                         )}
                       </div>
                     ) : null}

@@ -1,34 +1,22 @@
 """Open Law Data Thailand — Ingestion Service.
 
 Fetches Thai court judgments from openlawdatathailand.org, applies the
-full LegalGuard processing pipeline (PII masking → chunking → embedding →
+LegalGuard processing pipeline (PII masking → chunking → embedding →
 Qdrant upsert + BM25 index), and computes CFS for the ingested batch.
 
-This uses the existing Qdrant + BM25 infrastructure (NOT ChromaDB), so
-results are immediately available to SearchPipeline.search().
-
-Architecture:
-    OpenLawDataClient → PII mask → ThaiChunker → EmbeddingService (e5-large)
-    → QdrantService.upsert + BM25Indexer.add → CFS report
-
-Embedding model: intfloat/multilingual-e5-large
-    - 1024 dims, trained on 100+ languages including Thai
-    - Superior to text-embedding-3-small for Thai legal domain
-    - Loaded via sentence-transformers (already in pyproject.toml)
-
-References:
-    Wang et al. (2024) "Improving Text Embeddings with Large Language Models"
-    https://huggingface.co/intfloat/multilingual-e5-large
+This service intentionally uses the same embedding/Qdrant/BM25 contracts as
+the main ingestion pipeline so OpenLaw documents become searchable through the
+existing runtime without a separate storage path.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import logging
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 from app.services.bm25_indexer import BM25Indexer
 from app.services.dashboard_service import (
@@ -39,44 +27,13 @@ from app.services.dashboard_service import (
     calc_court_fairness,
     calc_time_fairness,
 )
+from app.services.embedding_service import EmbeddingService
 from app.services.openlaw_client import OpenLawDataClient
 from app.services.pii_masking import mask_pii
 from app.services.qdrant_loader import QdrantService
 from app.services.thai_chunker import ThaiChunker
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# multilingual-e5-large embedder (lazy-loaded — 1024 dims)
-# ---------------------------------------------------------------------------
-
-_E5_MODEL: Any = None
-_E5_DIM = 1024
-
-
-def _get_e5_model() -> Any:
-    """Lazy-load intfloat/multilingual-e5-large via sentence-transformers."""
-    global _E5_MODEL
-    if _E5_MODEL is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            logger.info("Loading multilingual-e5-large (first call — downloading if needed)")
-            _E5_MODEL = SentenceTransformer("intfloat/multilingual-e5-large")
-        except Exception as exc:
-            logger.warning("multilingual-e5-large unavailable (%s), falling back to EmbeddingService", exc)
-    return _E5_MODEL
-
-
-def _embed_texts(texts: list[str]) -> list[list[float]]:
-    """Embed texts with multilingual-e5-large; fall back to zero vectors."""
-    model = _get_e5_model()
-    if model is not None:
-        # e5 models require "query: " / "passage: " prefix for asymmetric retrieval
-        prefixed = [f"passage: {t}" for t in texts]
-        embeddings = model.encode(prefixed, normalize_embeddings=True, batch_size=32)
-        return [emb.tolist() for emb in embeddings]
-    # Fallback: zero vectors (pipeline still works, retrieval accuracy degrades)
-    return [[0.0] * _E5_DIM for _ in texts]
 
 
 # ---------------------------------------------------------------------------
@@ -114,7 +71,7 @@ class OpenLawIngestionService:
         1. Fetch judgments via OpenLawDataClient
         2. PII masking on full content
         3. Thai chunking (512 tokens, 64 overlap)
-        4. multilingual-e5-large embedding
+        4. Shared EmbeddingService embedding
         5. Upsert to Qdrant + BM25 index
         6. CFS computation for ingested batch
     """
@@ -127,11 +84,13 @@ class OpenLawIngestionService:
         qdrant_service: Optional[QdrantService] = None,
         bm25_indexer: Optional[BM25Indexer] = None,
         chunker: Optional[ThaiChunker] = None,
+        embedding_service: Optional[EmbeddingService] = None,
     ) -> None:
         self.client = openlaw_client or OpenLawDataClient()
         self.qdrant = qdrant_service or QdrantService()
         self.bm25 = bm25_indexer or BM25Indexer()
         self.chunker = chunker or ThaiChunker()
+        self.embedding_service = embedding_service or EmbeddingService()
 
     async def ingest(
         self,
@@ -188,32 +147,41 @@ class OpenLawIngestionService:
                 cfs_warning=True, error_log=error_log, status="completed_with_errors",
             )
 
-        # 4. Embed in thread pool (CPU-bound)
-        texts = [c["text"] for c in all_chunks]
-        logger.info("Embedding %d chunks with multilingual-e5-large", len(texts))
-        vectors = await asyncio.to_thread(_embed_texts, texts)
+        self.qdrant.ensure_collection()
+        self.bm25.ensure_index()
 
-        # 5. Upsert to Qdrant
+        # 4. Embed using the same embedding service as the main pipeline
+        texts = [c["text"] for c in all_chunks]
+        logger.info("Embedding %d chunks with shared EmbeddingService", len(texts))
+        vectors = await asyncio.to_thread(self.embedding_service.embed_batch, texts)
+
+        # 5. Upsert to Qdrant + BM25 using the same batch contracts as the core ingestion path
+        qdrant_points = [
+            {
+                "id": chunk["id"],
+                "vector": vector,
+                "payload": chunk["payload"],
+            }
+            for chunk, vector in zip(all_chunks, vectors)
+        ]
+        bm25_docs = [
+            {
+                "id": chunk["id"],
+                "text": chunk["text"],
+                "source_code": chunk["payload"]["source_code"],
+                "court_type": chunk["payload"]["court_type"],
+                "year": chunk["payload"]["year"],
+            }
+            for chunk in all_chunks
+        ]
+
         ingested = 0
-        for chunk, vector in zip(all_chunks, vectors):
-            try:
-                await asyncio.to_thread(
-                    self.qdrant.upsert,
-                    doc_id=chunk["id"],
-                    vector=vector,
-                    payload=chunk["payload"],
-                )
-                # BM25 index
-                await asyncio.to_thread(
-                    self.bm25.add_document,
-                    doc_id=chunk["id"],
-                    text=chunk["text"],
-                    metadata=chunk["payload"],
-                )
-                ingested += 1
-            except Exception as exc:
-                logger.error("Upsert failed for chunk %s: %s", chunk["id"], exc)
-                error_log.append({"chunk_id": chunk["id"], "error": str(exc)})
+        try:
+            await asyncio.to_thread(self.qdrant.upsert_chunks, qdrant_points)
+            ingested = await asyncio.to_thread(self.bm25.add_documents, bm25_docs)
+        except Exception as exc:
+            logger.error("OpenLaw batch upsert failed: %s", exc)
+            error_log.append({"stage": "storage", "error": str(exc)})
 
         # 6. CFS for ingested batch
         f_geo = calc_geo_fairness(doc_metas)
@@ -260,13 +228,10 @@ class OpenLawIngestionService:
         raw_chunks = self.chunker.chunk(masked_content)
 
         chunks: list[dict] = []
-        for i, chunk_text in enumerate(raw_chunks):
-            if not chunk_text.strip():
+        for i, chunk in enumerate(raw_chunks):
+            chunk_text = getattr(chunk, "text", chunk)
+            if not str(chunk_text).strip():
                 continue
-
-            chunk_id = hashlib.sha256(
-                f"{doc.get('judgment_id', '')}:{i}:{chunk_text[:64]}".encode()
-            ).hexdigest()[:32]
 
             payload = {
                 "chunk_text": chunk_text,
@@ -278,13 +243,14 @@ class OpenLawIngestionService:
                 "statutes": doc.get("statutes", []),
                 "citation": doc.get("citation", ""),
                 "source_code": source_code,
+                "document_type": "judgment",
                 "judgment_id": doc.get("judgment_id", ""),
                 "chunk_index": i,
                 "summary": chunk_text[:300],
             }
 
             chunks.append({
-                "id": chunk_id,
+                "id": str(uuid.uuid4()),
                 "text": chunk_text,
                 "payload": payload,
             })

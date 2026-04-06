@@ -1,4 +1,5 @@
 """Search router — hybrid, semantic, and keyword search endpoints."""
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/search", tags=["search"])
 
 # Lazily initialised singleton — avoids import-time side-effects.
-_pipeline: SearchPipeline | None = None
+_pipeline: Optional[SearchPipeline] = None
 
 
 def _get_pipeline() -> SearchPipeline:
@@ -33,7 +34,7 @@ def _get_pipeline() -> SearchPipeline:
         try:
             from app.services.semantic_cache import SemanticCache
 
-            cache: SemanticCache | None = SemanticCache()
+            cache: Optional[SemanticCache] = SemanticCache()
         except Exception:
             cache = None
         _pipeline = SearchPipeline(

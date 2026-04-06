@@ -16,6 +16,7 @@ Data sources:
 - HuggingFace iapp/rag_thai_laws
 - Mock case data (case_2568_sample.json, mockResults.ts)
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

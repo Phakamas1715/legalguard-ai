@@ -1,4 +1,5 @@
 """Speech-to-Text API endpoints for court hearing transcription."""
+from __future__ import annotations
 
 from __future__ import annotations
 

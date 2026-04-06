@@ -22,6 +22,7 @@ LeJEPA Reranker (LeCun 2022 + Assran et al. 2023 + Balestriero & LeCun 2025):
               λ = 0.04  (Balestriero & LeCun 2025)
     - Final score = cos_sim · (1 − OOD_penalty) + SIGReg_bonus
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

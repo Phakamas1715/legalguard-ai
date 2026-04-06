@@ -9,6 +9,7 @@ Implements the RAAIA 3.1 framework from the design document:
 - Strategic Dishonesty Detection
 - Bias Convergence Detection
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

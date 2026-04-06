@@ -9,6 +9,7 @@ Architecture:
 
 Reference: https://github.com/traccar/traccar-geocoder
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

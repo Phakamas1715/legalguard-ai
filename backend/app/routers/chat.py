@@ -1,8 +1,9 @@
 """Chat router — RAG-enhanced น้องซื่อสัตย์ chatbot endpoint."""
+from __future__ import annotations
 
 from __future__ import annotations
 
-from typing import AsyncIterator
+from typing import Optional, AsyncIterator
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -12,7 +13,7 @@ from app.services.llm_service import stream_llm
 
 router = APIRouter(prefix="/chat", tags=["chatbot"])
 
-_chatbot: NongKotChatbot | None = None
+_chatbot: Optional[NongKotChatbot] = None
 
 
 def _get_chatbot() -> NongKotChatbot:

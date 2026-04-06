@@ -12,6 +12,7 @@ Reference: OWASP Top 10 for LLM Applications (2025)
 
 Architecture layer: Input Guardrails (Bala Kalavala, 2025)
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

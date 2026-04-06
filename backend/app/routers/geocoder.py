@@ -2,6 +2,7 @@
 
 Self-hosted via traccar-geocoder (OSM Thailand data, PDPA compliant).
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

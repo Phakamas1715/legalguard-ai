@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText, Send, CheckCircle2, AlertCircle, Scale, User, MapPin, Gavel,
-  Loader2, Sparkles, Download, ArrowLeft, ArrowRight, AlertTriangle
+  Loader2, Sparkles, Download, ArrowLeft, ArrowRight, AlertTriangle, Database, ShieldCheck
 } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import {
+  apiClient,
+  type ComplaintClassifyResponse,
+  type ComplaintDraftResponse,
+  type ComplaintExportXmlResponse,
+  type ComplaintValidateResponse,
+  type ComplaintVerifyResponse,
+} from "@/lib/apiClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -14,6 +21,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useBackendStatus } from "@/hooks/useBackendStatus";
+import { loadWorkspace, saveWorkspace, WORKSPACE_STORAGE_KEYS } from "@/lib/flowWorkspace";
+import { memory } from "@/lib/layeredMemory";
 
 const CASE_TYPES = [
   { value: "civil", label: "คดีแพ่ง", desc: "สัญญา ละเมิด หนี้สิน มรดก" },
@@ -33,6 +43,74 @@ const COURTS = [
   { value: "family_court", label: "ศาลเยาวชนและครอบครัว", desc: "หย่า อำนาจปกครองบุตร" },
   { value: "provincial_court", label: "ศาลจังหวัด", desc: "คดีทั่วไปในต่างจังหวัด" },
 ];
+
+const NAME_PREFIXES = ["นาย", "นาง", "นางสาว", "น.ส.", "บริษัท", "ห้างหุ้นส่วน"];
+
+const getCourtLabel = (courtValue: string) =>
+  COURTS.find((court) => court.value === courtValue)?.label ?? courtValue;
+
+const normalizeCaseType = (value: string) => {
+  switch (value) {
+    case "admin":
+      return "administrative";
+    default:
+      return value;
+  }
+};
+
+const mapRecommendedCourtToValue = (value: string) => {
+  const normalized = value.trim().toLowerCase();
+  const directMatch = COURTS.find(
+    (court) => court.value === normalized || court.label.toLowerCase() === normalized,
+  );
+  if (directMatch) {
+    return directMatch.value;
+  }
+
+  if (normalized.includes("ปกครอง")) return "admin_court";
+  if (normalized.includes("แพ่ง")) return "civil_court";
+  if (normalized.includes("อาญา")) return "criminal_court";
+  if (normalized.includes("แรงงาน")) return "labor_court";
+  if (normalized.includes("ครอบครัว")) return "family_court";
+  if (normalized.includes("ผู้บริโภค")) return "consumer_court";
+  if (normalized.includes("จังหวัด")) return "provincial_court";
+
+  return "";
+};
+
+const splitThaiName = (fullName: string, role: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const prefix = parts[0] && NAME_PREFIXES.includes(parts[0]) ? parts[0] : "";
+  const nameParts = prefix ? parts.slice(1) : parts;
+  return {
+    prefix,
+    first_name: nameParts[0] ?? "",
+    last_name: nameParts.slice(1).join(" "),
+    role,
+  };
+};
+
+const recommendedCourtValue = (caseType: string, backendCourt = "") =>
+  mapRecommendedCourtToValue(backendCourt) || CASE_COURT_MAP[caseType]?.primary || "";
+
+interface ComplaintAnalysisState {
+  classify: ComplaintClassifyResponse;
+  draft: ComplaintDraftResponse;
+  validate: ComplaintValidateResponse;
+  verify: ComplaintVerifyResponse;
+}
+
+interface ComplaintWorkspaceState {
+  step: number;
+  formData: {
+    plaintiff: string;
+    defendant: string;
+    location: string;
+    caseType: string;
+    court: string;
+    description: string;
+  };
+}
 
 // Mapping: ประเภทคดี → ศาลหลัก (primary) + ศาลทางเลือก
 const CASE_COURT_MAP: Record<string, { primary: string; courts: string[]; hint: string }> = {
@@ -111,6 +189,8 @@ const EXAMPLE_COMPLAINTS = [
   },
 ];
 
+const COMPLAINT_WORKSPACE_STORAGE_KEY = WORKSPACE_STORAGE_KEYS.complaint;
+
 const ComplaintFormPage = () => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -121,6 +201,9 @@ const ComplaintFormPage = () => {
     summary: string;
   } | null>(null);
   const [aiError, setAiError] = useState(false);
+  const [analysis, setAnalysis] = useState<ComplaintAnalysisState | null>(null);
+  const [xmlLoading, setXmlLoading] = useState(false);
+  const [xmlResult, setXmlResult] = useState<ComplaintExportXmlResponse | null>(null);
   const [formData, setFormData] = useState({
     plaintiff: "",
     defendant: "",
@@ -129,6 +212,32 @@ const ComplaintFormPage = () => {
     court: "",
     description: "",
   });
+  const hydratedRef = useRef(false);
+  const backendStatus = useBackendStatus();
+  const memoryStats = memory.getStats();
+
+  useEffect(() => {
+    const saved = loadWorkspace<ComplaintWorkspaceState>(COMPLAINT_WORKSPACE_STORAGE_KEY);
+    if (!saved) return;
+    setStep(saved.step ?? 1);
+    setFormData(saved.formData ?? {
+      plaintiff: "",
+      defendant: "",
+      location: "",
+      caseType: "",
+      court: "",
+      description: "",
+    });
+    hydratedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!hydratedRef.current) {
+      hydratedRef.current = true;
+      return;
+    }
+    saveWorkspace(COMPLAINT_WORKSPACE_STORAGE_KEY, { step, formData });
+  }, [step, formData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => {
@@ -141,6 +250,65 @@ const ComplaintFormPage = () => {
     });
   };
 
+  const buildComplaintPayload = (
+    caseType: string,
+    courtValue: string,
+    statutes: string[],
+  ) => {
+    const normalizedCaseType = normalizeCaseType(caseType);
+    const courtLabel = getCourtLabel(courtValue);
+    const payload: Record<string, unknown> = {
+      plaintiff: formData.plaintiff.trim(),
+      defendant: formData.defendant.trim(),
+      facts: formData.description.trim(),
+      case_type: normalizedCaseType,
+      court: courtLabel,
+      location: formData.location.trim(),
+      statutes,
+      legal_grounds: statutes.join(", ") || "พิจารณาตามข้อเท็จจริงและกฎหมายที่เกี่ยวข้อง",
+      relief: "ขอให้ศาลมีคำพิพากษาตามข้อเท็จจริงและกฎหมายที่เกี่ยวข้อง",
+    };
+
+    if (normalizedCaseType === "criminal") {
+      payload.offense_date = "ตามวันที่ปรากฏในข้อเท็จจริง";
+    }
+
+    if (normalizedCaseType === "administrative") {
+      payload.section_56_elements = "ตรวจสอบองค์ประกอบตามมาตรา 56 จากข้อเท็จจริงเบื้องต้น";
+      payload.jurisdiction = "ให้ศาลปกครองตรวจสอบเขตอำนาจตามหน่วยงานและคำสั่งทางปกครองที่เกี่ยวข้อง";
+      payload.legal_interest = "ผู้ฟ้องคดีได้รับผลกระทบโดยตรงจากการกระทำของหน่วยงานรัฐ";
+      payload.filing_deadline = "ให้ตรวจสอบการยื่นฟ้องภายใน 90 วันตามข้อเท็จจริง";
+    }
+
+    return payload;
+  };
+
+  const buildXmlPayload = (statutes: string[]) => {
+    const caseType = normalizeCaseType(formData.caseType || "civil");
+    return {
+      case_type: caseType,
+      court_name: getCourtLabel(formData.court),
+      filing_date: new Date().toISOString().slice(0, 10),
+      plaintiffs: formData.plaintiff.trim()
+        ? [splitThaiName(formData.plaintiff, caseType === "administrative" ? "ผู้ฟ้องคดี" : "โจทก์")]
+        : [],
+      defendants: formData.defendant.trim()
+        ? [splitThaiName(formData.defendant, caseType === "administrative" ? "ผู้ถูกฟ้องคดี" : "จำเลย")]
+        : [],
+      facts: formData.description.trim(),
+      legal_grounds: statutes.join(", ") || "พิจารณาตามข้อเท็จจริงและกฎหมายที่เกี่ยวข้อง",
+      statutes,
+      relief_requested: "ขอให้ศาลมีคำพิพากษาตามข้อเท็จจริงและกฎหมายที่เกี่ยวข้อง",
+      damages_amount: 0,
+      witness_list: [],
+      attachments: [],
+      section_56_elements: caseType === "administrative" ? "ตรวจสอบองค์ประกอบตามมาตรา 56 จากข้อเท็จจริงเบื้องต้น" : "",
+      jurisdiction_reason: caseType === "administrative" ? "ให้ศาลปกครองตรวจสอบเขตอำนาจจากหน่วยงานที่เกี่ยวข้อง" : "",
+      legal_interest: caseType === "administrative" ? "ผู้ฟ้องคดีได้รับผลกระทบโดยตรงจากการกระทำของรัฐ" : "",
+      filing_deadline_check: caseType === "administrative" ? "ให้ตรวจสอบกรอบเวลา 90 วันตามข้อเท็จจริง" : "",
+    };
+  };
+
   const handleAnalyze = async () => {
     if (!formData.description) {
       toast.error("กรุณาระบุรายละเอียดเหตุการณ์");
@@ -149,45 +317,121 @@ const ComplaintFormPage = () => {
     setIsSubmitting(true);
     setAiError(false);
     setAiSuggestion(null);
+    setAnalysis(null);
+    setXmlResult(null);
+    memory.write("working", `[complaint] ${formData.description.slice(0, 120)}`, {
+      concept: "complaint_draft",
+      importance: 0.8,
+    });
 
     try {
-      const data = await apiClient.search(formData.description, {}, "citizen", 5);
+      const classify = await apiClient.classifyComplaint(formData.description);
+      const normalizedCaseType = normalizeCaseType(classify.case_type);
+      const suggestedCourt = recommendedCourtValue(
+        normalizedCaseType,
+        classify.recommended_court,
+      );
+      const nextCourt = formData.court || suggestedCourt;
+      const draft = await apiClient.draftComplaint({
+        facts: formData.description,
+        case_type: normalizedCaseType,
+        plaintiff: formData.plaintiff,
+        defendant: formData.defendant,
+      });
+      const complaintPayload = buildComplaintPayload(normalizedCaseType, nextCourt, classify.statutes);
+      const validate = await apiClient.validateComplaint(complaintPayload);
+      const verify = await apiClient.verifyComplaint({
+        complaint: complaintPayload,
+        target_court: normalizedCaseType === "administrative" ? "administrative" : "justice",
+      });
 
-      if (data) {
-        const results = data.results || [];
-        const statutes = results.flatMap((r: Record<string, unknown>) => (r.statutes as string[]) || []).filter(Boolean);
-        const uniqueStatutes = [...new Set(statutes)].slice(0, 5) as string[];
-
-        // Simple heuristic for case type suggestion
-        const text = formData.description.toLowerCase();
-        let suggestedType = "civil";
-        let suggestedCourt = "civil_court";
-        if (text.includes("ฉ้อโกง") || text.includes("ลักทรัพย์") || text.includes("ทำร้าย") || text.includes("อาญา")) {
-          suggestedType = "criminal"; suggestedCourt = "criminal_court";
-        } else if (text.includes("หน่วยงานรัฐ") || text.includes("ปกครอง") || text.includes("คำสั่งทางปกครอง")) {
-          suggestedType = "administrative"; suggestedCourt = "admin_court";
-        } else if (text.includes("เลิกจ้าง") || text.includes("ค่าจ้าง") || text.includes("แรงงาน")) {
-          suggestedType = "labor"; suggestedCourt = "labor_court";
-        } else if (text.includes("สินค้า") || text.includes("ผู้บริโภค") || text.includes("ออนไลน์")) {
-          suggestedType = "consumer"; suggestedCourt = "consumer_court";
-        } else if (text.includes("หย่า") || text.includes("บุตร") || text.includes("ครอบครัว")) {
-          suggestedType = "family"; suggestedCourt = "family_court";
-        }
-
-        setAiSuggestion({
-          caseType: suggestedType,
-          court: suggestedCourt,
-          statutes: uniqueStatutes,
-          summary: results[0]?.summary || "ระบบได้วิเคราะห์ข้อเท็จจริงเบื้องต้นแล้ว กรุณาตรวจสอบประเภทคดีและศาลที่แนะนำ",
-        });
-        setFormData(prev => ({ ...prev, caseType: suggestedType, court: suggestedCourt }));
-      }
+      setAnalysis({
+        classify: { ...classify, case_type: normalizedCaseType },
+        draft,
+        validate,
+        verify,
+      });
+      setAiSuggestion({
+        caseType: normalizedCaseType,
+        court: nextCourt,
+        statutes: classify.statutes,
+        summary: verify.summary,
+      });
+      memory.write(
+        "episodic",
+        `Complaint analyzed type=${normalizedCaseType} court=${nextCourt} completeness=${validate.completeness_score.toFixed(2)}`,
+        { concept: "complaint_analysis", importance: Math.max(0.65, validate.completeness_score) },
+      );
+      memory.summarizeToL5(
+        `Complaint workspace "${formData.description.slice(0, 70)}" -> ${normalizedCaseType} @ ${nextCourt}`,
+        "complaint_workspace",
+      );
+      setFormData((prev) => ({ ...prev, caseType: normalizedCaseType, court: nextCourt }));
       setStep(2);
+      toast.success("วิเคราะห์คำฟ้องจาก backend สำเร็จ");
     } catch {
       setAiError(true);
+      memory.write("episodic", `Complaint analyze failed for "${formData.description.slice(0, 90)}"`, {
+        concept: "complaint_failure",
+        importance: 0.7,
+      });
+      toast.error("ไม่สามารถเชื่อมต่อ backend สำหรับวิเคราะห์คำฟ้องได้");
       setStep(2);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleExportXml = async () => {
+    if (!formData.caseType || !formData.court) {
+      toast.error("กรุณาเลือกประเภทคดีและศาลก่อนส่งออก XML");
+      return;
+    }
+
+    setXmlLoading(true);
+    setXmlResult(null);
+
+    try {
+      const selectedCaseType = normalizeCaseType(formData.caseType);
+      const statutes =
+        analysis && normalizeCaseType(analysis.classify.case_type) === selectedCaseType
+          ? analysis.classify.statutes
+          : [];
+      const complaintPayload = buildComplaintPayload(selectedCaseType, formData.court, statutes);
+      const validate = await apiClient.validateComplaint(complaintPayload);
+      const verify = await apiClient.verifyComplaint({
+        complaint: complaintPayload,
+        target_court: selectedCaseType === "administrative" ? "administrative" : "justice",
+      });
+      if (analysis) {
+        setAnalysis({ ...analysis, validate, verify });
+      }
+
+      const payload = buildXmlPayload(statutes);
+      const result = await apiClient.exportComplaintXml(payload);
+      setXmlResult(result);
+      memory.write(
+        "episodic",
+        `Complaint XML export ${result.valid ? "passed" : "failed"} form=${result.form}`,
+        { concept: "complaint_export", importance: result.valid ? 0.8 : 0.6 },
+      );
+
+      if (result.valid && result.xml) {
+        const blob = new Blob([result.xml], { type: "application/xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `legalguard-${formData.caseType}-${result.form}.xml`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`ส่งออก e-Filing XML สำเร็จ (${result.form})`);
+      } else {
+        toast.error(result.errors[0] || "ส่งออก XML ไม่สำเร็จ");
+      }
+    } catch {
+      toast.error("ไม่สามารถส่งออก XML จาก backend ได้");
+    } finally {
+      setXmlLoading(false);
     }
   };
 
@@ -202,6 +446,35 @@ const ComplaintFormPage = () => {
           <div className="text-center mb-10">
             <h1 className="font-heading text-3xl font-bold text-primary mb-3">ร่างคำฟ้องอัจฉริยะ</h1>
             <p className="text-muted-foreground">AI ช่วยตรวจสอบและแนะนำข้อกฎหมายเบื้องต้น</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3 mb-8">
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <ShieldCheck className="h-4 w-4 text-teal" />
+                Workflow Status
+              </div>
+              <p className={`text-sm font-bold ${backendStatus.online ? "text-teal" : "text-destructive"}`}>
+                {backendStatus.online ? "Complaint backend พร้อมใช้งาน" : "Backend ยังไม่ตอบสนอง"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">รองรับ classify, draft, validate, verify และ export XML</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Database className="h-4 w-4 text-primary" />
+                Layered Memory
+              </div>
+              <p className="text-sm font-bold text-foreground">L1 {memoryStats.l1Count} · L2 {memoryStats.l2Count} · L5 {memoryStats.l5Count}</p>
+              <p className="mt-1 text-xs text-muted-foreground">ระบบจำ draft ล่าสุดและคืนค่า workspace ข้าม session</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Scale className="h-4 w-4 text-accent-foreground" />
+                Responsible Filing
+              </div>
+              <p className="text-sm font-bold text-foreground">Human review required</p>
+              <p className="mt-1 text-xs text-muted-foreground">คำฟ้องและ XML ที่ได้ต้องผ่านการตรวจทานก่อนใช้ยื่นจริงทุกครั้ง</p>
+            </div>
           </div>
 
           {/* Step indicator */}
@@ -339,6 +612,18 @@ const ComplaintFormPage = () => {
                           ))}
                         </div>
                       )}
+                      {analysis && (
+                        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                          <div className="rounded-lg bg-white/70 p-3">
+                            <p className="text-muted-foreground mb-1">ความมั่นใจจาก backend</p>
+                            <p className="font-bold text-foreground">{Math.round(analysis.classify.confidence * 100)}%</p>
+                          </div>
+                          <div className="rounded-lg bg-white/70 p-3">
+                            <p className="text-muted-foreground mb-1">คะแนนความครบถ้วน</p>
+                            <p className="font-bold text-foreground">{Math.round(analysis.validate.completeness_score * 100)}%</p>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -436,6 +721,31 @@ const ComplaintFormPage = () => {
                         </div>
                       </div>
                     </div>
+
+                    {analysis && (
+                      <div className="space-y-3">
+                        {analysis.validate.warnings.length > 0 && (
+                          <div className="rounded-xl border border-accent/20 bg-accent/10 p-4">
+                            <p className="text-sm font-medium text-accent-foreground mb-2">คำเตือนจาก backend</p>
+                            <ul className="space-y-1 text-xs text-muted-foreground">
+                              {analysis.validate.warnings.map((warning) => (
+                                <li key={warning}>- {warning}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {analysis.validate.missing_fields.length > 0 && (
+                          <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+                            <p className="text-sm font-medium text-destructive mb-2">รายการที่ยังขาด</p>
+                            <ul className="space-y-1 text-xs text-muted-foreground">
+                              {analysis.validate.missing_fields.map((item) => (
+                                <li key={item.field}>- {item.instruction}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                   <CardFooter className="flex justify-between">
                     <Button variant="outline" onClick={() => setStep(1)}>
@@ -478,19 +788,54 @@ const ComplaintFormPage = () => {
                       </div>
                     </div>
 
+                    {analysis && (
+                      <>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="rounded-xl border border-border bg-muted/20 p-4">
+                            <p className="text-xs text-muted-foreground mb-1">คะแนนความครบถ้วน</p>
+                            <p className="text-2xl font-bold text-primary">{Math.round(analysis.validate.completeness_score * 100)}%</p>
+                          </div>
+                          <div className="rounded-xl border border-border bg-muted/20 p-4">
+                            <p className="text-xs text-muted-foreground mb-1">กฎหมายที่อ้างอิง</p>
+                            <p className="text-sm font-medium text-foreground">{analysis.verify.cited_statutes.join(", ") || "ยังไม่มี"}</p>
+                          </div>
+                        </div>
+
+                        <div className="rounded-xl border border-border bg-card p-4">
+                          <p className="text-xs text-muted-foreground mb-2">สรุปจาก backend</p>
+                          <pre className="whitespace-pre-wrap text-sm text-foreground font-sans">{analysis.verify.summary}</pre>
+                        </div>
+
+                        <div className="rounded-xl border border-border bg-card p-4">
+                          <p className="text-xs text-muted-foreground mb-2">ร่างคำฟ้องที่สร้างโดย backend</p>
+                          <pre className="whitespace-pre-wrap text-sm text-foreground font-sans">{analysis.draft.draft_text}</pre>
+                        </div>
+                      </>
+                    )}
+
                     <div className="bg-accent/10 border border-accent/20 rounded-xl p-3">
                       <p className="text-xs text-muted-foreground flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 text-accent-foreground" />
                         เอกสารนี้เป็นร่างเบื้องต้นจาก AI กรุณาตรวจสอบกับทนายความก่อนยื่นต่อศาล
                       </p>
                     </div>
+
+                    {!analysis && (
+                      <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-3">
+                        <p className="text-xs text-destructive flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          หน้านี้ยังไม่ได้รับผลวิเคราะห์จาก backend ในรอบล่าสุด คุณยังส่งออกได้ แต่ควรวิเคราะห์ใหม่ก่อนยื่นจริง
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                   <CardFooter className="flex flex-col sm:flex-row gap-3">
                     <Button variant="outline" onClick={() => setStep(2)} className="sm:mr-auto">
                       <ArrowLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
                     </Button>
-                    <Button variant="outline" onClick={() => toast.success("ดาวน์โหลด XML สำเร็จ (จำลอง)")}>
-                      <Download className="w-4 h-4 mr-2" /> ส่งออก e-Filing XML
+                    <Button variant="outline" onClick={handleExportXml} disabled={xmlLoading}>
+                      {xmlLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                      ส่งออก e-Filing XML
                     </Button>
                     <Button className="bg-teal hover:bg-teal/90" asChild>
                       <a href="https://efiling.coj.go.th" target="_blank" rel="noopener noreferrer">
@@ -499,6 +844,24 @@ const ComplaintFormPage = () => {
                     </Button>
                   </CardFooter>
                 </Card>
+
+                {xmlResult && (
+                  <Card className={`border ${xmlResult.valid ? "border-teal/30 bg-teal-light/20" : "border-destructive/30 bg-destructive/5"}`}>
+                    <CardContent className="pt-6">
+                      <p className="text-sm font-medium mb-2">
+                        {xmlResult.valid ? "ส่งออก XML สำเร็จ" : "ส่งออก XML ไม่ผ่าน validation"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-3">Form: {xmlResult.form}</p>
+                      {xmlResult.errors.length > 0 && (
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          {xmlResult.errors.map((error) => (
+                            <li key={error}>- {error}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

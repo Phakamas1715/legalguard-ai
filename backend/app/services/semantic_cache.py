@@ -3,6 +3,7 @@
 Provides exact SHA-256 hash matching and fuzzy matching via RapidFuzz
 token_sort_ratio to serve cached results for repeated or similar queries.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -65,7 +66,7 @@ class SemanticCache:
 
     # -- Public API -----------------------------------------------------------
 
-    async def get(self, query: str) -> dict | None:
+    async def get(self, query: str) -> Optional[dict]:
         """Look up a cached result by *query*.
 
         1. Try an exact SHA-256 hash match.

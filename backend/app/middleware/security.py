@@ -9,6 +9,7 @@ Implements:
 - LLM fallback to local model (Ollama) when external API unavailable
 - Security response headers (OWASP)
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

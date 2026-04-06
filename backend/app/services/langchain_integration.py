@@ -6,6 +6,7 @@ Provides:
 - LangChain RAG chain with retriever
 - NeMo Guardrails integration
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

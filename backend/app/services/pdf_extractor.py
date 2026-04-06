@@ -3,6 +3,7 @@
 Uses PyMuPDF (fitz) for text-based PDFs with EasyOCR fallback for scanned PDFs.
 Handles malformed PDFs gracefully — logs errors and continues batch processing.
 """
+from __future__ import annotations
 
 import logging
 from pathlib import Path

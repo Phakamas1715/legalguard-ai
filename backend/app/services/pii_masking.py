@@ -2,6 +2,7 @@
 
 Ported from src/lib/piiMasking.ts with all Thai-specific patterns.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

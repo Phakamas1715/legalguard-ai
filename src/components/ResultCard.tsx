@@ -1,7 +1,19 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Bookmark, BookmarkCheck, ExternalLink, ChevronDown, ChevronUp, Calendar, FileText, Eye } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  FileText,
+  Eye,
+  FileCheck2,
+  ShieldCheck,
+  CircleAlert,
+} from "lucide-react";
 import type { UserRole } from "./RoleSelector";
 
 export interface SearchResult {
@@ -17,6 +29,7 @@ export interface SearchResult {
   relevanceScore: number;
   province?: string;
   link?: string;
+  sourceCode?: string;
   relatedStatutes?: Array<{ statute: string; description: string; relatedCases?: string[] }>;
 }
 
@@ -55,6 +68,30 @@ const getConfidenceLabel = (score: number) => {
   return "มั่นใจต่ำ";
 };
 
+const getUsageGuidance = (score: number, role: UserRole) => {
+  if (score >= 0.8) {
+    return role === "judge"
+      ? "เหมาะสำหรับใช้เป็นจุดตั้งต้นในการเทียบแนวคำวินิจฉัยและตรวจต่อกับสำนวนจริง"
+      : "เหมาะสำหรับใช้เป็นข้อมูลตั้งต้นก่อนอ่านคำพิพากษาฉบับเต็มหรือเอกสารต้นฉบับ";
+  }
+  if (score >= 0.55) {
+    return "ควรใช้ร่วมกับการอ่านรายละเอียดเต็มและตรวจสอบข้อกฎหมายที่อ้างอิงเพิ่มเติม";
+  }
+  return "ควรใช้เพื่อสำรวจประเด็นเบื้องต้นเท่านั้น และตรวจทานกับแหล่งข้อมูลต้นฉบับก่อนใช้อ้างอิง";
+};
+
+const getVerificationLabel = (result: SearchResult) => {
+  if (result.link) return "มีลิงก์ต้นฉบับสำหรับตรวจทาน";
+  if (result.sourceCode) return "มีรหัสแหล่งข้อมูลในระบบ";
+  return "ควรตรวจสอบ metadata เพิ่มเติม";
+};
+
+const getSourceLabel = (result: SearchResult) => {
+  if (result.sourceCode) return result.sourceCode;
+  if (result.link) return "external_reference";
+  return "metadata_pending";
+};
+
 const highlightQuery = (text: string, query: string) => {
   if (!query) return text;
   const words = query.split(/\s+/).filter(Boolean);
@@ -68,6 +105,15 @@ const highlightQuery = (text: string, query: string) => {
 
 const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark }: ResultCardProps) => {
   const [expanded, setExpanded] = useState(false);
+  const guidance = getUsageGuidance(result.confidence, role);
+  const verificationLabel = getVerificationLabel(result);
+  const sourceLabel = getSourceLabel(result);
+  const verificationTone =
+    result.confidence >= 0.7
+      ? "border-teal/20 bg-teal/5 text-teal"
+      : result.confidence >= 0.4
+      ? "border-accent/30 bg-accent/5 text-accent-foreground"
+      : "border-destructive/20 bg-destructive/5 text-destructive";
 
   return (
     <motion.div
@@ -91,9 +137,9 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
               <FileText className="w-3.5 h-3.5" />
               {result.caseNo}
             </span>
-            {(result as Record<string, unknown>).sourceCode && (
+            {result.sourceCode && (
               <span className="text-[11px] bg-primary/5 text-primary px-1.5 py-0.5 rounded font-mono">
-                {String((result as Record<string, unknown>).sourceCode)}
+                {result.sourceCode}
               </span>
             )}
           </div>
@@ -127,6 +173,24 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
           dangerouslySetInnerHTML={{ __html: highlightQuery(result.summary, query) }}
         />
 
+        <div className="mb-3 grid gap-2 sm:grid-cols-3">
+          <TraceabilityItem
+            label="แหล่งข้อมูล"
+            value={sourceLabel}
+            icon={<FileCheck2 className="w-3.5 h-3.5 text-primary" />}
+          />
+          <TraceabilityItem
+            label="การตรวจสอบ"
+            value={verificationLabel}
+            icon={<ShieldCheck className="w-3.5 h-3.5 text-teal" />}
+          />
+          <TraceabilityItem
+            label="คำแนะนำ"
+            value={result.confidence >= 0.7 ? "พร้อมใช้อ้างอิงเบื้องต้น" : "ควรตรวจทานเพิ่มเติม"}
+            icon={<CircleAlert className="w-3.5 h-3.5 text-accent-foreground" />}
+          />
+        </div>
+
         {/* Statutes */}
         {result.statutes.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
@@ -141,6 +205,11 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
           </div>
         )}
 
+        <div className={`mb-4 rounded-xl border px-3 py-3 ${verificationTone}`}>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em]">Professional Guidance</p>
+          <p className="text-sm leading-relaxed">{guidance}</p>
+        </div>
+
         {/* Actions */}
         <div className="flex items-center gap-3 pt-2 border-t border-border">
           <button
@@ -152,6 +221,7 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
           </button>
           <Link
             to={`/judgment/${result.id}`}
+            state={{ result }}
             className="flex items-center gap-1.5 text-sm font-medium text-teal hover:underline"
           >
             <Eye className="w-4 h-4" />
@@ -201,5 +271,23 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
     </motion.div>
   );
 };
+
+const TraceabilityItem = ({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon: ReactNode;
+}) => (
+  <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+    <div className="mb-1 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      {icon}
+      {label}
+    </div>
+    <p className="break-words text-sm font-medium text-foreground">{value}</p>
+  </div>
+);
 
 export default ResultCard;

@@ -7,8 +7,11 @@ import {
   Search, FileText, MessageCircle, Clock, BookOpen,
   ArrowRight, CheckCircle2, AlertCircle, MapPin, Phone,
   Shield, HelpCircle, ExternalLink, Mic, Scale,
-  ChevronRight, Star, FileDown, Bookmark, History
+  ChevronRight, Star, FileDown, Bookmark, History,
+  Handshake, Volume2, MessageSquare, Gavel, ShieldCheck, Building2
 } from "lucide-react";
+import nongSuesutImg from "@/assets/nong-suesut.svg";
+import heroCourthouseImg from "@/assets/hero-courthouse.jpg";
 
 const CitizenDashboard = () => {
   const navigate = useNavigate();
@@ -16,13 +19,14 @@ const CitizenDashboard = () => {
   const [activeGuideCategory, setActiveGuideCategory] = useState("ทั้งหมด");
 
   const quickActions = [
-    { icon: Search, title: "ค้นหาคำพิพากษา", desc: "สืบค้นคดีด้วย AI เชิงความหมาย", path: "/search?role=citizen", color: "bg-primary/10 text-primary", badge: "แนะนำ" },
-    { icon: FileText, title: "ร่างคำฟ้อง", desc: "AI ช่วยร่างคำฟ้อง + ตรวจความครบถ้วน", path: "/complaint-form", color: "bg-teal/10 text-teal", badge: null },
-    { icon: MessageCircle, title: "ถามน้องซื่อสัตย์", desc: "Chatbot ตอบคำถามกฎหมาย 24 ชม.", path: "#open-chat", color: "bg-accent/10 text-accent-foreground", badge: "AI" },
+    { icon: Gavel, title: "ค้นหาคำพิพากษา", desc: "สืบค้นคดีด้วย semantic search พร้อมระดับความเชื่อถือ", path: "/search?role=citizen", color: "bg-primary/10 text-primary", badge: "บริการหลัก" },
+    { icon: FileText, title: "ร่างคำฟ้อง", desc: "ช่วยร่างคำฟ้องและตรวจความครบถ้วนก่อนยื่น", path: "/complaint-form", color: "bg-teal/10 text-teal", badge: "พร้อมใช้งาน" },
+    { icon: ShieldCheck, title: "ถามน้องซื่อสัตย์", desc: "Chatbot สำหรับอธิบายข้อกฎหมายและขั้นตอนเบื้องต้น", path: "#open-chat", color: "bg-accent/10 text-accent-foreground", badge: "บริการประชาชน" },
     { icon: Bookmark, title: "บุ๊กมาร์กของฉัน", desc: "คำพิพากษาที่บันทึกไว้", path: "/bookmarks", color: "bg-secondary text-foreground", badge: null },
+    { icon: Handshake, title: "ไกล่เกลี่ยออนไลน์", desc: "แนวทางบริการ ODR สำหรับยุติข้อพิพาทก่อนศาล", path: "#odr", color: "bg-teal/10 text-teal", badge: "Roadmap" },
     { icon: History, title: "ประวัติการค้นหา", desc: "ย้อนดูการค้นหาที่ผ่านมา", path: "/history", color: "bg-accent/10 text-accent-foreground", badge: null },
-    { icon: Mic, title: "พูดเพื่อค้นหา", desc: "ค้นหาด้วยเสียง (Speech-to-Text)", path: "/search?role=citizen", color: "bg-primary/5 text-primary", badge: "เร็วๆ นี้" },
-    { icon: Scale, title: "พยากรณ์ผลคดี", desc: "AI วิเคราะห์แนวโน้มจากคดีที่คล้ายกัน", path: "/predict", color: "bg-accent/10 text-accent-foreground", badge: "AI" },
+    { icon: Mic, title: "พูดเพื่อค้นหา", desc: "ค้นหาด้วยเสียงสำหรับการเข้าถึงที่สะดวกขึ้น", path: "/search?role=citizen", color: "bg-primary/5 text-primary", badge: "Roadmap" },
+    { icon: Scale, title: "พยากรณ์ผลคดี", desc: "วิเคราะห์แนวโน้มจากคดีที่มีข้อเท็จจริงคล้ายกัน", path: "/predict", color: "bg-accent/10 text-accent-foreground", badge: "เครื่องมือวิเคราะห์" },
     { icon: BookOpen, title: "ศัพท์กฎหมาย", desc: "ค้นหาความหมายศัพท์ + ฎีกาสำคัญ", path: "/glossary", color: "bg-teal/10 text-teal", badge: null },
     { icon: MapPin, title: "ค้นหาศาล", desc: "ค้นหาศาลใกล้เคียงจาก GPS", path: "/courts", color: "bg-primary/10 text-primary", badge: null },
   ];
@@ -30,15 +34,15 @@ const CitizenDashboard = () => {
   const guideCategories = ["ทั้งหมด", "อาญา", "แพ่ง", "ครอบครัว", "แรงงาน", "ผู้บริโภค", "ปกครอง", "จราจร"];
 
   const guides = [
-    { title: "ถูกฉ้อโกงต้องทำอย่างไร?", category: "อาญา", icon: "🔍", desc: "ป.อ. มาตรา 341 — ขั้นตอนแจ้งความและฟ้องคดี" },
-    { title: "ฟ้องหย่าต้องเตรียมอะไรบ้าง?", category: "ครอบครัว", icon: "👨‍👩‍👧", desc: "เอกสาร ค่าธรรมเนียม และขั้นตอนทั้งหมด" },
-    { title: "นายจ้างเลิกจ้างไม่เป็นธรรม", category: "แรงงาน", icon: "💼", desc: "พ.ร.บ.คุ้มครองแรงงาน — สิทธิที่ควรรู้" },
-    { title: "สินค้าไม่ตรงตามโฆษณา", category: "ผู้บริโภค", icon: "🛒", desc: "ฟ้องคดีผู้บริโภค ไม่ต้องมีทนาย" },
-    { title: "ฟ้องหน่วยงานรัฐได้ไหม?", category: "ปกครอง", icon: "🏛️", desc: "คดีปกครอง มาตรา 9 — เขตอำนาจศาล" },
-    { title: "ยืมเงินแล้วไม่คืน", category: "แพ่ง", icon: "💰", desc: "ป.พ.พ. มาตรา 653 — หลักฐานที่ต้องมี" },
-    { title: "ค่าปรับจราจรเท่าไหร่?", category: "จราจร", icon: "🚗", desc: "อัตราค่าปรับตาม พ.ร.บ.จราจรทางบก" },
-    { title: "ถูกโกงออนไลน์ ไม่ส่งของ", category: "อาญา", icon: "📱", desc: "ป.อ. มาตรา 341 + พ.ร.บ.คอมพิวเตอร์ มาตรา 14" },
-    { title: "ค่าเสียหายจากอุบัติเหตุ", category: "แพ่ง", icon: "🚑", desc: "เรียกค่าสินไหมทดแทน — ขั้นตอนและเอกสาร" },
+    { title: "ถูกฉ้อโกงต้องทำอย่างไร?", category: "อาญา", icon: Scale, desc: "ป.อ. มาตรา 341 — ขั้นตอนแจ้งความและฟ้องคดี" },
+    { title: "ฟ้องหย่าต้องเตรียมอะไรบ้าง?", category: "ครอบครัว", icon: Handshake, desc: "เอกสาร ค่าธรรมเนียม และขั้นตอนทั้งหมด" },
+    { title: "นายจ้างเลิกจ้างไม่เป็นธรรม", category: "แรงงาน", icon: Building2, desc: "พ.ร.บ.คุ้มครองแรงงาน — สิทธิที่ควรรู้" },
+    { title: "สินค้าไม่ตรงตามโฆษณา", category: "ผู้บริโภค", icon: ShieldCheck, desc: "ฟ้องคดีผู้บริโภค ไม่ต้องมีทนาย" },
+    { title: "ฟ้องหน่วยงานรัฐได้ไหม?", category: "ปกครอง", icon: Gavel, desc: "คดีปกครอง มาตรา 9 — เขตอำนาจศาล" },
+    { title: "ยืมเงินแล้วไม่คืน", category: "แพ่ง", icon: FileText, desc: "ป.พ.พ. มาตรา 653 — หลักฐานที่ต้องมี" },
+    { title: "ค่าปรับจราจรเท่าไหร่?", category: "จราจร", icon: AlertCircle, desc: "อัตราค่าปรับตาม พ.ร.บ.จราจรทางบก" },
+    { title: "ถูกโกงออนไลน์ ไม่ส่งของ", category: "อาญา", icon: Shield, desc: "ป.อ. มาตรา 341 + พ.ร.บ.คอมพิวเตอร์ มาตรา 14" },
+    { title: "ค่าเสียหายจากอุบัติเหตุ", category: "แพ่ง", icon: Scale, desc: "เรียกค่าสินไหมทดแทน — ขั้นตอนและเอกสาร" },
   ];
 
   const filteredGuides = activeGuideCategory === "ทั้งหมด"
@@ -56,35 +60,58 @@ const CitizenDashboard = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-hero-gradient py-10">
-        <div className="container mx-auto px-4 text-center text-primary-foreground">
-          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="font-heading text-3xl font-bold mb-2">
-            สวัสดีครับ ยินดีต้อนรับ
-          </motion.h1>
-          <p className="opacity-80">ระบบผู้ช่วยทางกฎหมายอัจฉริยะสำหรับประชาชน</p>
-          {/* Quick search bar */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="max-w-xl mx-auto mt-6">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="พิมพ์คำถามกฎหมาย เช่น ถูกโกงเงินต้องทำยังไง..."
-                className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:ring-2 focus:ring-gold focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
-                    navigate(`/search?role=citizen&q=${encodeURIComponent((e.target as HTMLInputElement).value)}`);
-                  }
-                }}
-              />
-              <button onClick={(e) => {
-                const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
-                navigate(`/search?role=citizen${input?.value ? `&q=${encodeURIComponent(input.value)}` : ""}`);
-              }}
-                className="bg-accent text-accent-foreground px-6 py-3 rounded-xl font-medium hover:brightness-110 transition-all flex items-center gap-2">
-                <Search className="w-4 h-4" /> ค้นหา
-              </button>
+      <section className="bg-hero-gradient pt-16 pb-16 relative overflow-hidden flex items-center min-h-[400px]">
+        {/* Background Decorative Pattern */}
+        <div 
+          className="absolute inset-0 opacity-15 bg-cover bg-center mix-blend-overlay"
+          style={{ backgroundImage: `url(${heroCourthouseImg})` }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80 md:opacity-0 mix-blend-multiply"></div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-6xl mx-auto">
+            <div className="text-center md:text-left text-primary-foreground flex-1">
+              <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                ศูนย์บริการกฎหมายดิจิทัลสำหรับประชาชน
+              </motion.h1>
+              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-lg md:text-xl lg:text-2xl opacity-90 mb-8 max-w-xl font-light">
+                ค้นหาคำพิพากษา ร่างคำฟ้อง ตรวจขั้นตอน และรับคำอธิบายทางกฎหมายอย่างเป็นระบบ พร้อมแนวทางใช้งานอย่างรับผิดชอบ
+              </motion.p>
+              
+              {/* Quick search bar */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="max-w-xl mt-2 mx-auto md:mx-0">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    placeholder="พิมพ์คำถามกฎหมาย เช่น ถูกโกงเงินต้องทำยังไง..."
+                    className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-5 py-4 text-base text-primary-foreground placeholder:text-primary-foreground/70 focus:ring-2 focus:ring-gold focus:outline-none shadow-lg"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
+                        navigate(`/search?role=citizen&q=${encodeURIComponent((e.target as HTMLInputElement).value)}`);
+                      }
+                    }}
+                  />
+                  <button onClick={(e) => {
+                    const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                    navigate(`/search?role=citizen${input?.value ? `&q=${encodeURIComponent(input.value)}` : ""}`);
+                  }}
+                    className="bg-gold text-foreground px-8 py-4 rounded-xl font-bold hover:bg-gold-light transition-all flex items-center justify-center gap-2 shadow-gold whitespace-nowrap">
+                    <Search className="w-5 h-5" /> ค้นหาเลย
+                  </button>
+                </div>
+              </motion.div>
             </div>
-          </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, x: 20 }} 
+              animate={{ opacity: 1, scale: 1, x: 0 }} 
+              transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
+              className="hidden md:flex w-64 lg:w-96 justify-center"
+            >
+              <img src={nongSuesutImg} alt="น้องซื่อสัตย์" className="w-full h-auto drop-shadow-2xl object-contain" />
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -160,6 +187,14 @@ const CitizenDashboard = () => {
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
             </div>
+            <div className="mt-4 rounded-xl border border-border bg-muted/40 px-4 py-3">
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                การ์ดสถานะด้านบนเป็นตัวอย่างการแสดงผลเพื่อสาธิตรูปแบบบริการประชาชน การเชื่อมต่อข้อมูลคดีจริงจะขึ้นกับระบบต้นทางของศาล
+              </p>
+            </div>
+            <button className="mt-4 w-full bg-[#00B900]/10 text-[#00B900] border border-[#00B900]/20 px-4 py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-[#00B900]/20 transition-colors">
+              <MessageSquare className="w-4 h-4" /> รับการแจ้งเตือนพิจารณาคดีผ่าน LINE
+            </button>
           </div>
 
           {/* Emergency Contacts */}
@@ -218,12 +253,17 @@ const CitizenDashboard = () => {
                 onClick={() => navigate(`/search?role=citizen&q=${encodeURIComponent(g.title)}`)}
                 className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary/30 transition-colors group"
               >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{g.icon}</span>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+                    <g.icon className="w-6 h-6 text-primary/70 group-hover:text-primary" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">{g.title}</h3>
                     <p className="text-[11px] text-muted-foreground leading-tight mb-2">{g.desc}</p>
-                    <span className="text-[11px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{g.category}</span>
+                    <div className="flex gap-2">
+                       <span className="text-[11px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{g.category}</span>
+                       <span className="text-[10px] bg-primary/5 text-primary px-1.5 py-0.5 rounded-full flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Volume2 className="w-3 h-3" /> ฟัง</span>
+                    </div>
                   </div>
                 </div>
               </motion.button>
@@ -232,16 +272,33 @@ const CitizenDashboard = () => {
         </div>
 
         {/* AI Confidence Notice */}
-        <div className="bg-teal-light border border-teal/20 rounded-2xl p-4 mb-8">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-teal mb-1">ระบบ AI ที่ซื่อสัตย์และโปร่งใส</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                ผลลัพธ์ทุกรายการแสดง Honesty Score (ระดับความมั่นใจ) — หากระบบไม่แน่ใจจะแจ้งให้ทราบ
-                และแนะนำให้ปรึกษาทนายความ ข้อมูลส่วนบุคคลถูกปกปิดอัตโนมัติก่อนประมวลผล AI
-              </p>
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <div className="rounded-2xl border border-teal/20 bg-teal-light p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-teal">
+              <Shield className="h-4 w-4" />
+              โปร่งใสในการใช้งาน
             </div>
+            <p className="text-xs leading-6 text-muted-foreground">
+              ผลลัพธ์สำคัญจะแสดงระดับความเชื่อถือ แหล่งข้อมูล และคำแนะนำก่อนนำไปใช้อ้างอิง
+            </p>
+          </div>
+          <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-primary">
+              <ShieldCheck className="h-4 w-4" />
+              คุ้มครองข้อมูลส่วนบุคคล
+            </div>
+            <p className="text-xs leading-6 text-muted-foreground">
+              ระบบออกแบบให้ปกปิดข้อมูลส่วนบุคคลก่อนประมวลผล และลดความเสี่ยงในการเผยแพร่ข้อมูลเกินจำเป็น
+            </p>
+          </div>
+          <div className="rounded-2xl border border-accent/20 bg-gold-light p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-accent-foreground">
+              <Star className="h-4 w-4" />
+              ใช้เพื่อประกอบการตัดสินใจ
+            </div>
+            <p className="text-xs leading-6 text-muted-foreground">
+              เหมาะสำหรับเตรียมตัวก่อนดำเนินคดีหรือรับบริการศาล และควรอ่านเอกสารต้นฉบับหรือปรึกษาผู้เชี่ยวชาญเพิ่มเติมเมื่อจำเป็น
+            </p>
           </div>
         </div>
       </div>

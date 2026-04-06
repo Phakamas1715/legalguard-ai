@@ -5,12 +5,13 @@ from __future__ import annotations
 import pytest
 
 from app.services.audit_service import AuditService
+from app.services.audit_service import InMemoryAuditRepository
 from app.services.dashboard_service import DashboardService
 
 
 class TestLiveMetrics:
     def _make_service(self) -> DashboardService:
-        audit = AuditService()
+        audit = AuditService(repository=InMemoryAuditRepository())
         # Add some audit entries
         audit.log_entry("ค้นหาฉ้อโกง", "search", result_count=5, confidence=0.85)
         audit.log_entry("ร่างคำฟ้อง", "chat", result_count=1, confidence=0.75)
@@ -61,8 +62,115 @@ class TestLiveMetrics:
         assert health["search_pipeline"] == "healthy"
 
     def test_live_metrics_empty_audit(self):
-        svc = DashboardService(audit_service=AuditService())
+        svc = DashboardService(audit_service=AuditService(repository=InMemoryAuditRepository()))
         metrics = svc.get_live_metrics()
 
         assert metrics["requests_1h"] == 0
         assert metrics["requests_24h"] == 0
+
+    def test_recent_audit_entries_returns_rows(self):
+        svc = self._make_service()
+        payload = svc.get_recent_audit_entries(limit=2)
+
+        assert payload["chain_valid"] is True
+        assert len(payload["entries"]) == 2
+        assert payload["entries"][0]["action"] in {"search", "chat", "complaint_verification"}
+        assert payload["page"] == 1
+        assert payload["page_size"] == 2
+
+    def test_audit_entry_detail_returns_full_metadata(self):
+        audit = AuditService(repository=InMemoryAuditRepository())
+        entry = audit.log_entry(
+            "ค้นหาแนวคำพิพากษา",
+            "search",
+            result_count=3,
+            confidence=0.91,
+            metadata={"court_type": "civil", "result_ids": ["A", "B", "C"]},
+        )
+        svc = DashboardService(audit_service=audit)
+
+        payload = svc.get_audit_entry_detail(entry.id)
+
+        assert payload is not None
+        assert payload["entry"]["id"] == entry.id
+        assert payload["entry"]["metadata"]["court_type"] == "civil"
+        assert payload["entry"]["metadata"]["result_ids"] == ["A", "B", "C"]
+        assert payload["entry"]["query_storage"] == "preview_only"
+
+    def test_audit_entry_detail_returns_none_when_missing(self):
+        svc = DashboardService(audit_service=AuditService(repository=InMemoryAuditRepository()))
+
+        assert svc.get_audit_entry_detail("missing") is None
+
+    def test_recent_audit_entries_support_filters(self):
+        audit = AuditService(repository=InMemoryAuditRepository())
+        audit.log_entry(
+            "ค้นหาคดีแพ่ง",
+            "search",
+            result_count=2,
+            agent_role="researcher",
+            metadata={"case_type": "civil"},
+        )
+        audit.log_entry(
+            "ร่างคำฟ้องคดีอาญา",
+            "chat",
+            result_count=1,
+            agent_role="drafter",
+            metadata={"case_type": "criminal"},
+        )
+        audit.log_entry(
+            "ค้นหาคดีอาญา",
+            "search",
+            result_count=4,
+            agent_role="researcher",
+            metadata={"case_type": "criminal"},
+        )
+        svc = DashboardService(audit_service=audit)
+
+        payload = svc.get_recent_audit_entries(
+            limit=10,
+            action="search",
+            agent_role="researcher",
+            case_type="criminal",
+            query="อาญา",
+        )
+
+        assert len(payload["entries"]) == 1
+        assert payload["entries"][0]["query_preview"] == "ค้นหาคดีอาญา"
+
+    def test_recent_audit_entries_support_pagination(self):
+        audit = AuditService(repository=InMemoryAuditRepository())
+        for index in range(6):
+            audit.log_entry(f"query {index}", "search", result_count=index)
+        svc = DashboardService(audit_service=audit)
+
+        payload = svc.get_recent_audit_entries(limit=2, page=2, page_size=2)
+
+        assert payload["total"] == 6
+        assert payload["page"] == 2
+        assert payload["page_size"] == 2
+        assert payload["total_pages"] == 3
+        assert len(payload["entries"]) == 2
+
+    def test_export_audit_entries_respects_filters(self):
+        audit = AuditService(repository=InMemoryAuditRepository())
+        audit.log_entry("ค้นหาคดีแพ่ง", "search", agent_role="researcher", metadata={"case_type": "civil"})
+        audit.log_entry("ค้นหาคดีอาญา", "search", agent_role="researcher", metadata={"case_type": "criminal"})
+        svc = DashboardService(audit_service=audit)
+
+        payload = svc.export_audit_entries(case_type="criminal")
+
+        assert payload["total"] == 1
+        assert payload["entries"][0]["query_preview"] == "ค้นหาคดีอาญา"
+
+    def test_export_audit_entries_supports_current_page_scope(self):
+        audit = AuditService(repository=InMemoryAuditRepository())
+        for index in range(5):
+            audit.log_entry(f"query {index}", "search", result_count=index)
+        svc = DashboardService(audit_service=audit)
+
+        payload = svc.export_audit_entries(scope="current_page", page=2, page_size=2)
+
+        assert payload["scope"] == "current_page"
+        assert payload["total"] == 2
+        assert len(payload["entries"]) == 2

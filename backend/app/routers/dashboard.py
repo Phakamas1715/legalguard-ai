@@ -1,8 +1,13 @@
 """Dashboard API endpoints — stats, bottleneck analysis, fairness monitoring, report generation."""
+from __future__ import annotations
 
+import csv
+import io
+import json
 from typing import List, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from app.services.audit_service import AuditService
@@ -75,6 +80,105 @@ async def get_live_metrics():
     AI model health, and ingestion status.
     """
     return _dashboard_service.get_live_metrics()
+
+
+@router.get("/audit/recent")
+async def get_recent_audit_entries(
+    limit: int = Query(20, ge=1, le=100),
+    page: int = Query(1, ge=1),
+    page_size: Optional[int] = Query(None, ge=1, le=500),
+    action: Optional[str] = Query(None),
+    agent_role: Optional[str] = Query(None),
+    case_type: Optional[str] = Query(None),
+    q: Optional[str] = Query(None),
+):
+    """Return recent CAL-130 audit rows for dashboard/admin views."""
+    return _dashboard_service.get_recent_audit_entries(
+        limit=limit,
+        page=page,
+        page_size=page_size,
+        action=action,
+        agent_role=agent_role,
+        case_type=case_type,
+        query=q,
+    )
+
+
+@router.get("/audit/export")
+async def export_audit_entries(
+    format: str = Query("json", pattern="^(json|csv)$"),
+    scope: str = Query("all_filtered", pattern="^(all_filtered|current_page)$"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=500),
+    action: Optional[str] = Query(None),
+    agent_role: Optional[str] = Query(None),
+    case_type: Optional[str] = Query(None),
+    q: Optional[str] = Query(None),
+):
+    """Export filtered audit rows as JSON or CSV."""
+    payload = _dashboard_service.export_audit_entries(
+        scope=scope,
+        page=page,
+        page_size=page_size,
+        action=action,
+        agent_role=agent_role,
+        case_type=case_type,
+        query=q,
+    )
+    filename_base = "audit-export"
+    if format == "json":
+        return JSONResponse(
+            content=payload,
+            headers={"Content-Disposition": f'attachment; filename="{filename_base}.json"'},
+        )
+
+    output = io.StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=[
+            "id",
+            "created_at",
+            "action",
+            "agent_role",
+            "query_preview",
+            "result_count",
+            "confidence",
+            "entry_hash",
+            "case_type",
+            "metadata_json",
+        ],
+    )
+    writer.writeheader()
+    for entry in payload["entries"]:
+        metadata = entry.get("metadata") or {}
+        writer.writerow(
+            {
+                "id": entry.get("id", ""),
+                "created_at": entry.get("created_at", ""),
+                "action": entry.get("action", ""),
+                "agent_role": entry.get("agent_role", ""),
+                "query_preview": entry.get("query_preview", ""),
+                "result_count": entry.get("result_count", 0),
+                "confidence": entry.get("confidence", ""),
+                "entry_hash": entry.get("entry_hash", ""),
+                "case_type": metadata.get("case_type", ""),
+                "metadata_json": json.dumps(metadata, ensure_ascii=False),
+            }
+        )
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename_base}.csv"'},
+    )
+
+
+@router.get("/audit/{entry_id}")
+async def get_audit_entry_detail(entry_id: str):
+    """Return full metadata for one CAL-130 audit entry."""
+    payload = _dashboard_service.get_audit_entry_detail(entry_id)
+    if payload is None:
+        raise HTTPException(status_code=404, detail=f"Audit entry {entry_id} not found")
+    return payload
 
 
 @router.get("/system-stats")

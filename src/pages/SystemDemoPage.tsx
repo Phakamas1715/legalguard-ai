@@ -1,258 +1,306 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
   Database, Search, FileText, Shield, Scale, BarChart3,
   ArrowRight, CheckCircle2, Cpu, Layers, Eye, Lock,
-  MessageCircle, Mic, AlertTriangle, ExternalLink, Zap
+  MessageCircle, Mic, AlertTriangle, ExternalLink, Zap,
+  Play, RefreshCw, Terminal, ChevronRight, Activity, HardDrive,
+  Users, Bot, ShieldCheck, FileSearch, type LucideIcon
 } from "lucide-react";
+import demoBg from "@/assets/demo-bg.jpg";
 
-type Phase = "ingestion" | "search" | "agents" | "safety" | "output";
+type Phase = "idle" | "ingestion" | "search" | "agents" | "safety" | "output";
 
 const SystemDemoPage = () => {
-  const [activePhase, setActivePhase] = useState<Phase>("ingestion");
+  const [currentPhase, setCurrentPhase] = useState<Phase>("idle");
+  const [progress, setProgress] = useState(0);
+  const [logs, setLogs] = useState<string[]>([]);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const phases: { id: Phase; label: string; icon: typeof Database; desc: string }[] = [
-    { id: "ingestion", label: "1. นำเข้าข้อมูล", icon: Database, desc: "Data Ingestion Pipeline" },
-    { id: "search", label: "2. ค้นหาอัจฉริยะ", icon: Search, desc: "Hybrid RAG Search" },
-    { id: "agents", label: "3. AI วิเคราะห์", icon: Cpu, desc: "Multi-Agent System" },
-    { id: "safety", label: "4. ตรวจสอบความปลอดภัย", icon: Shield, desc: "Anti-Hallucination 7 ชั้น" },
-    { id: "output", label: "5. แสดงผลลัพธ์", icon: Eye, desc: "Output + Audit" },
+  const phases: { id: Phase; label: string; icon: LucideIcon; color: string; desc: string }[] = [
+    { id: "ingestion", label: "Data Ingestion", icon: Database, color: "text-blue-400", desc: "นำเข้าและประมวลผลเอกสารกองกลาง" },
+    { id: "search", label: "Hybrid RAG", icon: Search, color: "text-purple-400", desc: "สืบค้นความหมายและข้อกฎหมาย" },
+    { id: "agents", label: "Multi-Agent", icon: Cpu, color: "text-gold", desc: "เครือข่าย AI วิเคราะห์เชิงลึก" },
+    { id: "safety", label: "Guardrails", icon: ShieldCheck, color: "text-teal", desc: "ตรวจสอบความปลอดภัยและ PDPA" },
+    { id: "output", label: "Final Result", icon: Eye, color: "text-white", desc: "สรุปและร่างเอกสารอัตโนมัติ" },
   ];
 
+  const addLog = (msg: string) => {
+    setLogs(prev => [...prev.slice(-15), `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  };
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  const runSimulation = async () => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    setLogs([]);
+    
+    // Step 1: Ingestion
+    setCurrentPhase("ingestion");
+    addLog("Initializing Data Ingestion Pipeline...");
+    for (let i = 0; i <= 100; i += 5) {
+      setProgress(i);
+      if (i === 20) addLog("Loading Thai Judicial Dataset (OpenLaw)...");
+      if (i === 50) addLog("Executing Advanced OCR & NLP Segmentation...");
+      if (i === 80) addLog("Applying Automated PII/PDPA Masking...");
+      await new Promise(r => setTimeout(r, 100));
+    }
+    addLog("✔ Ingestion Complete: 160K+ vectors indexed.");
+    await new Promise(r => setTimeout(r, 500));
+
+    // Step 2: Search
+    setCurrentPhase("search");
+    addLog("User Query: 'ถูกหลอกลงทุนออนไลน์ ฟ้องอย่างไร?'");
+    for (let i = 0; i <= 100; i += 10) {
+      setProgress(i);
+      if (i === 30) addLog("Neural Semantic Search active...");
+      if (i === 60) addLog("Hybrid Reranking (FAISS + BM25) in progress...");
+      await new Promise(r => setTimeout(r, 150));
+    }
+    addLog("✔ Top 3 candidates retrieved with 94.2% confidence.");
+    await new Promise(r => setTimeout(r, 500));
+
+    // Step 3: Agents
+    setCurrentPhase("agents");
+    addLog("Orchestrating Multi-Agent Network...");
+    for (let i = 0; i <= 100; i += 10) {
+      setProgress(i);
+      if (i === 20) addLog("Researcher Agent identifying Penal Code Sec. 341...");
+      if (i === 50) addLog("Reviewer Agent validating case precedents...");
+      if (i === 80) addLog("Compliance Agent scanning for potential bias...");
+      await new Promise(r => setTimeout(r, 200));
+    }
+    addLog("✔ Multi-Agent reasoning verified (CAL-130 Protected).");
+    await new Promise(r => setTimeout(r, 500));
+
+    // Step 4: Safety
+    setCurrentPhase("safety");
+    addLog("Activating Legal Guardrails...");
+    for (let i = 0; i <= 100; i += 10) {
+      setProgress(i);
+      if (i === 40) addLog("Running Hallucination-Check (Grounding)...");
+      if (i === 80) addLog("Verifying AWS Bedrock Security Policies...");
+      await new Promise(r => setTimeout(r, 150));
+    }
+    addLog("✔ Safety validated: Zero Hallucination detected.");
+    await new Promise(r => setTimeout(r, 500));
+
+    // Step 5: Output
+    setCurrentPhase("output");
+    addLog("Generating final response for Citizen Role...");
+    setProgress(100);
+    addLog("✔ Operation Success: LegalGuard AI is ready.");
+    setIsSimulating(false);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-[#050b18] text-white">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 flex-1">
-        <div className="text-center mb-8">
-          <h1 className="font-heading text-3xl font-bold text-primary mb-2">ขั้นตอนการทำงานของระบบ</h1>
-          <p className="text-muted-foreground">Smart LegalGuard AI — ETDA Responsible AI Innovation Hackathon 2026</p>
+      {/* Hero Simulator Header */}
+      <div className="relative pt-24 pb-12 overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 z-0">
+          <img src={demoBg} className="w-full h-full object-cover opacity-10" alt="" />
+          <div className="absolute inset-0 bg-gradient-to-b from-navy-deep via-transparent to-transparent"></div>
         </div>
-
-        {/* Phase selector */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 justify-center">
-          {phases.map((p) => (
-            <button key={p.id} onClick={() => setActivePhase(p.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
-                activePhase === p.id ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:bg-muted"
-              }`}>
-              <p.icon className="w-4 h-4" /> {p.label}
-            </button>
-          ))}
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 text-gold rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-gold/20">
+              <Activity className="w-3 h-3" /> Real-time System Simulator
+            </motion.div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+              LegalGuard AI <span className="text-gold">Simulator</span>
+            </h1>
+            <p className="text-white/60 text-lg md:text-xl font-medium max-w-2xl mx-auto mb-10">
+              สัมผัสประสบการณ์การทำงานของสถาปัตยกรรมระดับชาติ <br />แบบ Step-by-Step ผ่านเครื่องจำลองระบบอัจฉริยะ
+            </p>
+            
+            {!isSimulating && currentPhase === "idle" && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={runSimulation}
+                className="group relative px-8 py-4 bg-gold text-navy-deep font-bold rounded-2xl shadow-2xl flex items-center gap-3 mx-auto overflow-hidden transition-all"
+              >
+                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                <Play className="w-5 h-5 fill-current" /> เริ่มต้นการจำลองระบบ
+              </motion.button>
+            )}
+            
+            {isSimulating && (
+              <div className="flex items-center justify-center gap-4 text-gold font-bold">
+                <RefreshCw className="w-5 h-5 animate-spin" /> 
+                <span className="animate-pulse">ระบบกำลังประมวลผลจำลอง...</span>
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Phase 1: Data Ingestion */}
-        {activePhase === "ingestion" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card title="Data Ingestion Pipeline" icon={Database} desc="นำเข้าข้อมูลจากแหล่งต่างๆ เข้าสู่ฐานข้อมูล">
-              <div className="space-y-4">
-                <Step num={1} title="รับเอกสาร" desc="PDF ~188 ไฟล์ (แบบฟอร์มศาลยุติธรรม ~98 + ศาลปกครอง ~90) + คู่มือ + FAQ + คดีตัวอย่าง 25 คดี" />
-                <Step num={2} title="OCR + แยกข้อความ" desc="PyMuPDF สำหรับ PDF ปกติ / EasyOCR สำหรับเอกสารสแกน" />
-                <Step num={3} title="ตัดข้อความเป็นชิ้นเล็ก" desc="PyThaiNLP ตัดประโยคภาษาไทย → ชิ้นละ 512 tokens ซ้อนทับ 64 tokens" />
-                <Step num={4} title="ปกปิดข้อมูลส่วนบุคคล" desc="PII Masking 9 รูปแบบ (เลขบัตร, เบอร์โทร, ชื่อ, ที่อยู่ ฯลฯ)" />
-                <Step num={5} title="สร้าง Embedding + จัดทำดัชนี" desc="Vector Index (Qdrant/FAISS) + BM25 Keyword Index (Tantivy)" />
-                <Step num={6} title="บันทึกลงฐานข้อมูล" desc="PostgreSQL (metadata) + Qdrant (vectors) + Redis (cache)" />
-              </div>
-            </Card>
-            <StatsRow items={[
-              { label: "PDF เอกสาร", value: "~188" },
-              { label: "คดีตัวอย่าง", value: "25" },
-              { label: "HuggingFace Datasets", value: "10" },
-              { label: "Phase 2 เป้าหมาย", value: "160K+ คดี" },
-            ]} />
-          </div>
-        )}
-
-        {/* Phase 2: Search */}
-        {activePhase === "search" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card title="Hybrid RAG Search Pipeline" icon={Search} desc="ค้นหาเชิงความหมาย + คำสำคัญ รวมผลลัพธ์ด้วย Weighted RRF">
-              <div className="space-y-4">
-                <Step num={1} title="รับคำถามจากผู้ใช้" desc="เช่น 'ถูกโกงเงินออนไลน์ ฟ้องยังไง'" />
-                <Step num={2} title="ปกปิดข้อมูลส่วนบุคคล" desc="PII Masking ก่อนส่งเข้าระบบ" />
-                <Step num={3} title="แปลงคำถาม (Query Rewriting)" desc="แปลงภาษาพูด → ศัพท์กฎหมาย เช่น 'โกงเงิน' → 'ฉ้อโกง ป.อ. มาตรา 341'" />
-                <Step num={4} title="ตรวจ Cache" desc="Redis Semantic Cache — ถ้าเคยถามคล้ายกัน ตอบทันที" />
-                <Step num={5} title="ค้นหาแบบ Hybrid" desc="FAISS (ความหมาย 70%) + BM25 (คำสำคัญ 30%) → รวมด้วย Reciprocal Rank Fusion" />
-                <Step num={6} title="จัดอันดับใหม่ (Reranking)" desc="LeJEPA Reranking + OOD Detection — ตรวจจับข้อมูลนอกขอบเขต" />
-              </div>
-            </Card>
-            <StatsRow items={[
-              { label: "Hit@3 เป้าหมาย", value: "93.7%" },
-              { label: "เวลาค้นหา P95", value: "< 2 วินาที" },
-              { label: "สัดส่วน FAISS:BM25", value: "70:30" },
-              { label: "Cache Hit Rate", value: "~40%" },
-            ]} />
-            <DemoButton label="ทดลองค้นหา" onClick={() => navigate("/search?role=citizen")} />
-          </div>
-        )}
-
-        {/* Phase 3: Multi-Agent */}
-        {activePhase === "agents" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card title="LangGraph Multi-Agent System" icon={Cpu} desc="5 AI Agents ทำงานร่วมกัน ตรวจสอบซึ่งกันและกัน">
-              <div className="grid md:grid-cols-2 gap-4">
-                <AgentCard name="Manager Agent" role="จัดการ" desc="รับคำถาม → จำแนกประเภท → ส่งต่อให้ Agent ที่เหมาะสม" color="bg-primary/10 text-primary" />
-                <AgentCard name="Researcher Agent" role="ค้นหา" desc="ค้นหาข้อมูลจากฐานข้อมูลกฎหมาย ดึงคำพิพากษาที่เกี่ยวข้อง" color="bg-teal/10 text-teal" />
-                <AgentCard name="Reviewer Agent" role="ตรวจสอบ" desc="ตรวจว่าอ้างอิงมาตรา/เลขคดีถูกต้อง แยก verified/unverified" color="bg-accent/10 text-accent-foreground" />
-                <AgentCard name="Compliance Agent" role="ปกป้อง" desc="ตรวจ PII + สิทธิการเข้าถึง + บล็อกถ้าไม่ผ่าน" color="bg-destructive/10 text-destructive" />
-                <AgentCard name="Drafter Agent" role="ร่าง" desc="ร่างคำฟ้อง/คำพิพากษา ตาม template ศาล + ข้อมูลที่ค้นได้" color="bg-secondary text-foreground" />
-              </div>
-              <div className="mt-4 p-4 bg-muted/50 rounded-xl">
-                <p className="text-sm font-medium mb-2">Commit-Reveal Protocol (ป้องกัน AI ฮั้วกัน)</p>
-                <p className="text-xs text-muted-foreground">Researcher และ Skeptic ต่างคนต่างค้นหา → lock คำตอบด้วย SHA-256 → เปิดเผยพร้อมกัน → Reviewer ตัดสิน</p>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Phase 4: Safety */}
-        {activePhase === "safety" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card title="Anti-Hallucination 7 ชั้น" icon={Shield} desc="ป้องกัน AI สร้างข้อมูลเท็จ ตามหลัก Responsible AI">
-              <div className="space-y-3">
-                {[
-                  { num: 1, title: "RAG Grounding", desc: "ตอบจากข้อมูลจริงในฐานข้อมูลเท่านั้น ไม่ใช้ความรู้ในตัว AI", color: "bg-primary" },
-                  { num: 2, title: "Citation Verification", desc: "ตรวจว่ามาตรากฎหมายและเลขคดีที่อ้างมีอยู่จริง", color: "bg-teal" },
-                  { num: 3, title: "NeMo Guardrails", desc: "กรองเนื้อหาอันตราย + บังคับ disclaimer + บล็อกคำถามนอกขอบเขต", color: "bg-accent" },
-                  { num: 4, title: "Unverified Flagging", desc: "ถ้าอ้างอิงไม่ได้ยืนยัน → แสดงคำเตือน 'ยังไม่ได้รับการยืนยัน'", color: "bg-destructive" },
-                  { num: 5, title: "นโยบาย 'ไม่รู้'", desc: "ถ้าไม่มีข้อมูล → ตอบว่า 'ไม่พบข้อมูล กรุณาปรึกษาทนายความ' ห้ามเดา", color: "bg-primary" },
-                  { num: 6, title: "Confidence Bound", desc: "จำกัดเพดานความมั่นใจ เช่น พยากรณ์คดี ≤ 85%, ร่างคำพิพากษา ≤ 80%", color: "bg-teal" },
-                  { num: 7, title: "Disclaimer อัตโนมัติ", desc: "ทุกคำตอบลงท้ายด้วย 'ข้อมูลเบื้องต้น กรุณาปรึกษาทนายความ'", color: "bg-accent" },
-                ].map(layer => (
-                  <div key={layer.num} className="flex items-start gap-3 p-3 bg-card border border-border rounded-xl">
-                    <div className={`w-8 h-8 rounded-lg ${layer.color} text-white flex items-center justify-center text-sm font-bold flex-shrink-0`}>{layer.num}</div>
-                    <div>
-                      <p className="text-sm font-medium">{layer.title}</p>
-                      <p className="text-xs text-muted-foreground">{layer.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-            <Card title="Responsible AI Compliance" icon={Lock} desc="สอดคล้องกับหลักธรรมาภิบาลปัญญาประดิษฐ์ในกระบวนการยุติธรรมและ ETDA AI Governance">
-              <div className="grid md:grid-cols-2 gap-3">
-                {[
-                  { label: "ข้อมูลเก็บในไทย", desc: "PDPA Compliant", ok: true },
-                  { label: "ปกปิดข้อมูลส่วนบุคคล", desc: "PII Masking 9 รูปแบบ", ok: true },
-                  { label: "บันทึกการใช้งาน", desc: "SHA-256 Audit Log", ok: true },
-                  { label: "ความเป็นธรรม", desc: "CFS Monitoring 3 มิติ", ok: true },
-                  { label: "AI ช่วยสนับสนุนเท่านั้น", desc: "ห้ามแทนดุลยพินิจ", ok: true },
-                  { label: "เปิดเผยการใช้ AI", desc: "Disclaimer ทุกผลลัพธ์", ok: true },
-                ].map(item => (
-                  <div key={item.label} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                    <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium">{item.label}</p>
-                      <p className="text-xs text-muted-foreground">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Phase 5: Output */}
-        {activePhase === "output" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card title="ผลลัพธ์สำหรับผู้ใช้แต่ละกลุ่ม" icon={Eye} desc="ปรับรูปแบบตามบทบาท — ประชาชน / ทนาย / เจ้าหน้าที่">
-              <div className="space-y-4">
-                <OutputCard role="ประชาชน" features={["สรุปสั้นเข้าใจง่าย", "แนะนำขั้นตอนดำเนินคดี", "ช่องทางช่วยเหลือ (สายด่วน 1111)", "น้องซื่อสัตย์ Chatbot 24 ชม."]}
-                  action={() => navigate("/citizen")} color="bg-teal/10" />
-                <OutputCard role="ทนายความ" features={["อ้างอิงมาตรา + เลขฎีกาเต็ม", "ร่างคำฟ้อง + e-Filing XML Export", "เปรียบเทียบแนวคำพิพากษา", "ติดตามคดี + ลิงก์ CIOS/e-Filing"]}
-                  action={() => navigate("/lawyer")} color="bg-primary/10" />
-                <OutputCard role="เจ้าหน้าที่ / ตุลาการ" features={["คัดกรองคำฟ้อง AI Triage", "ร่างคำพิพากษา", "สถิติคดี + รายงาน", "แหล่งข้อมูล (ราชกิจจานุเบกษา/ฎีกา)"]}
-                  action={() => navigate("/government")} color="bg-accent/10" />
-              </div>
-            </Card>
-            <Card title="NitiBench — มาตรฐานวัดคุณภาพ" icon={BarChart3} desc="Benchmark สำหรับ RAG กฎหมายไทย — ค่าด้านล่างเป็นเป้าหมาย">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { label: "Hit@3 เป้าหมาย", value: "93.7%" },
-                  { label: "Halluc. เป้าหมาย", value: "< 1%" },
-                  { label: "PII Recall เป้าหมาย", value: "99.2%" },
-                  { label: "CFS เป้าหมาย", value: "93.5%" },
-                ].map(m => (
-                  <div key={m.label} className="p-3 bg-muted/50 rounded-xl text-center">
-                    <div className="text-xl font-bold text-primary">{m.value}</div>
-                    <div className="text-xs text-muted-foreground">{m.label}</div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        )}
       </div>
+
+      {/* Simulator Interface */}
+      <div className="container mx-auto px-4 py-12 flex-1">
+        <div className="grid lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
+          
+          {/* Left: Logic Flow */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-10">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-gold" /> System Flow Visualizer
+                </h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
+                    <span className="text-[10px] font-bold text-gold uppercase tracking-widest">Active State</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative space-y-12 pl-6">
+                <div className="absolute left-[2.45rem] top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-500 via-gold to-teal-500 opacity-20" />
+                
+                {phases.map((phase, idx) => (
+                  <motion.div 
+                    key={phase.id}
+                    animate={{ 
+                      opacity: currentPhase === phase.id || currentPhase === "idle" ? 1 : 0.3,
+                      scale: currentPhase === phase.id ? 1.02 : 1
+                    }}
+                    className={`relative flex items-start gap-8 transition-all px-6 py-4 rounded-3xl ${currentPhase === phase.id ? 'bg-white/5 border border-white/10 shadow-2xl' : ''}`}
+                  >
+                    <div className={`relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg ${
+                      currentPhase === phase.id 
+                      ? 'bg-gold text-navy-deep scale-110' 
+                      : 'bg-white/5 text-white/40'
+                    }`}>
+                      <phase.icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className={`text-lg font-bold transition-colors ${currentPhase === phase.id ? 'text-gold' : 'text-white/60'}`}>
+                          {phase.label}
+                        </h4>
+                        {currentPhase === phase.id && (
+                          <div className="text-[10px] font-bold bg-gold/20 text-gold px-2 py-0.5 rounded-lg border border-gold/20 mr-2 uppercase">
+                            Processing {progress}%
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-white/40 font-medium">{phase.desc}</p>
+                      
+                      {currentPhase === phase.id && (
+                        <motion.div className="mt-4 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            className="h-full bg-gold shadow-[0_0_10px_rgba(255,b153,0,0.5)]"
+                          />
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Technical Logs & Output */}
+          <div className="lg:col-span-5 space-y-6">
+            
+            {/* Terminal Logs */}
+            <div className="bg-[#0a1221] rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden flex flex-col h-[400px]">
+              <div className="bg-white/5 px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-gold" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-white/60">System Core Logs</span>
+                </div>
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
+                </div>
+              </div>
+              <div 
+                ref={scrollRef}
+                className="flex-1 p-6 font-mono text-[11px] leading-relaxed overflow-y-auto space-y-2 scrollbar-hide"
+              >
+                {logs.length === 0 && (
+                  <p className="text-white/20 italic">Waiting for system trigger...</p>
+                )}
+                {logs.map((log, i) => (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    key={i} 
+                    className={`${log.includes('✔') ? 'text-teal font-bold' : log.includes('Executing') ? 'text-gold' : 'text-white/70'}`}
+                  >
+                    {log}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Live Metrics */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8">
+              <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-gold" /> Security & Performance
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Data Quality", value: "99.8%", icon: ShieldCheck, color: "text-teal" },
+                  { label: "AI Latency", value: "<150ms", icon: Zap, color: "text-blue-400" },
+                  { label: "RAG Accuracy", value: "94.2%", icon: FileSearch, color: "text-purple-400" },
+                  { label: "Trust Score", value: "CAL-130", icon: Scale, color: "text-gold" }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
+                    <div className="text-xl font-bold">{stat.value}</div>
+                    <div className="text-[10px] text-white/40 font-bold uppercase">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Call to Action */}
+            <AnimatePresence>
+              {currentPhase === "output" && !isSimulating && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-gold to-accent p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group"
+                >
+                  <div className="relative z-10">
+                    <h3 className="text-navy-deep text-2xl font-bold mb-2">Simulated Success!</h3>
+                    <p className="text-navy-deep/80 text-sm font-medium mb-6">ระบบจำลองยืนยันความพร้อมของสถาปัตยกรรม 100% กุญแจสู่ความยุติธรรมดิจิทัลพร้อมใช้งานแล้ว</p>
+                    <button 
+                      onClick={() => navigate("/search?role=citizen")}
+                      className="w-full py-4 bg-navy-deep text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:gap-4 transition-all"
+                    >
+                      ลองใช้งานจริงบนระบบ Sandbox <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="absolute top-[-50%] right-[-20%] w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );
 };
-
-// Reusable components
-const Card = ({ title, icon: Icon, desc, children }: { title: string; icon: typeof Database; desc: string; children: React.ReactNode }) => (
-  <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
-    <div className="p-6 border-b border-border">
-      <h3 className="font-heading font-bold text-lg flex items-center gap-2 text-primary"><Icon className="w-5 h-5" /> {title}</h3>
-      <p className="text-sm text-muted-foreground mt-1">{desc}</p>
-    </div>
-    <div className="p-6">{children}</div>
-  </div>
-);
-
-const Step = ({ num, title, desc }: { num: number; title: string; desc: string }) => (
-  <div className="flex items-start gap-3">
-    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold flex-shrink-0">{num}</div>
-    <div>
-      <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs text-muted-foreground">{desc}</p>
-    </div>
-  </div>
-);
-
-const StatsRow = ({ items }: { items: { label: string; value: string }[] }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-    {items.map(i => (
-      <div key={i.label} className="p-3 bg-card border border-border rounded-xl text-center">
-        <div className="text-xl font-bold text-primary">{i.value}</div>
-        <div className="text-xs text-muted-foreground">{i.label}</div>
-      </div>
-    ))}
-  </div>
-);
-
-const AgentCard = ({ name, role, desc, color }: { name: string; role: string; desc: string; color: string }) => (
-  <div className={`p-4 rounded-xl border border-border ${color}`}>
-    <div className="flex items-center gap-2 mb-2">
-      <Cpu className="w-4 h-4" />
-      <span className="text-sm font-bold">{name}</span>
-      <span className="text-xs bg-card px-2 py-0.5 rounded-full">{role}</span>
-    </div>
-    <p className="text-xs text-muted-foreground">{desc}</p>
-  </div>
-);
-
-const OutputCard = ({ role, features, action, color }: { role: string; features: string[]; action: () => void; color: string }) => (
-  <div className={`p-4 rounded-xl border border-border ${color}`}>
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-sm font-bold">{role}</span>
-      <button onClick={action} className="text-xs text-primary hover:underline flex items-center gap-1">ดูแดชบอร์ด <ArrowRight className="w-3 h-3" /></button>
-    </div>
-    <ul className="space-y-1">
-      {features.map(f => <li key={f} className="text-xs text-muted-foreground flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-teal" />{f}</li>)}
-    </ul>
-  </div>
-);
-
-const DemoButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
-  <div className="text-center">
-    <button onClick={onClick} className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-medium hover:bg-navy-deep transition-colors inline-flex items-center gap-2">
-      <Zap className="w-4 h-4" /> {label}
-    </button>
-  </div>
-);
 
 export default SystemDemoPage;

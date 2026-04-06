@@ -58,7 +58,7 @@ const BookmarksPage = () => {
                       <h3 className="font-heading text-base font-bold text-foreground mb-1">{item.title}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-2">{item.summary}</p>
                       <div className="flex gap-3 mt-3">
-                        <Link to={`/judgment/${item.id}`} className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+                        <Link to={`/judgment/${item.id}`} state={{ result: item }} className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
                           <ExternalLink className="w-3.5 h-3.5" /> ดูรายละเอียด
                         </Link>
                       </div>

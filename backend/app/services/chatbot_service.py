@@ -4,6 +4,7 @@ Retrieves relevant context from Knowledge Base using SearchPipeline,
 then generates a response via LLM (Grok → Anthropic fallback).
 API keys are read from server-side env vars only.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

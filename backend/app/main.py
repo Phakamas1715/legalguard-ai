@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -26,7 +27,10 @@ app = FastAPI(
 
 import os
 
-_cors_origins_str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+_cors_origins_str = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:4173",
+)
 _cors_origins = [o.strip() for o in _cors_origins_str.split(",") if o.strip()]
 
 app.add_middleware(SecurityMiddleware)

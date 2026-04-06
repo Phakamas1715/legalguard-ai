@@ -5,11 +5,12 @@ that routes queries through Manager → Researcher/Drafter → Reviewer → Comp
 
 Agent nodes are simple state-updating functions; actual LLM calls will be added later.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
 import logging
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 from langgraph.graph import END, StateGraph
 
@@ -29,7 +30,7 @@ from app.services.responsible_ai import (
 from app.services.search_pipeline import SearchPipeline, SearchRequest
 
 # Module-level SearchPipeline singleton (lazy-initialised on first use)
-_pipeline: SearchPipeline | None = None
+_pipeline: Optional[SearchPipeline] = None
 
 
 def _get_pipeline() -> SearchPipeline:

@@ -7,7 +7,7 @@ import {
   Clock, Target, AlertTriangle, Loader2
 } from "lucide-react";
 
-const API_BASE = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "/api/v1";
+import { API_BASE } from "@/lib/runtimeConfig";
 
 interface BenchmarkResult {
   case_id: string;

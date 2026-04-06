@@ -8,6 +8,7 @@ Flow:
 This is the Agentic RAG entry point. Every query passes through the full
 agent graph with citation verification, PII masking, and role-based access.
 """
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agent", tags=["agentic-rag"])
 
-_engine: LegalAgentEngine | None = None
+_engine: Optional[LegalAgentEngine] = None
 
 
 def _get_engine() -> LegalAgentEngine:

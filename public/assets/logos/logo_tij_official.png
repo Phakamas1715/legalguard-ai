@@ -1,0 +1,582 @@
+	<!DOCTYPE html>
+<!--[if lt IE 7 ]><html lang="en-US" class="ie6 th"> <![endif]-->
+<!--[if IE 7 ]><html lang="en-US" class="ie7 th"> <![endif]-->
+<!--[if IE 8 ]><html lang="en-US" class="ie8 th"> <![endif]-->
+<!--[if IE 9 ]><html lang="en-US" class="ie9 th"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html lang="en-US" class="th " id="area-tailwindcss">
+<!--<![endif]-->
+
+<head>
+	<meta charset="utf-8">
+	<title>Thailand Institute of Justice (TIJ) | สถาบันเพื่อการยุติธรรมแห่งประเทศไทยnot_found</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+
+	
+	<!-- GOOGLE PLUS -->
+	<meta itemprop="name" content="Thailand Institute of Justice (TIJ) | สถาบันเพื่อการยุติธรรมแห่งประเทศไทยnot_found">
+	<meta itemprop="description" content="Thailand Institute of Justice">
+	<meta itemprop="image" content="https://www.tijthailand.org/public/themes/tij_new/assets/img/share-img/og-1200x630.jpg">
+	<meta itemprop="url" content="https://www.tijthailand.org/">
+	<meta itemprop="alternateName" content="Thailand Institute of Justice">
+
+	<!-- Meta Open Graph (FB) -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://www.tijthailand.org/">
+	<meta property="og:title" content="Thailand Institute of Justice (TIJ) | สถาบันเพื่อการยุติธรรมแห่งประเทศไทยnot_found">
+	<meta property="og:description" content="">
+	<meta property="og:image" content="https://www.tijthailand.org/public/themes/tij_new/assets/img/share-img/og-1200x630.jpg">
+	<meta property="og:site_name" content="Thailand Institute of Justice">
+
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="Thailand Institute of Justice (TIJ) | สถาบันเพื่อการยุติธรรมแห่งประเทศไทยnot_found">
+	<meta name="twitter:description" content="">
+	<meta name="twitter:url" content="https://www.tijthailand.org/">
+	<meta name="twitter:image:src" content="https://www.tijthailand.org/public/themes/tij_new/assets/img/share-img/og-1200x630.jpg">
+
+			<link rel="shortcut icon" type="image/png" href="https://www.tijthailand.org/uploads/config/20190121/dikmoptwz038.png">
+		<link rel="apple-touch-icon" type="image/png" href="https://www.tijthailand.org/uploads/config/20190121/dikmoptwz038.png">
+	
+	<!-- css main -->
+	<link rel="stylesheet" href="https://www.tijthailand.org/public/themes/tij_new/assets-old/css/fonts/tij/styles.css">
+	<link rel="stylesheet" href="https://www.tijthailand.org/public/themes/tij_new/assets-old/css/main.css">
+	<link rel="stylesheet" href="https://www.tijthailand.org/public/themes/tij_new/assets-old/css/custom-main.css">
+	<link rel="stylesheet" href="https://www.tijthailand.org/public/themes/tij_new/assets/css/main.css">
+
+	<!-- main -->
+	<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/fancybox.min.js"></script>
+
+	
+	<script type="text/javascript">
+		// declare variable for use in .js file
+		var base_url = 'https://www.tijthailand.org/';
+		var site_url = 'https://www.tijthailand.org/';
+		var site_lang = 'https://www.tijthailand.org/th/';
+		var theme_default = 'tij_new';
+		var banner_slide_time = '5000';
+		var csrf_name = 'tij2018_token';
+		var csrf_value = '8d3a4fcc98bed40d919f6425a53dfe3c';
+	</script>
+
+	<!-- javascript => inc all js -->
+	<!-- plugin -->
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/gsap.min.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/ScrollTrigger.min.js"></script>
+<!-- <script type="text/javascript" src="assets/js/fancybox.min.js"></script> -->
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/splide.min.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/splide-extension-video.min.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/swiper-bundle.min.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/simplebar.min.js"></script>
+
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/plugin/ajaxupload.3.6.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/jquery.easing.1.3.min.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/SmoothScroll.min.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/jquery.jscrollpane.min.js"></script>
+
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/owl.carousel/owl.carousel.min.js"></script>
+<link rel="stylesheet" href="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/jquery.fancybox/jquery.fancybox.min.css">
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/jquery.fancybox/jquery.fancybox.min.js"></script>
+
+<link rel="stylesheet" href="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/plugin/jquery.waitme/css/waitMe.min.css">
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/plugin/jquery.waitme/js/waitMe.min.js"></script>
+
+
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/main.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets/js/main.js"></script>
+<script type="text/javascript" src="https://www.tijthailand.org/public/themes/tij_new/assets-old/js/custom-main.js"></script>
+
+
+	<script src="https://www.google.com/recaptcha/api.js?render=6LdwBnUsAAAAAEDe2dXrxadTlYL2wanyqeKMe3Ho&hl=th"></script>
+
+		
+	<!-- google analytic -->
+	<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-127801597-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-127801597-1');
+</script>	<!-- end google analytic -->
+	<!--[if lte IE 8]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+	<!-- Google Tag Manager -->
+	<script>
+		(function(w, d, s, l, i) {
+			w[l] = w[l] || [];
+			w[l].push({
+				'gtm.start': new Date().getTime(),
+				event: 'gtm.js'
+			});
+			var f = d.getElementsByTagName(s)[0],
+				j = d.createElement(s),
+				dl = l != 'dataLayer' ? '&l=' + l : '';
+			j.async = true;
+			j.src =
+				'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+			f.parentNode.insertBefore(j, f);
+		})(window, document, 'script', 'dataLayer', 'GTM-5P3R4KH6');
+	</script>
+	<!-- End Google Tag Manager -->
+</head>
+
+<body>
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WZLD6G7" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5P3R4KH6" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->		<!-- wrapper -->
+		<div id="wrapper" class="page-in">
+
+			<!-- header / box-search / pdpa -->
+			<!-- header -->
+<header id="header">
+    <div class="container">
+        <a href="https://www.tijthailand.org/home" class="group-logo">
+            <span class="logo-tij"><img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/share/logo.svg" alt="TIJ Thailand Institute of Justice affiliated with the United Nations" width="100" height="72" loading="lazy"></span>
+            <span class="logo-full-text"><img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/share/logo-full-text.svg" alt="TIJ Thailand Institute of Justice affiliated with the United Nations" width="232" height="40" loading="lazy"></span>
+        </a>
+
+        <div class="box-menu">
+            <div class="overlay" onclick="handleBoxMenu()"></div>
+
+            <div class="language text-size">
+                <a class="active" href="javascript:;"><span>A</span></a>
+                <a href="javascript:;"><span>A+</span></a>
+            </div>
+
+            <!-- language switcher -->
+            <div class="language"><a class="active" title="th" href="https://www.tijthailand.org/th/assets/images/tij-logo.png"><span>TH</span></a> <a  title="en" href="https://www.tijthailand.org/en/assets/images/tij-logo.png"><span>EN</span></a> </div>      
+            <nav class="main-menu">
+                <ul>
+                                        <li class="">
+                        <a href="javascript:;">เกี่ยวกับเรา</a>
+                        <button type="button" class="btn-sub-level-02">open sub menu level 02</button>
+                        <div class="sub-menu">
+                            <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/uploads/submenu-about-bg.jpg" alt="" class="bg" loading="lazy">
+
+                            <div class="inner">
+                                <h2>เกี่ยวกับเรา</h2>
+                                    <div class="sub-level-02">
+                                    <ul>
+                                        <li class="">
+                                            <button type="button" class="btn-sub-level-03">open sub menu level 03</button>
+                                            <a href="javascript:;">รู้จักเรา</a>
+                                            <div class="sub-level-03">
+                                                <ul>
+                                                    <li class="">
+                                                        <a href="https://www.tijthailand.org/overview">ข้อมูลองค์กร</a>
+                                                    </li>
+                                                    <li class="">
+                                                        <a href="https://www.tijthailand.org/management">โครงสร้างการบริหารงาน</a>
+                                                    </li>
+                                                    <li class="">
+                                                        <a href="https://www.tijthailand.org/publication?category=7">รายงานประจำปี</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                        <li class="">
+                                            <button type="button" class="btn-sub-level-03">open sub menu level 03</button>
+                                            <a href="https://www.tijthailand.org/area_of_work">กรอบการดำเนินงาน</a>
+                                            <div class="sub-level-03 scroll-area-of-work">
+                                                <ul>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/tijcommonground">TIJ COMMON GROUND</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/tij-academy">TIJ Academy</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/tij-justice-innovation">TIJ Justice Innovation</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/การอนุวัติข้อกำหนดกรุงเทพและมาตรฐานการปฏิบัติต่อผู้ต้องขัง">การอนุวัติข้อกำหนดกรุงเทพและมาตรฐานการปฏิบัติต่อผู้ต้องขัง</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/4">การประสานงานนโยบาย</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/wccj">ผู้หญิงและเด็กในระบบยุติธรรมทางอาญา</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/statistics-programme">พัฒนาข้อมูลสถิติเพื่อการวิจัยและนโยบาย</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/5">ความเชื่อมโยงอาชญากรรมและการพัฒนา</a>
+    </li>
+        <li>
+        <a href="https://www.tijthailand.org/area_of_work/detail/2">องค์กรอาชญากรรมข้ามชาติ</a>
+    </li>
+    </ul>
+                                            </div>
+                                        </li>
+                                        <li class="">
+                                            <a href="https://www.tijthailand.org/faq">คำถามที่พบบ่อย</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="">
+                        <a href="https://www.tijthailand.org/what-we-do">งานของเรา</a>
+                    </li>
+
+                                        <li class="">
+                        <a href="javascript:;">คลังความรู้</a>
+                        <button type="button" class="btn-sub-level-02">open sub menu level 02</button>
+                        <div class="sub-menu">
+                            <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/uploads/submenu-about-bg.jpg" alt="" class="bg" loading="lazy">
+
+                            <div class="inner">
+                                <h2>คลังความรู้</h2>
+                                <div class="sub-level-02">
+                                    <ul>
+                                                                                <li class="">
+                                            <a href="https://www.tijthailand.org/resource-and-publication">แหล่งความรู้และสื่อสิ่งพิมพ์</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://www.tijthailand.org/public/documents/O9-คู่มือการใช้งานแหล่งความรู้และสื่อสิ่งพิมพ์.pdf" target="_blank">
+                                                คู่มือการใช้งานแหล่งความรู้และสื่อสิ่งพิมพ์                                            </a>
+                                        </li>
+                                                                                <li>
+                                            <a href="https://www.tijthailand.org/statistic_data">ข้อมูลสถิติกระบวนการยุติธรรม</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://lib.tijthailand.org/main/index.aspx" target="_blank">ห้องสมุด TIJ</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="javascript:;">ร่วมงานกับเรา</a>
+                        <button type="button" class="btn-sub-level-02">open sub menu level 02</button>
+
+                        <div class="sub-menu">
+                            <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/uploads/submenu-about-bg.jpg" alt="" class="bg" loading="lazy">
+
+                            <div class="inner">
+                                <h2>ร่วมงานกับเรา</h2>
+                                <div class="sub-level-02">
+                                    <ul>
+                                        <li>
+                                            <a href="https://www.tijthailand.org/career">Life@TIJ</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://www.tijthailand.org/voice_from_employee">Voices from Employees</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://www.tijthailand.org/career/jobs_opening">Jobs Opening</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://www.tijthailand.org/career/internship_program">Internship Programme</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="">
+                        <a href="https://www.tijthailand.org/event">ปฏิทินกิจกรรม</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <button type="button" class="btn-search" onclick="handleBoxSearch()">
+            <span class="open-search">
+                <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-search-gray.svg" alt="icon" class="icon -gray" width="20" height="20" loading="lazy">
+                <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-search-orange.svg" alt="icon" class="icon -orange" width="20" height="20" loading="lazy">
+                <span class="text">Search</span>
+            </span>
+            <span class="close-search">
+                <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/close-search.svg" alt="icon" class="icon -gray" width="15" height="17" loading="lazy">
+                <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/close-search-orange.svg" alt="icon" class="icon -orange" width="15" height="17" loading="lazy">
+                <span class="text">Closed</span>
+            </span>
+        </button>
+
+        <button type="button" class="hamburger" onclick="handleBoxMenu()">
+            <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/btn-hamburger.svg" alt="icon" class="open" width="22" height="20">
+            <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/btn-hamburger-close.svg" alt="icon" class="close" width="22" height="20">
+        </button>
+    </div>
+</header><!-- End header -->
+
+<div class="box-search">
+    <div class="overlay" onclick="handleBoxSearch()"></div>
+  
+    <div class="inner">
+        <form action="https://www.tijthailand.org/search" accept-charset="utf-8" class="frm-search" method="get">            <div class="form-style">
+                <input autocomplete="off" type="text" name="q" class="form-input" placeholder="กรุณากรอกคำที่ต้องการค้นหา">
+                <button type="submit" class="submit-search">
+                    <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-search-gray.svg" alt="icon" class="icon -gray" width="20" height="20" loading="lazy">
+                    <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-search-orange.svg" alt="icon" class="icon -orange" width="20" height="20" loading="lazy">
+                </button>
+            </div>
+        </form>
+                <div class="tags">
+                            <a href="https://www.tijthailand.org/search?q=16dayscampaign&type=hashtag">#16dayscampaign</a>
+                            <a href="https://www.tijthailand.org/search?q=Access to Justice&type=hashtag">#Access to Justice</a>
+                            <a href="https://www.tijthailand.org/search?q=ACCPCJ&type=hashtag">#ACCPCJ</a>
+                            <a href="https://www.tijthailand.org/search?q=Alternative Measures&type=hashtag">#Alternative Measures</a>
+                            <a href="https://www.tijthailand.org/search?q=Anti-corruption&type=hashtag">#Anti-corruption</a>
+                            <a href="https://www.tijthailand.org/search?q=ASEAN&type=hashtag">#ASEAN</a>
+                            <a href="https://www.tijthailand.org/search?q=Bangkok Rules&type=hashtag">#Bangkok Rules</a>
+                            <a href="https://www.tijthailand.org/search?q=BAScii&type=hashtag">#BAScii</a>
+                            <a href="https://www.tijthailand.org/search?q=Blockchain&type=hashtag">#Blockchain</a>
+                            <a href="https://www.tijthailand.org/search?q=Bounce Be Good (BBG)&type=hashtag">#Bounce Be Good (BBG)</a>
+                    </div>
+            </div>
+</div>
+
+<div class="pdpa">
+    <div class="container">
+        <div class="inner">
+            <div class="page-center">
+                <h3 class="text-primary">ยอมรับนโยบายความเป็นส่วนตัว</h3>
+                <div class="detail">
+                    <p>เว็บไซต์นี้มีการใช้คุกกี้ (cookie) เพื่อพัฒนาประสบการณ์การใช้งานและเพิ่มความพึงพอใจต่อการได้รับการเสนอข้อมูลและเนื้อหาต่างๆ ให้ดียิ่งขึ้น โดยการเข้าใช้งานเว็บไซต์นี้ถือว่าท่านได้อนุญาตให้เราใช้คุกกี้ตามนโยบายคุกกี้ของเรา</p>
+                    <a href="https://www.tijthailand.org/pdpa/cookie" class="text-primary link-detail" target="_blank">รายละเอียดเพิ่มเติม</a>
+                </div>
+            </div>
+            <button type="button" class="btn btn-accept-cookie" data-value="required">ยอมรับคุกกี้ที่จำเป็น</button>
+            <button type="button" class="btn btn-accept-cookie" data-value="all">ยอมรับคุกกี้ทั้งหมด</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.btn-accept-cookie').click(function (e) { 
+            e.preventDefault();
+            
+            var accept = $(this).data('value');
+            setCookie({
+                accept: accept,
+                [csrf_name]: csrf_value
+            })
+        });
+
+        $('#form-setting-cookie').submit(function (e) { 
+            e.preventDefault();
+
+            var accept = $(this).serialize();
+            setCookie(accept);
+        });
+
+        $('.btn-setting-cookie').click(function (e) { 
+            e.preventDefault();
+            $('html').addClass('open-setting-cookie');
+        });
+
+        $('.btn-close-setting-cookie').click(function (e) { 
+            e.preventDefault();
+            $('html').removeClass('open-setting-cookie');
+        });
+
+        function setCookie(data) {
+            $.ajax({
+                type: "post",
+                url: 'https://www.tijthailand.org/pdpa/set_cookie',
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    console.log({response})
+                    if(response.success == true) {
+                        // $('html').removeClass('open-setting-cookie');
+                        $('.pdpa').remove();
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+			<!-- Content this Page -->
+            <main id="main-content">
+			    <div role="main" id="container">
+
+<div class="box-not-found">
+	Page Not Found
+</div>
+
+</div>
+            </main>
+
+			<!-- footer => /body to /html [popup inline] -->
+			<!-- footer -->
+<footer id="footer">
+  <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/share/obj-dots.svg" alt="obj" class="obj-dots" width="186" height="134" loading="lazy">
+  
+  <button type="button" class="btn-to-top" onclick="scrollToTop();">
+    <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/angle-top-white.svg" alt="icon" width="9" height="16" loading="lazy">
+    <span>TOP</span>
+  </button>
+  
+  <div class="section-top">
+    <div class="container">
+        <nav class="menu-footer">
+                            <a href="https://www.tijthailand.org/purchase">จัดซื้อจัดจ้าง</a>
+                <a href="https://www.tijthailand.org/act">พ.ร.บ./ระเบียบ TIJ</a>
+                <a href="https://www.tijthailand.org/complaints">ช่องทางร้องเรียน</a>
+                <a href="https://www.tijthailand.org/financial_budget">รายงานผลการดำเนินงาน</a>
+                <a href="http://www.oic.go.th/INFOCENTER6/634" target="_blank">ศูนย์ข้อมูลอิเล็กทรอนิกส์ TIJ</a>
+                <a href="javascript:;" id="btn-subscription">บอกรับข่าวสาร</a>
+                <a href="https://www.tijthailand.org/uploads/document/a6b3a06792c33b1b.pdf" target="_blank">ช่องทางอิเล็กทรอนิกส์สำหรับติดต่อสถาบันฯ</a>
+                <a href="javascript:;" id="btn-contact">ติดต่อเรา</a>
+            
+      </nav>
+    </div>
+  </div>
+
+  <div class="section-middle">
+    <div class="container">
+        <div class="address">
+    <h3>ที่อยู่</h3>
+    <p>สถาบันเพื่อการยุติธรรมแห่งประเทศไทย (องค์การมหาชน) &nbsp;<br />
+999 ถนนแจ้งวัฒนะ แขวงทุ่งสองห้อง เขตหลักสี่ กรุงเทพฯ 10210</p>
+
+<p>อีเมล: info@tijthailand.org, saraban@tijthailand.org</p>
+
+<p class="icon-telephone">โทรศัพท์&nbsp;: 02-522-1199<br />
+โทรสาร&nbsp;: 02-522-1198</p>
+
+<p class="icon-telephone">&nbsp;</p>
+
+<p><iframe allowfullscreen="" height="250" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3873.1534001179402!2d100.5689865750928!3d13.889774286516607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e283c04a579e0d%3A0x2b572dc77a66de46!2sThailand%20Institute%20of%20Justice%20(TIJ)%20affiliated%20with%20the%20United%20Nations!5e0!3m2!1sen!2sth!4v1705992077278!5m2!1sen!2sth" style="border:0;" width="300"></iframe></p>
+    <!-- Social render -->
+	<div class="social">
+    <h3>ติดตามช่องทาง social</h3>
+
+    <div class="group-btn">
+                    <a target="_blank" href="https://www.facebook.com/tijthailand.org/" title="facebook">
+            <img src="https://www.tijthailand.org/public/themes/tij_new//assets/img/icons/icon-facebook-orange.svg" alt="facebook" loading="lazy">
+        </a>
+                    <a target="_blank" href="https://www.youtube.com/user/TIJThailand" title="youtube">
+            <img src="https://www.tijthailand.org/public/themes/tij_new//assets/img/icons/icon-youtube-orange.svg" alt="youtube" loading="lazy">
+        </a>
+                    <a target="_blank" href="https://twitter.com/tijthailand" title="twitter">
+            <img src="https://www.tijthailand.org/public/themes/tij_new//assets/img/icons/icon-twitter-orange.svg" alt="twitter" loading="lazy">
+        </a>
+                    <a target="_blank" href="https://www.linkedin.com/company/tijthailand/" title="linkedin">
+            <img src="https://www.tijthailand.org/public/themes/tij_new//assets/img/icons/icon-linkin-orange.svg" alt="linkedin" loading="lazy">
+        </a>
+        </div>
+</div>
+</div>
+
+<div class="contact">
+    <h3>ติดต่อเรา</h3>
+
+        <p>
+        <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-letter-orange.svg" alt="icon" width="19" height="14" loading="lazy">
+        <span>อีเมล : <a href="mailto:okm@tijthailand.org">okm@tijthailand.org</a></span>
+    </p>
+    
+        <p>
+        <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-tel-orange.svg" alt="icon" width="19" height="19" loading="lazy">
+        <span>Tel : <a href="tel:02-522-1199">02-522-1199</a></span>
+    </p>
+    
+        <p>
+        <img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/icon-fax-orange.svg" alt="icon" width="19" height="19" loading="lazy">
+        <span>Fax : 02-522-1198</span>
+    </p>
+    </div>    </div>
+  </div>
+  
+  <div class="section-bottom">
+    <div class="container">
+      <p>© Copyright 2023 Thailand Institute of Justice All Rights Reserved</p>
+
+      <div class="group-btn">
+        <a href="https://www.tijthailand.org/pdpa/privacy">Privacy Policy</a>
+        <a href="https://www.tijthailand.org/pdpa/cookie">Cookies Policy</a>
+      </div>
+    </div>
+  </div>
+</footer><!-- End footer -->
+
+<a class="fixed-chat" href="https://m.me/tijthailand.org" target="_blank"><img src="https://www.tijthailand.org/public/themes/tij_new/assets/img/icons/chat.svg" alt="chat" /></a>
+
+
+<script>
+    $(function(){
+        // Subscription
+        $('#btn-subscription').click(function (e) { 
+            e.preventDefault();
+
+            popupSubscribe();
+
+            Fancybox.close();
+            const modalSubscription = new Fancybox([
+                {
+                    src: site_lang+'subscription/subscribe_form_render',
+                    type: "ajax",
+                },
+            ]);
+
+            modalSubscription.on("done", () =>{
+                handleFormSelect();
+
+                $('#frm_subscription #allow').on('change', function () {
+                    e.preventDefault();
+
+                    var allow = $('#frm_subscription #allow:checked').val();
+                    console.log({allow})
+                    if(allow == 'on') {
+                        $('#frm_subscription button').removeAttr('disabled');
+                    }else{
+                        $('#frm_subscription button').attr('disabled', 'disabled');
+                    }
+                });
+
+                grecaptcha.ready(() => {
+                    grecaptcha.execute('6LdwBnUsAAAAAEDe2dXrxadTlYL2wanyqeKMe3Ho', { action: 'subscription' }).then((token) => {
+                        document.querySelector(`#frm_subscription [name="recaptcha_token"]`).value = token;
+                    });
+                });
+            })
+        });
+
+        // Contact
+        $('#btn-contact').click(function (e) { 
+            e.preventDefault();
+
+            contactForm();
+            
+            Fancybox.close();
+            const modalContact = new Fancybox([
+                {
+                    src: site_lang+'contactus/contact_form_render',
+                    type: "ajax",
+                },
+            ]);
+
+            modalContact.on("done", () =>{
+                grecaptcha.ready(() => {
+                    grecaptcha.execute('6LdwBnUsAAAAAEDe2dXrxadTlYL2wanyqeKMe3Ho', { action: 'contact' }).then((token) => {
+                        document.querySelector(`#frm_contact [name="recaptcha_token"]`).value = token;
+                    });
+                });
+            })
+        });
+    });
+</script>		</div>
+
+		<!-- start javascript this page -->
+			</body>
+</html>

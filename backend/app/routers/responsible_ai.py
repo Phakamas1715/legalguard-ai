@@ -1,4 +1,5 @@
 """Responsible AI API endpoints — Risk Tiers, Honesty Score, Circuit Breaker."""
+from __future__ import annotations
 
 from __future__ import annotations
 

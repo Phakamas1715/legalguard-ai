@@ -8,6 +8,7 @@
 
 Reference: UNESCO Guidelines for AI in Courts (2025), 15 Principles
 """
+from __future__ import annotations
 
 from __future__ import annotations
 

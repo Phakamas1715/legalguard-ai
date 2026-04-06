@@ -1,21 +1,64 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { AlertTriangle, Info, Sparkles, ArrowUpDown, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
+import { AlertTriangle, BadgeCheck, Database, FileSearch, Info, Scale, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SearchBar, { type SearchFilters } from "@/components/SearchBar";
 import ResultCard, { type SearchResult } from "@/components/ResultCard";
 import { SkeletonList } from "@/components/SkeletonCard";
 import type { UserRole } from "@/components/RoleSelector";
-import { mockResults } from "@/data/mockResults";
+import { useBackendStatus } from "@/hooks/useBackendStatus";
 import { useBookmarks, useSearchHistory } from "@/hooks/useBookmarksHistory";
+import { WORKSPACE_STORAGE_KEYS } from "@/lib/flowWorkspace";
+import { memory, type MemoryStats } from "@/lib/layeredMemory";
 import { apiClient } from "@/lib/apiClient";
 import { calculateCFS } from "@/lib/fairnessScoring";
-import { orchestrator } from "@/lib/agentOrchestrator";
 
 type SortBy = "relevance" | "year" | "confidence";
+const SEARCH_RESULTS_STORAGE_KEY = "lg-last-search-results";
+const SEARCH_WORKSPACE_STORAGE_KEY = WORKSPACE_STORAGE_KEYS.search;
+const EMPTY_SEARCH_RESULTS: SearchResult[] = [];
+const TRUST_SIGNAL_COPY = [
+  {
+    title: "Semantic Search",
+    detail: "ค้นหาตามบริบทกฎหมายและข้อเท็จจริง ไม่ใช่เฉพาะ keyword",
+    icon: FileSearch,
+  },
+  {
+    title: "Source Traceability",
+    detail: "ผลลัพธ์แสดง source code, metadata และลิงก์ต้นฉบับเมื่อมีข้อมูล",
+    icon: Database,
+  },
+  {
+    title: "Responsible Use",
+    detail: "มีระดับความเชื่อถือและคำแนะนำการใช้งานทุกผลลัพธ์",
+    icon: ShieldCheck,
+  },
+];
+
+interface SearchWorkspaceState {
+  role: UserRole;
+  query: string;
+  filters: SearchFilters;
+  sortBy: SortBy;
+  resultCount: number;
+  updatedAt: number;
+}
+
+const normalizeCourtType = (value: unknown): SearchResult["courtType"] => {
+  switch (String(value ?? "").toLowerCase()) {
+    case "appeal":
+      return "appeal";
+    case "district":
+      return "district";
+    case "admin":
+    case "administrative":
+      return "admin";
+    default:
+      return "supreme";
+  }
+};
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
@@ -29,47 +72,15 @@ const SearchPage = () => {
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { addHistory } = useSearchHistory();
   const [aiResults, setAiResults] = useState<SearchResult[]>([]);
-  const [useAI, setUseAI] = useState(true);
   const [sortBy, setSortBy] = useState<SortBy>("relevance");
   const [cfsResult, setCfsResult] = useState<ReturnType<typeof calculateCFS> | null>(null);
   const [agentSteps, setAgentSteps] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [cacheHit, setCacheHit] = useState(false);
-
-  // Text-based search on mock data as fallback
-  const searchMockResults = (q: string, f: SearchFilters): SearchResult[] => {
-    let filtered = [...mockResults];
-    const queryLower = q.toLowerCase();
-
-    // Text match
-    filtered = filtered.filter((r) => {
-      if (!queryLower) return true;
-      const searchText = `${r.title} ${r.summary} ${r.fullText} ${r.statutes.join(" ")} ${r.caseNo}`.toLowerCase();
-      const keywords = ["ฉ้อโกง", "รถ", "หย่า", "บุตร", "มรดก", "เลิกจ้าง", "หมิ่นประมาท", "ออนไลน์", "คอมพิวเตอร์", "ยืม", "ที่ดิน", "จราจร", "เมา", "ภาษี", "ลิขสิทธิ์", "ลักทรัพย์", "ot", "สมรส", "สร้าง", "ปกครอง", "วินัย"];
-      const matchedKeywords = keywords.filter(k => queryLower.includes(k));
-      if (matchedKeywords.length > 0) return matchedKeywords.some(k => searchText.includes(k));
-      const queryWords = queryLower.split(/\s+/).filter(Boolean);
-      if (queryWords.length > 0) return queryWords.some((w) => searchText.includes(w)) || searchText.includes(queryLower);
-      return searchText.includes(queryLower);
-    });
-
-    if (f.courtType) filtered = filtered.filter((r) => r.courtType === f.courtType);
-    if (f.year) filtered = filtered.filter((r) => r.year === Number(f.year));
-    if (f.statute) {
-      const statuteQuery = f.statute.toLowerCase();
-      filtered = filtered.filter((r) => r.statutes.some((s) => s.toLowerCase().includes(statuteQuery)));
-    }
-
-    filtered = filtered.map((r) => {
-      const searchText = `${r.title} ${r.summary}`.toLowerCase();
-      const queryWords = queryLower.split(/\s+/).filter(Boolean);
-      const matchCount = queryWords.filter((w) => searchText.includes(w)).length;
-      const relevanceBoost = matchCount / Math.max(queryWords.length, 1);
-      return { ...r, relevanceScore: Math.min(r.relevanceScore + relevanceBoost * 0.2, 1) };
-    });
-
-    return filtered;
-  };
+  const [errorMessage, setErrorMessage] = useState("");
+  const [memoryStats, setMemoryStats] = useState<MemoryStats>(() => memory.getStats());
+  const [restoredWorkspace, setRestoredWorkspace] = useState<SearchWorkspaceState | null>(null);
+  const backendStatus = useBackendStatus();
 
   useEffect(() => {
     if (initializedRef.current) return;
@@ -77,9 +88,44 @@ const SearchPage = () => {
     if (q) {
       initializedRef.current = true;
       handleSearch(q, { courtType: "", year: "", statute: "" });
+      return;
+    }
+    if (typeof window === "undefined") return;
+
+    const rawWorkspace = window.localStorage.getItem(SEARCH_WORKSPACE_STORAGE_KEY);
+    if (!rawWorkspace) return;
+
+    try {
+      const parsed = JSON.parse(rawWorkspace) as SearchWorkspaceState;
+      if (parsed.role !== role) return;
+      setQuery(parsed.query);
+      setFilters(parsed.filters);
+      setSortBy(parsed.sortBy);
+      setRestoredWorkspace(parsed);
+    } catch {
+      window.localStorage.removeItem(SEARCH_WORKSPACE_STORAGE_KEY);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!restoredWorkspace || !query.trim()) return;
+    const nextWorkspace: SearchWorkspaceState = {
+      ...restoredWorkspace,
+      role,
+      query,
+      filters,
+      sortBy,
+    };
+    persistWorkspace(nextWorkspace);
+    setRestoredWorkspace(nextWorkspace);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy]);
+
+  const persistWorkspace = (workspace: SearchWorkspaceState) => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(SEARCH_WORKSPACE_STORAGE_KEY, JSON.stringify(workspace));
+  };
 
   const handleSearch = async (q: string, f: SearchFilters) => {
     setQuery(q);
@@ -89,46 +135,99 @@ const SearchPage = () => {
     setAgentSteps([]);
     setSuggestions([]);
     setCacheHit(false);
+    setErrorMessage("");
+    setCfsResult(null);
 
-    // 1. Run Legal Multi-Agent Orchestrator
     try {
-      const reasoning = await orchestrator.orchestrate(q, role);
-      setAgentSteps(reasoning.split(". ").filter((s) => s.length > 5));
-    } catch (err) {
-      console.error("Orchestrator error:", err);
-    }
+      const data = await apiClient.search(q, f, role);
+      const backendResults: SearchResult[] = (data.results ?? []).map((r: Record<string, unknown>) => ({
+        id: String(r.id ?? ""),
+        caseNo: String(r.case_no ?? ""),
+        courtType: normalizeCourtType(r.court_type),
+        year: Number(r.year ?? 0),
+        title: String(r.title ?? ""),
+        summary: String(r.summary ?? r.chunk_text ?? ""),
+        fullText: String(r.chunk_text ?? ""),
+        statutes: Array.isArray(r.statutes) ? (r.statutes as string[]) : [],
+        relevanceScore: Number(r.rrf_score ?? r.relevance_score ?? 0),
+        confidence: Number(r.relevance_score ?? 0),
+        province: typeof r.province === "string" ? r.province : undefined,
+        link: typeof r.link === "string" ? r.link : undefined,
+        sourceCode: typeof r.source_code === "string" ? r.source_code : undefined,
+      }));
 
-    // 2. Fetch Results
-    let finalResults: SearchResult[] = [];
-    if (useAI) {
-      try {
-        const data = await apiClient.search(q, f, role);
-        const backendResults: SearchResult[] = (data.results ?? []).map((r: Record<string, unknown>) => ({
-          id: String(r.id ?? ""),
-          caseNo: String(r.case_no ?? ""),
-          courtType: String(r.court_type ?? ""),
-          year: Number(r.year ?? 0),
-          title: String(r.title ?? ""),
-          summary: String(r.summary ?? r.chunk_text ?? ""),
-          fullText: String(r.chunk_text ?? ""),
-          statutes: Array.isArray(r.statutes) ? r.statutes as string[] : [],
-          relevanceScore: Number(r.rrf_score ?? r.relevance_score ?? 0),
-          confidence: Number(r.relevance_score ?? 0),
-          tags: [],
-        }));
-        finalResults = backendResults.length > 0 ? backendResults : searchMockResults(q, f);
-        if (data.cache_hit) setCacheHit(true);
-      } catch {
-        finalResults = searchMockResults(q, f);
+      setAiResults(backendResults);
+      setSuggestions(Array.isArray(data.suggestions) ? data.suggestions as string[] : []);
+      setCacheHit(Boolean(data.cache_hit));
+      addHistory(q, f, backendResults.length);
+
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(SEARCH_RESULTS_STORAGE_KEY, JSON.stringify(backendResults));
       }
-    } else {
-      finalResults = searchMockResults(q, f);
-    }
 
-    setAiResults(finalResults);
-    setIsLoading(false);
-    addHistory(q, f, finalResults.length);
-    if (finalResults.length > 0) setCfsResult(calculateCFS(finalResults));
+      if (backendResults.length > 0) {
+        const fairness = calculateCFS(backendResults);
+        setCfsResult(fairness);
+        memory.write("working", `[${role}] ${q}`, { concept: "search_query", importance: 0.8 });
+        memory.write("episodic", `Retrieved ${backendResults.length} results for "${q.slice(0, 80)}"`, {
+          concept: "search_result",
+          importance: Math.min(0.9, 0.5 + backendResults.length / 20),
+        });
+        if (fairness.cfs >= 0.7) {
+          memory.summarizeToL5(
+            `Search ${role}: "${q.slice(0, 80)}" | results=${backendResults.length} | cfs=${fairness.cfs.toFixed(2)}`,
+            `${role}_search_workspace`,
+          );
+        }
+        setAgentSteps([
+          "ระบบค้นหา backend วิเคราะห์คำค้นและส่งเข้า hybrid retrieval",
+          `ดึงเอกสารอ้างอิงได้ ${backendResults.length} รายการจากคลังข้อมูลจริง`,
+          `คำนวณ CFS ได้ ${(fairness.cfs * 100).toFixed(1)}% ก่อนแสดงผล`,
+        ]);
+      } else {
+        setAgentSteps([
+          "ระบบค้นหา backend ทำงานแล้ว แต่ยังไม่พบเอกสารที่ตรงกับคำค้นนี้",
+        ]);
+      }
+      const workspace: SearchWorkspaceState = {
+        role,
+        query: q,
+        filters: f,
+        sortBy,
+        resultCount: backendResults.length,
+        updatedAt: Date.now(),
+      };
+      persistWorkspace(workspace);
+      setRestoredWorkspace(workspace);
+      setMemoryStats(memory.getStats());
+    } catch (error) {
+      console.error("Search backend error:", error);
+      setAiResults(EMPTY_SEARCH_RESULTS);
+      setSuggestions([]);
+      setCacheHit(false);
+      setErrorMessage("ไม่สามารถเชื่อมต่อระบบค้นหาหลักได้ กรุณาตรวจสอบว่า backend ทำงานอยู่ แล้วลองใหม่อีกครั้ง");
+      memory.write("episodic", `Search failed for "${q.slice(0, 80)}"`, {
+        concept: "search_failure",
+        importance: 0.7,
+      });
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(SEARCH_RESULTS_STORAGE_KEY);
+      }
+      addHistory(q, f, 0);
+      const workspace: SearchWorkspaceState = {
+        role,
+        query: q,
+        filters: f,
+        sortBy,
+        resultCount: 0,
+        updatedAt: Date.now(),
+      };
+      persistWorkspace(workspace);
+      setRestoredWorkspace(workspace);
+      setMemoryStats(memory.getStats());
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sortedResults = useMemo(() => {
@@ -146,27 +245,95 @@ const SearchPage = () => {
     citizen: "ประชาชนทั่วไป",
     lawyer: "ทนายความ / นักกฎหมาย",
     government: "เจ้าหน้าที่รัฐ",
+    judge: "ตุลาการ / ผู้พิพากษา",
+  };
+  const roleHeadlines: Record<UserRole, string> = {
+    citizen: "ค้นคำพิพากษาและข้อมูลกฎหมายพร้อมคำอธิบายที่เข้าใจง่าย",
+    lawyer: "ค้นคำพิพากษา ข้อกฎหมาย และบริบทคดีเพื่อใช้ประกอบการทำงานทางวิชาชีพ",
+    government: "สืบค้นข้อมูลกฎหมายและแนววินิจฉัยเพื่อประกอบการกลั่นกรองและบริหารงาน",
+    judge: "ค้นคดีคล้ายกัน ประเด็นข้อกฎหมาย และแนววินิจฉัยอย่างเป็นระบบ",
+  };
+  const roleDescriptions: Record<UserRole, string> = {
+    citizen: "ระบบจะแสดงผลพร้อมระดับความเชื่อถือ แหล่งข้อมูล และคำแนะนำการใช้งาน เพื่อช่วยให้เริ่มต้นค้นข้อกฎหมายได้อย่างมั่นใจขึ้น",
+    lawyer: "ผลลัพธ์ถูกจัดลำดับพร้อม metadata และ source traceability เพื่อช่วยตรวจทานต่อกับคำพิพากษาฉบับเต็มและเอกสารสำนวนจริง",
+    government: "ออกแบบสำหรับงานค้นคืนข้อมูลจริงในระบบ พร้อมแสดงสถานะการอ้างอิงและข้อเสนอแนะก่อนนำไปใช้ในงานราชการหรือธุรการศาล",
+    judge: "สนับสนุนการเปรียบเทียบข้อกฎหมายและคดีคล้ายกัน โดยแสดงผลลัพธ์พร้อมระดับความเชื่อถือและคำแนะนำก่อนใช้อ้างอิง",
   };
 
   const lowConfidenceResults = sortedResults.filter((r) => r.confidence < 0.7);
   const highConfidenceResults = sortedResults.filter((r) => r.confidence >= 0.7);
+  const averageConfidence = sortedResults.length
+    ? sortedResults.reduce((sum, result) => sum + result.confidence, 0) / sortedResults.length
+    : 0;
+  const resultsWithTraceability = sortedResults.filter((result) => result.sourceCode || result.link).length;
+  const traceabilityCoverage = sortedResults.length
+    ? Math.round((resultsWithTraceability / sortedResults.length) * 100)
+    : 0;
+  const sourceCatalog = Array.from(
+    new Set(
+      sortedResults
+        .map((result) => result.sourceCode ?? (result.link ? "external_reference" : null))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <section className="bg-hero-gradient py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-6">
-            <span className="inline-block text-sm bg-primary-foreground/10 text-primary-foreground px-3 py-1 rounded-full mb-3">
+          <div className="mx-auto mb-8 max-w-5xl text-center">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-3 py-1 text-sm text-primary-foreground">
+              <BadgeCheck className="h-4 w-4" />
               {roleLabels[role]}
             </span>
-            <h1 className="font-heading text-2xl md:text-3xl font-bold text-primary-foreground">สืบค้นข้อมูลกฎหมาย</h1>
+            <h1 className="font-heading text-2xl font-bold text-primary-foreground md:text-4xl">
+              {roleHeadlines[role]}
+            </h1>
+            <p className="mx-auto mt-3 max-w-3xl text-sm leading-7 text-primary-foreground/80 md:text-base">
+              {roleDescriptions[role]}
+            </p>
           </div>
-          <SearchBar onSearch={handleSearch} role={role} isLoading={isLoading} />
+          <SearchBar
+            onSearch={handleSearch}
+            role={role}
+            isLoading={isLoading}
+            initialQuery={query}
+            initialFilters={filters}
+          />
+          <div className="mx-auto mt-6 grid max-w-5xl gap-3 md:grid-cols-3">
+            {TRUST_SIGNAL_COPY.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-left backdrop-blur-md"
+              >
+                <div className="mb-2 flex items-center gap-2 text-primary-foreground">
+                  <item.icon className="h-4 w-4" />
+                  <span className="text-sm font-semibold">{item.title}</span>
+                </div>
+                <p className="text-sm leading-6 text-primary-foreground/75">{item.detail}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="container mx-auto px-4 py-8 flex-1">
+        {!isLoading && errorMessage && (
+          <div className="max-w-4xl mx-auto mb-6 rounded-3xl border border-destructive/20 bg-destructive/5 p-5">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive" />
+              <div>
+                <p className="text-sm font-semibold text-destructive">ระบบค้นหาหลักยังไม่พร้อมใช้งานในขณะนี้</p>
+                <p className="mt-1 text-sm text-destructive/90">{errorMessage}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  เมื่อระบบกลับมาพร้อมใช้งาน หน้า search จะกลับมาแสดงผลพร้อมระดับความเชื่อถือและ source traceability ตามปกติ
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isLoading && (
           <div className="max-w-4xl mx-auto space-y-4">
             {[1, 2, 3].map((i) => (
@@ -185,7 +352,7 @@ const SearchPage = () => {
                 </div>
               </div>
             ))}
-            <p className="text-center text-muted-foreground text-sm mt-4">🤖 AI กำลังวิเคราะห์และสืบค้น...</p>
+            <p className="mt-4 text-center text-sm text-muted-foreground">ระบบกำลังวิเคราะห์คำค้นและตรวจสอบผลลัพธ์จากคลังข้อมูลกฎหมาย</p>
             <div className="max-w-4xl mx-auto mt-6">
               <SkeletonList count={3} />
             </div>
@@ -194,37 +361,63 @@ const SearchPage = () => {
 
         {!isLoading && hasSearched && sortedResults.length > 0 && (
           <div className="max-w-4xl mx-auto">
+            <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <TrustSummaryCard
+                title="ผลลัพธ์พร้อมตรวจทาน"
+                value={`${sortedResults.length} รายการ`}
+                note={`${highConfidenceResults.length} รายการอยู่ในช่วงความเชื่อถือสูง`}
+                icon={<Scale className="h-4 w-4 text-primary" />}
+              />
+              <TrustSummaryCard
+                title="Traceability Coverage"
+                value={`${traceabilityCoverage}%`}
+                note={sourceCatalog.length > 0 ? sourceCatalog.join(" / ") : "จะแสดงเมื่อผลลัพธ์มี source metadata"}
+                icon={<Database className="h-4 w-4 text-teal" />}
+              />
+              <TrustSummaryCard
+                title="Average Confidence"
+                value={`${Math.round(averageConfidence * 100)}%`}
+                note="ใช้ประกอบการอ่านผลลัพธ์ ไม่ใช่คำยืนยันข้อกฎหมายโดยลำพัง"
+                icon={<ShieldCheck className="h-4 w-4 text-accent-foreground" />}
+              />
+              <TrustSummaryCard
+                title="Layered Memory"
+                value={`L1 ${memoryStats.l1Count} · L2 ${memoryStats.l2Count} · L5 ${memoryStats.l5Count}`}
+                note={`Context estimate ${memoryStats.totalTokensEstimate} tokens`}
+                icon={<BadgeCheck className="h-4 w-4 text-primary" />}
+              />
+            </div>
+
             {agentSteps.length > 0 && (
               <motion.div 
                 initial={{ opacity: 0, y: -20 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                className="mb-8 p-6 bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] shadow-lg shadow-navy/5"
+                className="mb-8 rounded-[2rem] border border-white/60 bg-white/40 p-6 shadow-lg shadow-navy/5 backdrop-blur-xl"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2 text-sm font-bold text-navy tracking-tight">
+                  <div className="flex items-center gap-2 text-sm font-bold tracking-tight text-navy">
                     <div className="w-2 h-6 bg-gold rounded-full" />
-                    Legal Multi-Agent Reasoning (CAL-130 Protected)
+                    กระบวนการตรวจสอบผลลัพธ์
                   </div>
-                  <div className="text-[10px] bg-navy/5 text-navy px-3 py-1 rounded-full font-bold uppercase tracking-widest">
-                    Execution State: Verified ✓
+                  <div className="rounded-full bg-navy/5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-navy">
+                    CAL-130 Protected
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                   {[
-                    { role: "Manager", status: "Orchestrating", icon: "🧠" },
-                    { role: "Researcher", status: "Retrieving Context", icon: "🔍" },
-                    { role: "Reviewer", status: "Validating Facts", icon: "⚖️" },
-                    { role: "Compliance", status: "Privacy Safety", icon: "🛡️" }
+                    { role: "Orchestrator", status: "วิเคราะห์คำค้นและจัดลำดับงาน" },
+                    { role: "Retriever", status: "ค้นคืนบริบทและเอกสารที่เกี่ยวข้อง" },
+                    { role: "Reviewer", status: "ตรวจทาน metadata และความตรงของผลลัพธ์" },
+                    { role: "Compliance", status: "กำกับความเป็นส่วนตัวและการใช้อย่างรับผิดชอบ" }
                   ].map((agent, idx) => (
                     <div key={idx} className="bg-white/80 border border-white p-3 rounded-2xl shadow-sm">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm">{agent.icon}</span>
+                      <div className="mb-1 flex items-center gap-2">
                         <span className="text-xs font-bold text-navy">{agent.role}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 bg-confidence-high rounded-full animate-pulse" />
-                        <span className="text-[10px] text-muted-foreground font-medium">{agent.status}</span>
+                        <span className="text-[10px] font-medium text-muted-foreground">{agent.status}</span>
                       </div>
                     </div>
                   ))}
@@ -244,7 +437,7 @@ const SearchPage = () => {
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <p className="text-sm text-muted-foreground">พบ <span className="font-bold text-foreground">{sortedResults.length}</span> ผลลัพธ์สำหรับ "{query}"
                 {cacheHit && (
-                  <span className="ml-2 text-xs bg-teal-light text-teal px-2 py-0.5 rounded-full">⚡ Cache</span>
+                  <span className="ml-2 rounded-full bg-teal-light px-2 py-0.5 text-xs text-teal">Cache</span>
                 )}
               </p>
               <div className="flex items-center gap-3">
@@ -284,29 +477,71 @@ const SearchPage = () => {
         )}
 
         {!isLoading && hasSearched && sortedResults.length === 0 && (
-          <div className="max-w-md mx-auto text-center py-16">
-            <Info className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="font-heading text-xl font-bold mb-2">ไม่พบผลลัพธ์</h3>
-            {suggestions.length > 0 && (
-              <div className="mt-4 p-4 bg-gold-light border border-accent/30 rounded-xl text-left">
-                <p className="text-sm font-medium mb-2">💡 ลองค้นหาด้วยคำเหล่านี้:</p>
-                <div className="flex flex-wrap gap-2">
-                  {suggestions.map((s, i) => (
-                    <button key={i} onClick={() => handleSearch(s, filters)} className="text-sm bg-white px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors">
-                      {s}
-                    </button>
-                  ))}
+          <div className="max-w-lg mx-auto py-16">
+            <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-card">
+              <Info className="mx-auto mb-4 h-16 w-16 text-muted-foreground/30" />
+              <h3 className="font-heading text-xl font-bold mb-2">
+                {errorMessage ? "ระบบค้นหายังไม่พร้อมใช้งาน" : "ไม่พบผลลัพธ์"}
+              </h3>
+              {errorMessage && (
+                <p className="text-sm text-muted-foreground">{errorMessage}</p>
+              )}
+              {!errorMessage && (
+                <p className="text-sm text-muted-foreground">
+                  ลองเพิ่มข้อเท็จจริงสำคัญ ชื่อมาตรา หรือจำกัดประเภทศาลเพื่อให้ผลลัพธ์ตรงมากขึ้น
+                </p>
+              )}
+              {suggestions.length > 0 && (
+                <div className="mt-4 rounded-xl border border-accent/30 bg-gold-light p-4 text-left">
+                  <p className="mb-2 text-sm font-medium">คำค้นที่ระบบแนะนำ</p>
+                  <div className="flex flex-wrap gap-2">
+                    {suggestions.map((s, i) => (
+                      <button key={i} onClick={() => handleSearch(s, filters)} className="text-sm bg-white px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors">
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
         {!hasSearched && !isLoading && (
-          <div className="max-w-lg mx-auto text-center py-16">
-             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-secondary flex items-center justify-center"><span className="text-4xl">⚖️</span></div>
-             <h3 className="font-heading text-xl font-bold mb-2">เริ่มต้นสืบค้น</h3>
-             <p className="text-muted-foreground">พิมพ์คำค้นหาด้านบนเพื่อค้นหาคำพิพากษาหรือข้อมูลทางกฎหมาย</p>
+          <div className="max-w-3xl mx-auto py-16">
+            <div className="mb-5 flex flex-wrap items-center justify-center gap-2">
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${
+                backendStatus.online ? "bg-teal-light text-teal" : "bg-destructive/10 text-destructive"
+              }`}>
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {backendStatus.online ? `${backendStatus.service} พร้อมใช้งาน` : "Backend ยังไม่ตอบสนอง"}
+              </span>
+              {restoredWorkspace && (
+                <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
+                  คืนค่า workspace ล่าสุด: "{restoredWorkspace.query}"
+                </span>
+              )}
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <TrustSummaryCard
+                title="เริ่มต้นจากข้อเท็จจริง"
+                value="Natural Language"
+                note="พิมพ์คำถามเหมือนเล่าเหตุการณ์ ระบบจะช่วยจับประเด็นสำคัญให้"
+                icon={<FileSearch className="h-4 w-4 text-primary" />}
+              />
+              <TrustSummaryCard
+                title="ตรวจสอบได้"
+                value="Traceable Results"
+                note="ผลลัพธ์จะแสดง source metadata และระดับความเชื่อถือเมื่อค้นหาแล้ว"
+                icon={<Database className="h-4 w-4 text-teal" />}
+              />
+              <TrustSummaryCard
+                title="ใช้อย่างรับผิดชอบ"
+                value="Review Before Use"
+                note="เหมาะสำหรับค้นข้อมูลและเตรียมตัวก่อนอ่านเอกสารฉบับเต็มหรือปรึกษาผู้เชี่ยวชาญ"
+                icon={<ShieldCheck className="h-4 w-4 text-accent-foreground" />}
+              />
+            </div>
           </div>
         )}
       </section>
@@ -314,5 +549,26 @@ const SearchPage = () => {
     </div>
   );
 };
+
+const TrustSummaryCard = ({
+  title,
+  value,
+  note,
+  icon,
+}: {
+  title: string;
+  value: string;
+  note: string;
+  icon: ReactNode;
+}) => (
+    <div className="rounded-3xl border border-border bg-card p-5 shadow-card">
+    <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+      {icon}
+      {title}
+    </div>
+    <p className="text-xl font-bold text-foreground">{value}</p>
+    <p className="mt-2 text-sm leading-6 text-muted-foreground">{note}</p>
+  </div>
+);
 
 export default SearchPage;

@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, Menu, X, Shield, FileText, Home, Users, Server, Eye, Scale, Bookmark, Clock } from "lucide-react";
+import { 
+  Search, Menu, X, Shield, FileText, Home, Users, Server, Eye,
+  Bookmark, Clock, Sparkles, Gavel, Layers, ChevronDown, ShieldCheck, Activity
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "@/assets/legalguard-logo.png";
+import logo from "@/assets/logos/legalguard-logo.png";
 
 const navItems = [
   { path: "/", label: "หน้าแรก", icon: Home },
-  { path: "/search", label: "สืบค้น", icon: Search },
-  { path: "/complaint-form", label: "ร่างคำฟ้อง", icon: FileText },
-  { path: "/demo", label: "ขั้นตอนระบบ", icon: Eye },
+  { path: "/search", label: "สืบค้นกฎหมาย", icon: Search },
+  { path: "/trust-center", label: "Trust Center", icon: Activity },
+  { path: "/prompts", label: "คลังคำสั่ง AI", icon: Sparkles },
+  { path: "/demo", label: "Simulator", icon: Eye },
 ];
 
 const userItems = [
@@ -17,10 +21,10 @@ const userItems = [
 ];
 
 const roleItems = [
-  { path: "/citizen", label: "ประชาชน", icon: Users },
-  { path: "/lawyer", label: "ทนายความ", icon: Scale },
-  { path: "/government", label: "เจ้าหน้าที่", icon: Shield },
-  { path: "/it", label: "ระบบ IT", icon: Server },
+  { path: "/citizen", label: "ประชาชน / ผู้เสียหาย", icon: Users },
+  { path: "/government", label: "เจ้าหน้าที่ / ธุรการ", icon: Shield },
+  { path: "/judge", label: "ตุลาการ / ผู้พิพากษา", icon: Gavel },
+  { path: "/it", label: "ระบบ IT / แอดมิน", icon: Server },
 ];
 
 const Navbar = () => {
@@ -93,17 +97,15 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setRoleOpen(!roleOpen)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm ${
                   currentRole
-                    ? "text-primary bg-secondary"
+                    ? "text-white bg-navy-deep"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                <Users className="w-4 h-4" />
-                {currentRole ? currentRole.label : "แดชบอร์ด"}
-                <svg className={`w-3 h-3 transition-transform ${roleOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <Layers className="w-4 h-4" />
+                {currentRole ? currentRole.label : "ศูนย์รวม Dashboard"}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${roleOpen ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
                 {roleOpen && (
@@ -162,9 +164,9 @@ const Navbar = () => {
           </div>
 
           {/* Trust badge */}
-          <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground bg-teal-light px-3 py-1.5 rounded-full">
-            <Shield className="w-3.5 h-3.5 text-teal" />
-            <span className="text-teal font-medium">ข้อมูลปลอดภัย PDPA</span>
+          <div className="hidden lg:flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-teal bg-teal-light px-5 py-2.5 rounded-2xl border border-teal/20">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Local PDPA Secured</span>
           </div>
 
           {/* Mobile toggle */}
