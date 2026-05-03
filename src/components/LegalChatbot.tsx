@@ -128,6 +128,23 @@ const LegalChatbot = () => {
     saveWorkspace(CHAT_WORKSPACE_STORAGE_KEY, { messages: messages.slice(-12), surveyDone });
   }, [messages, surveyDone]);
 
+  const [reasoningStep, setReasoningStep] = useState<string | null>(null);
+
+  const simulateReasoning = async () => {
+    const steps = [
+      "🔍 วิเคราะห์ข้อเท็จจริงเบื้องต้น...",
+      "📚 ดึงข้อมูลมาตรากฎหมายที่เกี่ยวข้อง...",
+      "🏛️ ตรวจสอบบรรทัดฐานคำพิพากษาศาลฎีกา...",
+      "🛡️ ตรวจสอบความถูกต้องผ่าน Guardrails...",
+      "⚖️ กำลังประมวลผลคำแนะนำ..."
+    ];
+    for (const step of steps) {
+      setReasoningStep(step);
+      await new Promise(r => setTimeout(r, 600));
+    }
+    setReasoningStep(null);
+  };
+
   const sendMessage = async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || isLoading) return;
@@ -139,26 +156,21 @@ const LegalChatbot = () => {
     const allMsgs = [...messages, { role: "user" as const, content: msg }];
     let reply = "";
 
-    // Try backend API (keys are server-side only)
     try {
+      // Showcase: Show reasoning process
+      await simulateReasoning();
+      
       const data = await apiClient.chat(allMsgs, "citizen");
       reply = data.content || "";
     } catch { /* fallback to local knowledge */ }
 
-    // Fallback to built-in knowledge base
     if (!reply) {
-      await new Promise(r => setTimeout(r, 400));
       reply = findAnswer(msg);
     }
 
     memory.write("episodic", `Chat question: ${msg.slice(0, 90)}`, { concept: "chat_turn", importance: 0.65 });
     memory.write("episodic", `Chat answer: ${reply.slice(0, 120)}`, { concept: "chat_response", importance: 0.55 });
-    if (allMsgs.length >= 4) {
-      memory.summarizeToL5(
-        `Citizen chat session | latest question="${msg.slice(0, 80)}" | turns=${allMsgs.length + 1}`,
-        "citizen_chat_session",
-      );
-    }
+    
     setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     setIsLoading(false);
   };
