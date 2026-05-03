@@ -6,8 +6,6 @@ Tags each record with its source dataset code (A1.1–A7.4, B1.1–B5.4).
 """
 from __future__ import annotations
 
-from __future__ import annotations
-
 import re
 from typing import Optional
 
@@ -34,6 +32,21 @@ SOURCE_TO_DOCTYPE: dict[str, str] = {
 }
 
 # ---------------------------------------------------------------------------
+# Detailed A1/B1 sub-mapping (National Security & Judicial Standard)
+# ---------------------------------------------------------------------------
+
+SUB_SOURCE_MAPPING: dict[str, str] = {
+    "A1.1": "คำฟ้องแพ่ง (Civil Complaint)",
+    "A1.2": "คำฟ้องอาญา (Criminal Complaint)",
+    "A1.3": "คำฟ้องปกครอง (Admin Complaint)",
+    "A1.4": "คำร้องทั่วไป (General Motion)",
+    "B1.1": "พยานเอกสาร (Documentary Evidence)",
+    "B1.2": "พยานวัตถุ (Material Evidence)",
+    "B1.3": "หนังสือมอบอำนาจ (Power of Attorney)",
+    "B1.4": "ใบแต่งทนาย (Appoint Attorney)",
+}
+
+# ---------------------------------------------------------------------------
 # Case-number prefix → court type
 # ---------------------------------------------------------------------------
 
@@ -44,20 +57,38 @@ _PREFIX_TO_COURT: dict[str, str] = {
     "ผบ": "district",
     "รง": "district",
     "ปค": "admin",
+    # E-prefix court-specific formats
+    "พE": "district",   # ศาลจังหวัด (แพ่ง)
+    "มE": "district",   # ศาลแขวง
+    "ผบE": "district",  # ศาลแขวง (ผู้บริโภค)
+    "ผE": "district",   # ศาลจังหวัด
+    "ยE": "district",   # ศาลจังหวัด (อาญา)
+    "อE": "appeal",     # ศาลอุทธรณ์
+    "ย": "district",    # ศาลจังหวัด (อาญา)
 }
 
 # ---------------------------------------------------------------------------
 # Regex patterns
 # ---------------------------------------------------------------------------
 
-# Case number patterns: ฎ.1234/2568, อ.999/2567, ชต.12/2566, ปค.45/2565, etc.
+# Case number patterns:
+# Classic: ฎ.1234/2568, อ.999/2567, ชต.12/2566, ปค.45/2565
+# Court-specific with E-prefix: พE 641/2567, มE500/2567, ผบE2001/2567
+# Criminal: ย20202/2567, อ.1234/2568
+# Black/Red numbers: คดีหมายเลขดำที่ / คดีหมายเลขแดงที่
 _CASE_NO_RE = re.compile(
     r"((?:ฎ|อ|ชต|ผบ|รง|ปค)\.\s*\d+/\d{4})"
+    r"|"
+    r"((?:พE|มE|ผบE|ผE|ยE|อE)\s*\d+/\d{4})"
+    r"|"
+    r"(ย\d+/\d{4})"
 )
 
 # Extract prefix from a matched case number.
 _CASE_PREFIX_RE = re.compile(
     r"^(ฎ|อ|ชต|ผบ|รง|ปค)\."
+    r"|^(พE|มE|ผบE|ผE|ยE|อE)"
+    r"|^(ย)"
 )
 
 # Buddhist year (25XX) — standalone or inside case numbers.
@@ -81,21 +112,19 @@ _FORM_NUMBER_FILE_RE = re.compile(r"(?:^|/)(\d{2,3})\s")
 
 # Form category keywords
 _FORM_CATEGORY_KEYWORDS: dict[str, list[str]] = {
-    "คำฟ้อง": ["คำฟ้อง", "ฟ้อง"],
-    "คำร้อง": ["คำร้อง", "ร้อง"],
-    "หมาย": ["หมาย", "หมายเรียก", "หมายนัด", "หมายจับ", "หมายค้น"],
-    "เอกสารประกอบ": [
-        "บัญชีพยาน",
-        "ใบแต่งทนาย",
-        "ใบมอบฉันทะ",
-        "ใบมอบอำนาจ",
-        "บัญชีทรัพย์",
-        "สารบาญ",
-        "สารบัญ",
-        "ปกหน้า",
-        "หน้าสำนวน",
-        "คำให้การ",
-    ],
+    "คำฟ้องแพ่ง": ["คำฟ้องแพ่ง", "ฟ้องแพ่ง"],
+    "คำฟ้องอาญา": ["คำฟ้องอาญา", "ฟ้องอาญา"],
+    "คำฟ้องปกครอง": ["คำร้องขอให้ศาลปกครอง", "ฟ้องปกครอง"],
+    "คำให้การ": ["คำให้การจำเลย", "แก้คำฟ้อง"],
+    "คำร้อง": ["คำร้อง", "ร้องขอ"],
+    "หมาย": ["หมายเรียก", "หมายนัด", "หมายจับ", "หมายค้น"],
+    "พยานเอกสาร": ["บัญชีพยานเอกสาร", "ส่งพยานเอกสาร"],
+    "พยานบุคคล": ["บัญชีพยานบุคคล", "นำสืบพยาน"],
+    "พยานวัตถุ": ["บัญชีพยานวัตถุ"],
+    "เอกสารแสดงตัวตน": ["สำเนาบัตรประชาชน", "สำเนาทะเบียนบ้าน", "หนังสือรับรองบริษัท"],
+    "เอกสารมอบอำนาจ": ["ใบแต่งทนาย", "หนังสือมอบฉันทะ", "หนังสือมอบอำนาจ"],
+    "ค่าธรรมเนียม": ["ใบเสร็จรับเงิน", "ค่าธรรมเนียมศาล", "ค่าขึ้นศาล"],
+    "สรุปสำนวน": ["สรุปรายงาน", "ข้อเท็จจริงเบื้องต้น", "สารบาญ"],
 }
 
 
@@ -167,7 +196,11 @@ class MetadataExtractor:
     @staticmethod
     def _extract_case_no(text: str) -> Optional[str]:
         m = _CASE_NO_RE.search(text)
-        return m.group(1).replace(" ", "") if m else None
+        if not m:
+            return None
+        # Return whichever group matched (classic, E-prefix, or criminal)
+        matched = m.group(1) or m.group(2) or m.group(3) or ""
+        return matched.replace(" ", "") if matched else None
 
     @staticmethod
     def _court_type_from_case_no(case_no: Optional[str]) -> Optional[str]:
@@ -175,7 +208,8 @@ class MetadataExtractor:
             return None
         m = _CASE_PREFIX_RE.match(case_no)
         if m:
-            return _PREFIX_TO_COURT.get(m.group(1))
+            prefix = m.group(1) or m.group(2) or m.group(3) or ""
+            return _PREFIX_TO_COURT.get(prefix)
         return None
 
     @staticmethod

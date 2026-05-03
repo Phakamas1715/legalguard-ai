@@ -240,13 +240,14 @@ const PromptsPage = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="w-20 h-20 mx-auto rounded-3xl bg-white/10 border border-white/20 backdrop-blur-xl flex items-center justify-center shadow-2xl mb-8 group"
           >
-            <Sparkles className="w-10 h-10 text-gold group-hover:scale-110 transition-transform" />
+            <ShieldCheck className="w-10 h-10 text-gold group-hover:scale-110 transition-transform" />
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-heading text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-            คลังคำสั่ง AI มาตรฐานตุลาการ
+             Legal Professional Prompt Library
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="opacity-90 text-lg md:text-2xl font-light max-w-3xl mx-auto leading-relaxed">
-            Prompt Templates ที่ผ่านการตรวจสอบความปลอดภัยทางกฎหมายมาแล้ว 100% โดย <span className="text-gold font-bold">Honest Predictor Enterprise</span>
+            ชุดคำสั่ง AI มาตรฐานวิชาชีพกฎหมายที่ผ่านการตรวจสอบ Security Audit โดย <span className="text-gold font-bold">Honest Predictor Enterprise</span> 
+            (เฉพาะ Commercial Bundle เท่านั้น)
           </motion.p>
         </div>
       </section>

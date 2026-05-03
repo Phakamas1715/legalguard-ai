@@ -98,7 +98,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     VALID_ROLES = {
         "citizen",       # ประชาชนทั่วไป
         "lawyer",        # ทนายความ / นักกฎหมาย
-        "government",    # เจ้าหน้าที่รัฐทั่วไป
+        "government",    # เจ้าหน้าที่ศาล / ข้าราชการธุรการ
         "judge",         # ผู้พิพากษา (ศาลยุติธรรม — คดีแพ่ง/อาญา)
         "admin_judge",   # ตุลาการ (ศาลปกครอง/ศาลรัฐธรรมนูญ — คดีปกครอง)
         "admin",         # ผู้ดูแลระบบ
@@ -218,7 +218,7 @@ class DataClassification(str, Enum):
 class UserRole(str, Enum):
     CITIZEN = "citizen"          # ประชาชนทั่วไป
     LAWYER = "lawyer"            # ทนายความ / นักกฎหมาย
-    GOVERNMENT = "government"    # เจ้าหน้าที่รัฐทั่วไป
+    GOVERNMENT = "government"    # เจ้าหน้าที่ศาล / ข้าราชการธุรการ
     JUDGE = "judge"              # ผู้พิพากษา (ศาลยุติธรรม)
     ADMIN_JUDGE = "admin_judge"  # ตุลาการ (ศาลปกครอง/ศาลรัฐธรรมนูญ)
     ADMIN = "admin"              # ผู้ดูแลระบบ

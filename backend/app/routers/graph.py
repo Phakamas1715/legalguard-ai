@@ -4,6 +4,7 @@ from __future__ import annotations
 from __future__ import annotations
 
 from typing import Optional
+from pathlib import Path
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -18,8 +19,11 @@ from app.services.legal_graph import (
 
 router = APIRouter(prefix="/graph", tags=["knowledge-graph"])
 
-# Shared graph instance (in-memory; swap for persistent store later)
-_graph = LegalGraphDB(embedding_fn=None)
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_GRAPH_PERSIST_PATH = _PROJECT_ROOT / "data" / "legal_graph.json"
+
+# Shared graph instance backed by a persisted JSON snapshot for demo/runtime continuity.
+_graph = LegalGraphDB(embedding_fn=None, persist_path=_GRAPH_PERSIST_PATH)
 
 
 class TextToGraphRequest(BaseModel):

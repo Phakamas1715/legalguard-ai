@@ -1,4 +1,8 @@
-"""Complaint Drafting Assistant API endpoints."""
+"""Complaint Drafting Assistant API endpoints.
+
+e-Filing v.4 (ม.ค. 2569) — รองรับประเภทคดีใหม่:
+  civil, criminal, administrative, consumer, juvenile_family, take_it_down
+"""
 from __future__ import annotations
 
 from fastapi import APIRouter
@@ -47,27 +51,38 @@ async def verify_complaint(request: VerifyRequest):
 
 @router.post("/export-xml")
 async def export_xml(complaint: EFilingComplaint):
-    """Export complaint to e-Filing XML format (Form 04/05/06/ปค.1).
+    """Export complaint to e-Filing v.4 XML (e-Form structure).
 
-    Returns XML string with validation. If XML generation fails,
-    returns a JSON fallback so the user can still review their data.
+    รองรับทุกประเภทคดี:
+      civil → Form 04+05 | criminal → Form 04+06
+      administrative → ปค.1 | consumer → CB-01
+      juvenile_family → JF-01 | take_it_down → TID-01 (CIOS)
+
+    Returns XML + validation result. JSON fallback ถ้า XML สร้างไม่ได้.
     """
     exporter = EFilingXMLExporter()
-    form_code = "pk1" if complaint.case_type == "administrative" else (
-        "06" if complaint.case_type == "criminal" else "04"
-    )
+    form_map = {
+        "civil": "04",
+        "criminal": "04",
+        "administrative": "pk1",
+        "consumer": "CB-01",
+        "juvenile_family": "JF-01",
+        "take_it_down": "TID-01",
+    }
+    form_code = form_map.get(complaint.case_type, "04")
 
     try:
         xml_string = exporter.export(complaint)
         validation = exporter.validate(xml_string)
 
         if not validation["valid"]:
-            # Return validation errors + JSON fallback
             return {
                 "xml": None,
                 "valid": False,
                 "form": form_code,
+                "efiling_version": "4.0",
                 "errors": validation["errors"],
+                "warnings": validation.get("warnings", []),
                 "json_fallback": complaint.model_dump(),
             }
 
@@ -75,7 +90,9 @@ async def export_xml(complaint: EFilingComplaint):
             "xml": xml_string,
             "valid": True,
             "form": form_code,
+            "efiling_version": "4.0",
             "errors": [],
+            "warnings": validation.get("warnings", []),
             "json_fallback": None,
         }
 

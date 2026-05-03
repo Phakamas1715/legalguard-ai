@@ -179,7 +179,8 @@ class TestNongKotChatbot:
         )
         response = await chatbot.chat(request)
 
-        assert "จากข้อมูลที่พบในระบบ" in response.content
+        # Citation-first format: [statute | case_no | source] summary
+        assert "มาตรา 341" in response.content or "คดี" in response.content
 
     @pytest.mark.asyncio
     async def test_chat_lawyer_role_uses_formal_language(self):
@@ -192,7 +193,8 @@ class TestNongKotChatbot:
         )
         response = await chatbot.chat(request)
 
-        assert "ผลการค้นหาจากฐานข้อมูล" in response.content
+        # Citation-first format includes statute references
+        assert "มาตรา 341" in response.content or "A4.1" in response.content
 
 
 # ---------------------------------------------------------------------------

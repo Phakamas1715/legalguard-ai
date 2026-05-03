@@ -17,18 +17,40 @@ const CitizenDashboard = () => {
   const navigate = useNavigate();
   const [caseNo, setCaseNo] = useState("");
   const [activeGuideCategory, setActiveGuideCategory] = useState("ทั้งหมด");
+  const [activeFeatureMenu, setActiveFeatureMenu] = useState("ค้นข้อมูล");
 
   const quickActions = [
-    { icon: Gavel, title: "ค้นหาคำพิพากษา", desc: "สืบค้นคดีด้วย semantic search พร้อมระดับความเชื่อถือ", path: "/search?role=citizen", color: "bg-primary/10 text-primary", badge: "บริการหลัก" },
-    { icon: FileText, title: "ร่างคำฟ้อง", desc: "ช่วยร่างคำฟ้องและตรวจความครบถ้วนก่อนยื่น", path: "/complaint-form", color: "bg-teal/10 text-teal", badge: "พร้อมใช้งาน" },
-    { icon: ShieldCheck, title: "ถามน้องซื่อสัตย์", desc: "Chatbot สำหรับอธิบายข้อกฎหมายและขั้นตอนเบื้องต้น", path: "#open-chat", color: "bg-accent/10 text-accent-foreground", badge: "บริการประชาชน" },
-    { icon: Bookmark, title: "บุ๊กมาร์กของฉัน", desc: "คำพิพากษาที่บันทึกไว้", path: "/bookmarks", color: "bg-secondary text-foreground", badge: null },
-    { icon: Handshake, title: "ไกล่เกลี่ยออนไลน์", desc: "แนวทางบริการ ODR สำหรับยุติข้อพิพาทก่อนศาล", path: "#odr", color: "bg-teal/10 text-teal", badge: "Roadmap" },
-    { icon: History, title: "ประวัติการค้นหา", desc: "ย้อนดูการค้นหาที่ผ่านมา", path: "/history", color: "bg-accent/10 text-accent-foreground", badge: null },
-    { icon: Mic, title: "พูดเพื่อค้นหา", desc: "ค้นหาด้วยเสียงสำหรับการเข้าถึงที่สะดวกขึ้น", path: "/search?role=citizen", color: "bg-primary/5 text-primary", badge: "Roadmap" },
-    { icon: Scale, title: "พยากรณ์ผลคดี", desc: "วิเคราะห์แนวโน้มจากคดีที่มีข้อเท็จจริงคล้ายกัน", path: "/predict", color: "bg-accent/10 text-accent-foreground", badge: "เครื่องมือวิเคราะห์" },
-    { icon: BookOpen, title: "ศัพท์กฎหมาย", desc: "ค้นหาความหมายศัพท์ + ฎีกาสำคัญ", path: "/glossary", color: "bg-teal/10 text-teal", badge: null },
-    { icon: MapPin, title: "ค้นหาศาล", desc: "ค้นหาศาลใกล้เคียงจาก GPS", path: "/courts", color: "bg-primary/10 text-primary", badge: null },
+    { icon: Gavel, title: "ค้นหาคำพิพากษา", desc: "สืบค้นคดีด้วยการค้นหาตามความหมาย พร้อมระดับความน่าเชื่อถือ", path: "/search?role=citizen", color: "bg-primary/10 text-primary", badge: "บริการหลัก", menu: "ค้นข้อมูล" },
+    { icon: BookOpen, title: "ศัพท์กฎหมาย", desc: "ค้นหาความหมายศัพท์ + ฎีกาสำคัญ", path: "/glossary", color: "bg-teal/10 text-teal", badge: null, menu: "ค้นข้อมูล" },
+    { icon: MapPin, title: "ค้นหาศาล", desc: "ค้นหาศาลใกล้เคียงจากตำแหน่งที่ตั้ง", path: "/courts", color: "bg-primary/10 text-primary", badge: null, menu: "ค้นข้อมูล" },
+    { icon: Mic, title: "พูดเพื่อค้นหา", desc: "ค้นหาด้วยเสียงเพื่อให้เข้าถึงบริการได้สะดวกขึ้น", path: "/search?role=citizen", color: "bg-primary/5 text-primary", badge: "แผนพัฒนา", disabled: true, menu: "ค้นข้อมูล" },
+    { icon: FileText, title: "ร่างคำฟ้อง", desc: "ช่วยร่างคำฟ้องและตรวจความครบถ้วนก่อนยื่น", path: "/complaint-form", color: "bg-teal/10 text-teal", badge: "พร้อมใช้งาน", menu: "ยื่นเรื่องและติดตาม" },
+    { icon: Bookmark, title: "บุ๊กมาร์กของฉัน", desc: "คำพิพากษาที่บันทึกไว้", path: "/bookmarks", color: "bg-secondary text-foreground", badge: null, menu: "ยื่นเรื่องและติดตาม" },
+    { icon: History, title: "ประวัติการค้นหา", desc: "ย้อนดูการค้นหาที่ผ่านมา", path: "/history", color: "bg-accent/10 text-accent-foreground", badge: null, menu: "ยื่นเรื่องและติดตาม" },
+    { icon: Scale, title: "พยากรณ์ผลคดี", desc: "วิเคราะห์แนวโน้มจากคดีที่มีข้อเท็จจริงคล้ายกัน", path: "/predict", color: "bg-accent/10 text-accent-foreground", badge: "เครื่องมือวิเคราะห์", menu: "ยื่นเรื่องและติดตาม" },
+    { icon: ShieldCheck, title: "ถามน้องซื่อสัตย์", desc: "ผู้ช่วยอธิบายข้อกฎหมายและขั้นตอนเบื้องต้นสำหรับประชาชน", path: "#open-chat", color: "bg-accent/10 text-accent-foreground", badge: "บริการประชาชน", menu: "ขอความช่วยเหลือ" },
+    { icon: Handshake, title: "ไกล่เกลี่ยออนไลน์", desc: "แนวทางบริการไกล่เกลี่ยออนไลน์ก่อนเข้าสู่กระบวนการศาล", path: "#odr", color: "bg-teal/10 text-teal", badge: "แผนพัฒนา", disabled: true, menu: "ขอความช่วยเหลือ" },
+  ];
+
+  const featureMenus = [
+    {
+      title: "ค้นข้อมูล",
+      desc: "ค้นคำพิพากษา ศัพท์กฎหมาย ศาล และข้อมูลอ้างอิงเบื้องต้น",
+      icon: Search,
+      accent: "text-primary",
+    },
+    {
+      title: "ยื่นเรื่องและติดตาม",
+      desc: "เตรียมเอกสาร ติดตามสถานะ และเก็บงานที่ใช้บ่อยไว้ในที่เดียว",
+      icon: FileDown,
+      accent: "text-teal",
+    },
+    {
+      title: "ขอความช่วยเหลือ",
+      desc: "รับคำอธิบายเบื้องต้นและบริการสนับสนุนก่อนเข้ากระบวนการศาล",
+      icon: MessageCircle,
+      accent: "text-accent-foreground",
+    },
   ];
 
   const guideCategories = ["ทั้งหมด", "อาญา", "แพ่ง", "ครอบครัว", "แรงงาน", "ผู้บริโภค", "ปกครอง", "จราจร"];
@@ -48,6 +70,11 @@ const CitizenDashboard = () => {
   const filteredGuides = activeGuideCategory === "ทั้งหมด"
     ? guides
     : guides.filter(g => g.category === activeGuideCategory);
+
+  const activeMenuMeta = featureMenus.find((menu) => menu.title === activeFeatureMenu) ?? featureMenus[0];
+  const visibleQuickActions = quickActions.filter((action) => action.menu === activeFeatureMenu);
+  const availableQuickActions = visibleQuickActions.filter((action) => !action.disabled);
+  const plannedQuickActions = visibleQuickActions.filter((action) => action.disabled);
 
   const emergencyContacts = [
     { name: "สายด่วนยุติธรรม", number: "1111 กด 77", icon: Phone, url: "tel:1111" },
@@ -116,44 +143,143 @@ const CitizenDashboard = () => {
       </section>
 
       <div className="container mx-auto px-4 py-8 flex-1">
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-          {quickActions.map((action, i) => (
-            <motion.button
-              key={action.title}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
-              onClick={() => {
-                if (action.path === "#open-chat") {
-                  // Trigger chatbot open via custom event
-                  window.dispatchEvent(new CustomEvent("open-legal-chat"));
-                } else {
-                  navigate(action.path);
-                }
-              }}
-              className="bg-card border border-border rounded-2xl p-4 text-left hover:shadow-card-hover transition-shadow group relative"
-            >
-              {action.badge && (
-                <span className="absolute top-2 right-2 text-[11px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full font-bold">
-                  {action.badge}
-                </span>
-              )}
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 ${action.color}`}>
-                <action.icon className="w-5 h-5" />
+        {/* Feature Menu */}
+        <section className="mb-8 rounded-[2rem] border border-border bg-card p-6 shadow-card">
+          <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">เมนูบริการผู้ใช้งาน</p>
+              <h2 className="font-heading text-2xl font-bold text-foreground">เลือกฟีเจอร์ตามงานที่ต้องการ</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                แยกเมนูตามลักษณะงาน เพื่อให้ประชาชนค้นหาฟีเจอร์ได้ง่ายขึ้น และแยกบริการที่พร้อมใช้งานออกจากแผนพัฒนาอย่างชัดเจน
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{activeMenuMeta.title}</span>
+              {" • "}
+              {activeMenuMeta.desc}
+              <div className="mt-1 text-xs">
+                พร้อมใช้งาน {availableQuickActions.length} รายการ{plannedQuickActions.length > 0 ? ` · แผนพัฒนา ${plannedQuickActions.length} รายการ` : ""}
               </div>
-              <h3 className="font-bold text-xs mb-0.5">{action.title}</h3>
-              <p className="text-[11px] text-muted-foreground leading-tight">{action.desc}</p>
-            </motion.button>
-          ))}
-        </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="space-y-3">
+              {featureMenus.map((menu) => (
+                <button
+                  key={menu.title}
+                  onClick={() => setActiveFeatureMenu(menu.title)}
+                  className={`w-full rounded-2xl border px-4 py-4 text-left transition-all ${
+                    activeFeatureMenu === menu.title
+                      ? "border-primary/30 bg-primary/5 shadow-sm"
+                      : "border-border bg-background hover:border-primary/20 hover:bg-muted/40"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-0.5 rounded-xl bg-background p-2 ${menu.accent}`}>
+                      <menu.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground">{menu.title}</p>
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                          {quickActions.filter((action) => action.menu === menu.title).length} ฟีเจอร์
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{menu.desc}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {availableQuickActions.map((action, i) => (
+                <motion.button
+                  key={action.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  onClick={() => {
+                    if (action.path === "#open-chat") {
+                      window.dispatchEvent(new CustomEvent("open-legal-chat"));
+                    } else if (!action.disabled) {
+                      navigate(action.path);
+                    }
+                  }}
+                  disabled={Boolean(action.disabled)}
+                  className="relative rounded-2xl border border-border bg-background p-4 text-left transition-shadow hover:shadow-card-hover disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
+                >
+                  {action.badge && (
+                    <span className="absolute right-3 top-3 rounded-full bg-accent px-1.5 py-0.5 text-[11px] font-bold text-accent-foreground">
+                      {action.badge}
+                    </span>
+                  )}
+                  <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${action.color}`}>
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="pr-14 text-sm font-bold text-foreground">{action.title}</h3>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{action.desc}</p>
+                  <div className="mt-4 flex items-center gap-2 text-xs font-medium text-primary">
+                    <span>{action.disabled ? "อยู่ในแผนพัฒนา" : "เปิดใช้งานฟีเจอร์"}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                </motion.button>
+                ))}
+              </div>
+
+              {plannedQuickActions.length > 0 && (
+                <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-foreground">บริการในแผนพัฒนา</p>
+                      <p className="text-xs text-muted-foreground">ยังไม่เปิดใช้งานในรอบสาธิตนี้ แต่แสดงไว้เพื่อให้เห็นทิศทางการขยายระบบ</p>
+                    </div>
+                    <span className="rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground">
+                      {plannedQuickActions.length} รายการ
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {plannedQuickActions.map((action) => (
+                      <div
+                        key={`planned-${action.title}`}
+                        className="relative rounded-2xl border border-border bg-background/80 p-4 text-left opacity-75"
+                      >
+                        {action.badge && (
+                          <span className="absolute right-3 top-3 rounded-full bg-muted px-1.5 py-0.5 text-[11px] font-bold text-muted-foreground">
+                            {action.badge}
+                          </span>
+                        )}
+                        <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${action.color}`}>
+                          <action.icon className="h-5 w-5" />
+                        </div>
+                        <h3 className="pr-14 text-sm font-bold text-foreground">{action.title}</h3>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{action.desc}</p>
+                        <div className="mt-4 text-xs font-medium text-muted-foreground">ยังไม่เปิดใช้งานในระบบปัจจุบัน</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* Case Tracking */}
           <div className="md:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-card">
-            <h2 className="font-heading font-bold text-lg mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" /> ติดตามสถานะคดี
-            </h2>
+            <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <h2 className="font-heading font-bold text-lg flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary" /> ติดตามสถานะคดี
+              </h2>
+              <span className="inline-flex w-fit rounded-full bg-gold-light px-3 py-1 text-[11px] font-bold text-accent-foreground">
+                ตัวอย่างรูปแบบการแสดงผล
+              </span>
+            </div>
+            <p className="mb-4 text-sm text-muted-foreground">
+              ส่วนนี้ใช้สาธิตรูปแบบบริการติดตามสถานะคดีสำหรับประชาชน การเชื่อมต่อข้อมูลจริงจะขึ้นกับระบบต้นทางของศาลที่ได้รับอนุญาตให้เชื่อมต่อ
+            </p>
             <div className="flex gap-3 mb-4">
               <input
                 type="text"
@@ -163,7 +289,7 @@ const CitizenDashboard = () => {
                 className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
               />
               <button
-                onClick={() => caseNo && navigate(`/search?role=citizen`)}
+                onClick={() => caseNo && navigate(`/search?role=citizen&q=${encodeURIComponent(caseNo)}`)}
                 className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-medium hover:bg-navy-deep transition-colors"
               >
                 ค้นหา
@@ -174,7 +300,7 @@ const CitizenDashboard = () => {
                 <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">ฎ.1234/2568</p>
-                  <p className="text-xs text-muted-foreground">อยู่ระหว่างพิจารณา — นัดสืบพยาน 15 ก.ค. 2569</p>
+                  <p className="text-xs text-muted-foreground">ตัวอย่างสถานะ — อยู่ระหว่างพิจารณา นัดสืบพยาน 15 ก.ค. 2569</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
@@ -182,18 +308,18 @@ const CitizenDashboard = () => {
                 <AlertCircle className="w-5 h-5 text-accent-foreground flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">ปค.45/2565</p>
-                  <p className="text-xs text-muted-foreground">พิพากษาแล้ว — คดีถึงที่สุด</p>
+                  <p className="text-xs text-muted-foreground">ตัวอย่างสถานะ — พิพากษาแล้ว คดีถึงที่สุด</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
             </div>
             <div className="mt-4 rounded-xl border border-border bg-muted/40 px-4 py-3">
               <p className="text-xs leading-relaxed text-muted-foreground">
-                การ์ดสถานะด้านบนเป็นตัวอย่างการแสดงผลเพื่อสาธิตรูปแบบบริการประชาชน การเชื่อมต่อข้อมูลคดีจริงจะขึ้นกับระบบต้นทางของศาล
+                การ์ดสถานะด้านบนเป็นตัวอย่างเพื่อสาธิตรูปแบบบริการประชาชน ไม่ใช่ข้อมูลคดีจริงในระบบขณะนี้
               </p>
             </div>
-            <button className="mt-4 w-full bg-[#00B900]/10 text-[#00B900] border border-[#00B900]/20 px-4 py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-[#00B900]/20 transition-colors">
-              <MessageSquare className="w-4 h-4" /> รับการแจ้งเตือนพิจารณาคดีผ่าน LINE
+            <button className="mt-4 w-full bg-[#00B900]/10 text-[#00B900] border border-[#00B900]/20 px-4 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors opacity-70 cursor-not-allowed" disabled>
+              <MessageSquare className="w-4 h-4" /> แนวคิดการแจ้งเตือนผ่าน LINE (แผนพัฒนา)
             </button>
           </div>
 

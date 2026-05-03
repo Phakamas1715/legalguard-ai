@@ -1,6 +1,6 @@
 """Unit tests for the BM25 indexer service."""
 
-from app.services.bm25_indexer import BM25Indexer, BM25Settings, _InMemoryBM25
+from app.services.bm25_indexer import BM25Indexer, BM25Settings, _InMemoryBM25, _thai_tokenize
 
 
 def _make_indexer() -> BM25Indexer:
@@ -164,3 +164,20 @@ class TestBM25IndexerEdgeCases:
         results = indexer.search("ทดสอบ")
         assert len(results) == 1
         assert len(results[0]["text_preview"]) <= 200
+
+    def test_thai_tokenize_falls_back_when_primary_engines_fail(self, monkeypatch) -> None:
+        import pythainlp.tokenize
+
+        original = pythainlp.tokenize.word_tokenize
+
+        def fake_word_tokenize(text: str, **kwargs):
+            engine = kwargs.get("engine")
+            if engine in {"newmm", "longest"}:
+                raise ModuleNotFoundError("No module named 'pycrfsuite'")
+            return original(text, **kwargs)
+
+        monkeypatch.setattr(pythainlp.tokenize, "word_tokenize", fake_word_tokenize)
+
+        tokenized = _thai_tokenize("นายสมชายฟ้องคดีฉ้อโกงมาตรา341")
+        assert "มาตรา" in tokenized
+        assert "341" in tokenized

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { API_BASE } from "@/lib/runtimeConfig";
+import { apiClient, type AgenticArchitectureResponse } from "@/lib/apiClient";
 
 interface TLAGFPillar {
   pillar: string;
@@ -31,7 +32,7 @@ interface CSEConstraint {
 
 interface ReleaseGuardResult {
   passed: boolean;
-  checks: { name: string; passed: boolean; detail: string }[];
+  checks: { name?: string; check?: string; passed: boolean; detail?: string; status?: string }[];
 }
 
 const PILLAR_ICONS: Record<string, typeof Shield> = {
@@ -43,11 +44,11 @@ const PILLAR_ICONS: Record<string, typeof Shield> = {
 };
 
 const MOCK_TLAGF: TLAGFPillar[] = [
-  { pillar: "transparency", name_th: "ความโปร่งใส", status: "active", score: 0.92, details: "ทุกผลลัพธ์แสดง Honesty Score + แหล่งอ้างอิง + Confidence Badge" },
+  { pillar: "transparency", name_th: "ความโปร่งใส", status: "active", score: 0.92, details: "ทุกผลลัพธ์แสดงดัชนีความซื่อสัตย์ แหล่งอ้างอิง และระดับความเชื่อมั่น" },
   { pillar: "fairness", name_th: "ความเป็นธรรม", status: "active", score: 0.88, details: "CFS ≥ 93.5% — ตรวจสอบ bias ด้านภูมิศาสตร์ ประเภทศาล และช่วงเวลา" },
-  { pillar: "accountability", name_th: "ความรับผิดชอบ", status: "active", score: 0.95, details: "CAL-130 Audit Log + SHA-256 Hash Chain ทุก action" },
-  { pillar: "privacy", name_th: "ความเป็นส่วนตัว", status: "active", score: 0.97, details: "PII Masking อัตโนมัติ + ข้อมูลเก็บในไทย + PDPA compliant" },
-  { pillar: "safety", name_th: "ความปลอดภัย", status: "active", score: 0.90, details: "Circuit Breaker + Risk Tier R1-R4 + Confidence Cap" },
+  { pillar: "accountability", name_th: "ความรับผิดชอบ", status: "active", score: 0.95, details: "มีบันทึกการใช้งาน CAL-130 และห่วงโซ่แฮช SHA-256 ทุกการทำงาน" },
+  { pillar: "privacy", name_th: "ความเป็นส่วนตัว", status: "active", score: 0.97, details: "มีการปกปิด PII อัตโนมัติ ข้อมูลจัดเก็บในไทย และสอดคล้องตาม PDPA" },
+  { pillar: "safety", name_th: "ความปลอดภัย", status: "active", score: 0.90, details: "มีวงจรหยุดฉุกเฉิน ระดับความเสี่ยง R1-R4 และเพดานความเชื่อมั่น" },
 ];
 
 const MOCK_RISK_TIERS: Record<string, RiskTier> = {
@@ -73,16 +74,73 @@ const MOCK_CSE: CSEConstraint[] = [
 ];
 
 const MOCK_RELEASE: ReleaseGuardResult = {
-  passed: true,
+  passed: false,
   checks: [
-    { name: "Unit Tests", passed: true, detail: "574/574 tests passed" },
-    { name: "PII Masking", passed: true, detail: "ปกปิดข้อมูลส่วนบุคคลทำงานปกติ" },
-    { name: "Honesty Score", passed: true, detail: "H-Score ≥ 0.85 ทุก endpoint" },
-    { name: "Hallucination Rate", passed: true, detail: "< 1% จากการทดสอบ NitiBench" },
-    { name: "PDPA Compliance", passed: true, detail: "CSE-200 constraints enforced" },
-    { name: "Risk Tier Caps", passed: true, detail: "Confidence cap ทำงานทุก tier" },
-    { name: "Audit Log Integrity", passed: true, detail: "SHA-256 hash chain valid" },
-    { name: "Bias Check (CFS)", passed: true, detail: "CFS = 93.5% ≥ threshold 90%" },
+    { name: "การเชื่อมต่อระบบหลังบ้าน", passed: false, detail: "ใช้ข้อมูลสำรองชั่วคราว เพราะระบบตรวจปล่อยใช้งานยังไม่ตอบกลับ" },
+    { name: "หลักฐานก่อนปล่อยใช้งาน", passed: false, detail: "ยังไม่มีหลักฐานจากระบบรันจริงเพื่อยืนยันการทดสอบ การ build และการกำกับดูแล" },
+    { name: "ขั้นตอนของผู้ดูแลระบบ", passed: false, detail: "ต้องตรวจระบบหลังบ้านและใช้ผลตรวจจากระบบจริงก่อนสาธิตหรือปล่อยใช้งาน" },
+  ],
+};
+
+const MOCK_ARCHITECTURE: AgenticArchitectureResponse = {
+  title: "Responsible AI Agentic Architecture",
+  subtitle: "สถาปัตยกรรมภาพรวมของระบบ AI ด้านกฎหมาย ที่รวมสิทธิ์การเข้าถึง การสืบค้น การทำงานของ agent การกำกับความเสี่ยง และการตรวจสอบย้อนหลังไว้ด้วยกัน",
+  badge: "Fallback View",
+  architecture_version: "fallback_demo",
+  relation_to_safety_pipeline: "7-Layer Safety Pipeline คือเส้นทางคุ้มครองของคำขอแต่ละครั้ง ส่วน Responsible AI Agentic Architecture คือกรอบภาพรวมของระบบทั้งหมด",
+  integrity: {
+    audit_chain_valid: false,
+    generated_at: new Date().toISOString(),
+  },
+  components: [
+    {
+      id: "access",
+      title: "Role-Aware Access Layer",
+      description: "กำหนดสิทธิ์ตามบทบาทผู้ใช้งานและระดับข้อมูล",
+      responsibilities: ["แยกบทบาทผู้ใช้งาน", "คุมการเข้าถึง endpoint", "กำกับ access matrix"],
+      mapped_layers: ["L2", "L5"],
+      services: ["Security Middleware", "Access Matrix"],
+    },
+    {
+      id: "retrieval",
+      title: "Trusted Retrieval Layer",
+      description: "สืบค้นจากฐานความรู้ที่เชื่อถือได้ พร้อมแหล่งอ้างอิง",
+      responsibilities: ["Hybrid retrieval", "context selection", "citation-first"],
+      mapped_layers: ["L1", "L4"],
+      services: ["Search Pipeline", "Vector Search", "BM25"],
+    },
+    {
+      id: "reasoning",
+      title: "Agentic Reasoning Layer",
+      description: "ให้ agent หลายบทบาทร่วมกันคิดและตรวจทาน",
+      responsibilities: ["intent routing", "research", "review", "compliance"],
+      mapped_layers: ["L0", "L6"],
+      services: ["LangGraph Agent Engine", "Feynman Multi-Agent Engine"],
+    },
+    {
+      id: "controls",
+      title: "Responsible AI Control Layer",
+      description: "คุมความเสี่ยงทั้งก่อน ระหว่าง และหลังการประมวลผล",
+      responsibilities: ["PII masking", "prompt guard", "risk tier", "circuit breaker"],
+      mapped_layers: ["L2", "L5"],
+      services: ["Prompt Guard", "PII Masking", "Release Guard"],
+    },
+    {
+      id: "governance",
+      title: "Audit & Governance Layer",
+      description: "บันทึกและตรวจสอบย้อนหลังได้",
+      responsibilities: ["audit log", "hash chain", "governance evidence"],
+      mapped_layers: ["audit"],
+      services: ["CAL-130 Audit Log", "Hash Chain"],
+    },
+    {
+      id: "oversight",
+      title: "Operational Oversight Layer",
+      description: "ให้ฝ่ายไอทีมองเห็นสถานะและความพร้อมของระบบ",
+      responsibilities: ["monitoring", "trace", "benchmark", "readiness"],
+      mapped_layers: ["L5", "audit"],
+      services: ["AI Control Tower", "IT Dashboard"],
+    },
   ],
 };
 
@@ -92,6 +150,7 @@ const ResponsibleAIPage = () => {
   const [cseConstraints, setCseConstraints] = useState<CSEConstraint[]>([]);
   const [cseCategories, setCseCategories] = useState<Record<string, number>>({});
   const [releaseGuard, setReleaseGuard] = useState<ReleaseGuardResult | null>(null);
+  const [architecture, setArchitecture] = useState<AgenticArchitectureResponse>(MOCK_ARCHITECTURE);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"tlagf" | "risk" | "cse" | "release">("tlagf");
 
@@ -106,6 +165,7 @@ const ResponsibleAIPage = () => {
         fetch(`${API_BASE}/responsible-ai/cse-constraints`).catch(() => null),
         fetch(`${API_BASE}/responsible-ai/release-guard`).catch(() => null),
       ]);
+      apiClient.getAgenticArchitecture().then(setArchitecture).catch(() => setArchitecture(MOCK_ARCHITECTURE));
       if (tlagfResp?.ok) {
         const tlagfData = await tlagfResp.json();
         const pillars = tlagfData.pillars ?? (Array.isArray(tlagfData) ? tlagfData : []);
@@ -132,15 +192,16 @@ const ResponsibleAIPage = () => {
       setCseConstraints(MOCK_CSE);
       setCseCategories({ PII: 3, sovereignty: 2, access: 1, ethics: 2, audit: 1, fairness: 1 });
       setReleaseGuard(MOCK_RELEASE);
+      setArchitecture(MOCK_ARCHITECTURE);
     }
     setLoading(false);
   };
 
   const tabs = [
-    { id: "tlagf" as const, label: "TLAGF 5 Pillars", icon: Shield },
-    { id: "risk" as const, label: "Risk Tiers", icon: AlertTriangle },
+    { id: "tlagf" as const, label: "หลักการ TLAGF 5 ด้าน", icon: Shield },
+    { id: "risk" as const, label: "ระดับความเสี่ยง", icon: AlertTriangle },
     { id: "cse" as const, label: "CSE-200", icon: Lock },
-    { id: "release" as const, label: "Release Guard", icon: CheckCircle2 },
+    { id: "release" as const, label: "การตรวจปล่อยใช้งาน", icon: CheckCircle2 },
   ];
 
   if (loading) return (
@@ -160,7 +221,7 @@ const ResponsibleAIPage = () => {
             <Shield className="w-8 h-8 text-teal" />
           </div>
           <div>
-            <h1 className="font-heading text-2xl font-bold">Responsible AI Dashboard</h1>
+            <h1 className="font-heading text-2xl font-bold">แดชบอร์ดการกำกับการใช้ AI</h1>
             <p className="text-muted-foreground">ธรรมาภิบาลปัญญาประดิษฐ์ในกระบวนการยุติธรรม</p>
           </div>
         </div>
@@ -179,6 +240,44 @@ const ResponsibleAIPage = () => {
         {/* TLAGF 5 Pillars */}
         {activeTab === "tlagf" && (
           <div className="max-w-4xl mx-auto">
+            <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="max-w-3xl">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+                    <BarChart3 className="h-4 w-4" /> {architecture.badge}
+                  </div>
+                  <h3 className="mt-4 font-heading text-xl font-bold">{architecture.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{architecture.subtitle}</p>
+                  <p className="mt-3 text-xs text-muted-foreground">{architecture.relation_to_safety_pipeline}</p>
+                </div>
+                <div className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] ${architecture.integrity.audit_chain_valid ? "border-teal/20 bg-teal/10 text-teal" : "border-destructive/20 bg-destructive/10 text-destructive"}`}>
+                  {architecture.integrity.audit_chain_valid ? "Audit Chain Verified" : "Runtime Not Verified"}
+                </div>
+              </div>
+              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                {architecture.components.map((component) => (
+                  <div key={component.id} className="rounded-2xl border border-border bg-muted/20 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-foreground">{component.title}</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{component.description}</p>
+                      </div>
+                      <div className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-primary">
+                        {component.mapped_layers.join(" · ")}
+                      </div>
+                    </div>
+                    <div className="mt-3 space-y-1">
+                      {component.responsibilities.slice(0, 2).map((item) => (
+                        <p key={item} className="text-xs text-foreground/80">• {item}</p>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-[11px] text-muted-foreground">
+                      บริการที่เกี่ยวข้อง: {component.services.join(", ")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
             {Array.isArray(tlagf) && tlagf.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tlagf.map((p, i) => {
@@ -206,7 +305,7 @@ const ResponsibleAIPage = () => {
               </div>
             ) : (
               <div className="text-center py-16 text-muted-foreground">
-                <p>ไม่พบข้อมูล TLAGF — ตรวจสอบ backend</p>
+                <p>ไม่พบข้อมูล TLAGF กรุณาตรวจสอบระบบหลังบ้าน</p>
               </div>
             )}
           </div>
@@ -217,17 +316,17 @@ const ResponsibleAIPage = () => {
           <div className="max-w-3xl mx-auto">
             <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
               <div className="p-5 border-b border-border">
-                <h3 className="font-heading font-bold flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-accent-foreground" /> Risk Tiers</h3>
-                <p className="text-xs text-muted-foreground mt-1">ระดับความเสี่ยงและ Confidence Cap สำหรับแต่ละ Action Type</p>
+                <h3 className="font-heading font-bold flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-accent-foreground" /> ระดับความเสี่ยง</h3>
+                <p className="text-xs text-muted-foreground mt-1">ระดับความเสี่ยงและเพดานความเชื่อมั่นสำหรับแต่ละประเภทงาน</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="px-4 py-3 text-left font-medium">Action Type</th>
-                      <th className="px-4 py-3 text-left font-medium">Risk Level</th>
-                      <th className="px-4 py-3 text-left font-medium">Confidence Cap</th>
-                      <th className="px-4 py-3 text-left font-medium">Human Required</th>
+                      <th className="px-4 py-3 text-left font-medium">ประเภทงาน</th>
+                      <th className="px-4 py-3 text-left font-medium">ระดับความเสี่ยง</th>
+                      <th className="px-4 py-3 text-left font-medium">เพดานความเชื่อมั่น</th>
+                      <th className="px-4 py-3 text-left font-medium">ต้องมีมนุษย์กำกับ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -270,17 +369,17 @@ const ResponsibleAIPage = () => {
             </div>
             <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
               <div className="p-5 border-b border-border">
-                <h3 className="font-heading font-bold flex items-center gap-2"><Lock className="w-5 h-5 text-primary" /> CSE-200 PDPA Constraints</h3>
-                <p className="text-xs text-muted-foreground mt-1">{cseConstraints.length} / 200 constraints</p>
+                <h3 className="font-heading font-bold flex items-center gap-2"><Lock className="w-5 h-5 text-primary" /> ข้อกำกับ CSE-200 ด้าน PDPA</h3>
+                <p className="text-xs text-muted-foreground mt-1">{cseConstraints.length} / 200 ข้อกำกับ</p>
               </div>
               <div className="max-h-96 overflow-y-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-muted sticky top-0">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium">ID</th>
-                      <th className="px-4 py-2 text-left font-medium">Category</th>
-                      <th className="px-4 py-2 text-left font-medium">Description</th>
-                      <th className="px-4 py-2 text-left font-medium">Status</th>
+                      <th className="px-4 py-2 text-left font-medium">หมวด</th>
+                      <th className="px-4 py-2 text-left font-medium">รายละเอียด</th>
+                      <th className="px-4 py-2 text-left font-medium">สถานะ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -312,8 +411,8 @@ const ResponsibleAIPage = () => {
                   ? <CheckCircle2 className="w-8 h-8 text-teal" />
                   : <AlertTriangle className="w-8 h-8 text-destructive" />}
                 <div>
-                  <h3 className="font-heading font-bold text-lg">{releaseGuard.passed ? "Release Guard ผ่าน ✅" : "Release Guard ไม่ผ่าน ❌"}</h3>
-                  <p className="text-sm text-muted-foreground">DevSecOps pre-deployment safety checks</p>
+                  <h3 className="font-heading font-bold text-lg">{releaseGuard.passed ? "ผ่านการตรวจปล่อยใช้งาน ✅" : "ยังไม่ผ่านการตรวจปล่อยใช้งาน ❌"}</h3>
+                  <p className="text-sm text-muted-foreground">การตรวจความปลอดภัยก่อนปล่อยใช้งานตามแนวทาง DevSecOps</p>
                 </div>
               </div>
               <div className="space-y-2">
@@ -322,8 +421,8 @@ const ResponsibleAIPage = () => {
                     className={`p-3 rounded-xl flex items-center gap-3 ${check.passed ? "bg-teal/5 border border-teal/20" : "bg-destructive/5 border border-destructive/20"}`}>
                     {check.passed ? <CheckCircle2 className="w-4 h-4 text-teal flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />}
                     <div>
-                      <p className="text-sm font-medium">{check.name}</p>
-                      <p className="text-xs text-muted-foreground">{check.detail}</p>
+                      <p className="text-sm font-medium">{check.name ?? check.check ?? "guard_check"}</p>
+                      <p className="text-xs text-muted-foreground">{check.detail ?? check.status ?? "พร้อมใช้งาน"}</p>
                     </div>
                   </motion.div>
                 ))}

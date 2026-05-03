@@ -2,12 +2,10 @@
 
 Provides:
 - Bedrock Claude LLM via langchain-aws
-- Bedrock Titan Embeddings via langchain-aws
+- Bedrock Embeddings via langchain-aws
 - LangChain RAG chain with retriever
 - NeMo Guardrails integration
 """
-from __future__ import annotations
-
 from __future__ import annotations
 
 import logging
@@ -25,7 +23,7 @@ class LangChainSettings(BaseSettings):
 
     llm_provider: str = "bedrock"  # bedrock | anthropic | typhoon | grok | ollama
     bedrock_model_id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
-    bedrock_embedding_model: str = "amazon.titan-embed-text-v2:0"
+    bedrock_embedding_model: str = "cohere.embed-multilingual-v3"
     aws_region: str = "ap-southeast-1"
     anthropic_api_key: str = ""
     typhoon_api_key: str = ""
@@ -168,7 +166,7 @@ def get_llm(settings: Optional[LangChainSettings] = None):
 
 
 def get_bedrock_embeddings(settings: Optional[LangChainSettings] = None):
-    """Get Bedrock Titan Embeddings via langchain-aws."""
+    """Get Bedrock embeddings via langchain-aws."""
     s = settings or LangChainSettings()
     try:
         from langchain_aws import BedrockEmbeddings

@@ -63,6 +63,177 @@ export interface ComplaintExportXmlResponse {
   json_fallback: Record<string, unknown> | null;
 }
 
+export interface DashboardSystemStatsResponse {
+  actual: {
+    pdf_files: number;
+    pdf_description?: string;
+    mock_cases: number;
+    mock_cases_description?: string;
+    hf_datasets: number;
+    hf_datasets_description?: string;
+    audit_entries?: number;
+    langgraph_agents?: number;
+    anti_hallucination_layers?: number;
+    pii_patterns: number;
+    api_endpoints?: number;
+    backend_services?: number;
+    total_tests?: number;
+  };
+  targets?: {
+    total_cases?: number;
+    total_cases_note?: string;
+    hit_at_3?: number;
+    hit_at_3_note?: string;
+    p95_latency_ms?: number;
+    p95_latency_note?: string;
+    cfs_target?: number;
+    cfs_note?: string;
+    honesty_score_target?: number;
+    honesty_note?: string;
+  };
+  phase: string;
+}
+
+export interface DashboardLiveResponse {
+  timestamp: string;
+  requests_1h: number;
+  requests_24h: number;
+  requests_by_action_1h: Record<string, number>;
+  requests_by_action_24h?: Record<string, number>;
+  avg_confidence_1h: number;
+  cache_hit_rate_1h: number;
+  error_rate_1h: number;
+  ingestion_jobs_24h?: number;
+  total_audit_entries?: number;
+  system_health: Record<string, string>;
+  ai_metrics: {
+    avg_honesty_score: number;
+    hallucination_rate: number;
+    pii_leak_count?: number;
+  };
+}
+
+export interface ReleaseGuardCheck {
+  id?: string;
+  name?: string;
+  check?: string;
+  required?: boolean;
+  passed: boolean;
+  status?: string;
+  detail?: string;
+}
+
+export interface ReleaseGuardResponse {
+  release_allowed?: boolean;
+  passed?: boolean;
+  passed_checks?: number;
+  failed_checks?: number;
+  checks: ReleaseGuardCheck[];
+  total_checks?: number;
+  failed?: number;
+  required_all_passed?: boolean;
+  mode?: string;
+}
+
+export interface BottlenecksResponse {
+  bottlenecks: Array<{
+    case_type: string;
+    avg_processing_days: number;
+    standard_days: number;
+    threshold_days: number;
+    sample_count: number;
+    contributing_factors?: string[];
+  }>;
+}
+
+export interface RecentAuditResponse {
+  entries: Array<{
+    id: string;
+    action: string;
+    query_preview: string;
+    result_count: number;
+    confidence: number | null;
+    agent_role: string | null;
+    entry_hash: string;
+    prev_hash?: string;
+    created_at: string;
+    metadata: Record<string, unknown>;
+  }>;
+  chain_valid: boolean;
+  broken_at: number | null;
+}
+
+export interface RecentIngestionJobsResponse {
+  jobs: Array<{
+    job_id: string;
+    source_code: string;
+    total_documents: number;
+    processed_documents: number;
+    failed_documents: number;
+    total_chunks: number;
+    error_log: Array<Record<string, unknown>>;
+    status: string;
+  }>;
+}
+
+export interface SafetyPipelineResponse {
+  title: string;
+  subtitle: string;
+  badge: string;
+  architecture_version?: string;
+  integrity: {
+    audit_chain_valid: boolean;
+    generated_at: string;
+  };
+  layers: Array<{
+    step: string;
+    layer_code?: string;
+    title: string;
+    description: string;
+    architecture_label?: string;
+    purpose?: string;
+    inputs?: string[];
+    controls?: string[];
+    outputs?: string[];
+    services?: string[];
+    runtime_status?: string;
+    runtime_evidence?: Record<string, unknown>;
+  }>;
+}
+
+export interface AgenticArchitectureResponse {
+  title: string;
+  subtitle: string;
+  badge: string;
+  architecture_version?: string;
+  relation_to_safety_pipeline: string;
+  integrity: {
+    audit_chain_valid: boolean;
+    generated_at: string;
+  };
+  components: Array<{
+    id: string;
+    title: string;
+    description: string;
+    responsibilities: string[];
+    mapped_layers: string[];
+    services: string[];
+    runtime_evidence?: Record<string, unknown>;
+  }>;
+}
+
+export interface RiskTier {
+  risk_level: string;
+  confidence_cap: number;
+  human_required: boolean;
+}
+
+async function getJson<T>(path: string): Promise<T> {
+  const resp = await fetch(`${API_BASE}${path}`);
+  if (!resp.ok) throw new Error(`${path} ${resp.status}`);
+  return resp.json();
+}
+
 export const apiClient = {
   /** Non-streaming chat — น้องซื่อสัตย์ chatbot */
   async chat(messages: ChatMessage[], role = "citizen"): Promise<ChatResponseData> {
@@ -164,5 +335,41 @@ export const apiClient = {
     });
     if (!resp.ok) throw new Error(`complaint/export-xml ${resp.status}`);
     return resp.json();
+  },
+
+  getDashboardSystemStats(): Promise<DashboardSystemStatsResponse> {
+    return getJson<DashboardSystemStatsResponse>("/dashboard/system-stats");
+  },
+
+  getDashboardLive(): Promise<DashboardLiveResponse> {
+    return getJson<DashboardLiveResponse>("/dashboard/live");
+  },
+
+  getReleaseGuard(): Promise<ReleaseGuardResponse> {
+    return getJson<ReleaseGuardResponse>("/responsible-ai/release-guard");
+  },
+
+  getRiskTiers(): Promise<Record<string, RiskTier>> {
+    return getJson<Record<string, RiskTier>>("/responsible-ai/risk-tiers");
+  },
+
+  getBottlenecks(): Promise<BottlenecksResponse> {
+    return getJson<BottlenecksResponse>("/dashboard/bottlenecks");
+  },
+
+  getRecentAudit(limit = 10): Promise<RecentAuditResponse> {
+    return getJson<RecentAuditResponse>(`/dashboard/audit/recent?limit=${limit}`);
+  },
+
+  getRecentIngestionJobs(limit = 10): Promise<RecentIngestionJobsResponse> {
+    return getJson<RecentIngestionJobsResponse>(`/ingest/recent?limit=${limit}`);
+  },
+
+  getSafetyPipeline(): Promise<SafetyPipelineResponse> {
+    return getJson<SafetyPipelineResponse>("/dashboard/safety-pipeline");
+  },
+
+  getAgenticArchitecture(): Promise<AgenticArchitectureResponse> {
+    return getJson<AgenticArchitectureResponse>("/dashboard/agentic-architecture");
   },
 };

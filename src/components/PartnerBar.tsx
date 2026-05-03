@@ -78,10 +78,10 @@ const PartnerCard = ({
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
-      whileHover={{ scale: 1.03, y: -4 }}
-      className="group/item flex h-full min-h-[146px] flex-col items-center justify-start rounded-[1.75rem] border border-white/10 bg-white/5 px-4 py-5 text-center shadow-xl shadow-navy/5 backdrop-blur-md transition-all duration-500 hover:border-gold/40 hover:bg-white/10"
+      whileHover={{ scale: 1.05, y: -8 }}
+      className="group/item flex h-full min-h-[160px] flex-col items-center justify-start rounded-[2rem] border-2 border-white/15 bg-navy-deep/30 px-5 py-6 text-center shadow-xl backdrop-blur-xl transition-all duration-500 hover:border-gold/50 hover:bg-navy-deep/50 hover:shadow-gold/15 float-card"
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-3 shadow-2xl ring-1 ring-black/5 md:h-[72px] md:w-[72px]">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5 md:h-[72px] md:w-[72px] group-hover/item:shadow-xl transition-shadow">
         <img
           src={logo}
           alt={name}
@@ -100,7 +100,7 @@ const PartnerCard = ({
 
 const PartnerBar = () => {
   return (
-    <div className="w-full bg-navy-deep/20 backdrop-blur-xl border-y border-white/5 py-10 overflow-hidden relative group">
+    <div className="w-full bg-navy-deep/15 backdrop-blur-xl border-y border-white/8 py-10 overflow-hidden relative group">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-gold/5 to-teal/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center gap-8">

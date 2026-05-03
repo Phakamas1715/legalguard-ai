@@ -18,12 +18,19 @@ test.describe("Home Page (/)", () => {
     await expect(page.locator("h1")).toContainText("LegalGuard");
   });
 
-  test("shows all 3 role cards", async ({ page }) => {
+  test("shows role cards including the IT control tower", async ({ page }) => {
     await goto(page, "/");
     await page.locator("#roles").scrollIntoViewIfNeeded();
-    // There should be 3 role selection buttons
     const roleButtons = page.locator("#roles button, #roles [role=button]");
     await expect(roleButtons.first()).toBeVisible();
+    const body = await page.textContent("body");
+    expect(body).toMatch(/ฝ่ายไอที \/ ผู้ดูแลระบบ|ระบบ IT \/ แอดมิน|AI Control Tower/);
+  });
+
+  test("home page shows backend-backed safety pipeline summary", async ({ page }) => {
+    await goto(page, "/");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/System Trust Layer|ผู้ใช้งานทุกบทบาทอยู่ภายใต้โครงสร้างความปลอดภัยเดียวกัน|Trace Console|AI Control Tower/);
   });
 
   test("'เริ่มค้นหาเลย' navigates to /search?role=citizen", async ({ page }) => {
@@ -189,7 +196,7 @@ test.describe("Government Dashboard (/government)", () => {
   test("loads dashboard heading", async ({ page }) => {
     await goto(page, "/government");
     const body = await page.textContent("body");
-    expect(body).toMatch(/รัฐ|ราชการ|Dashboard|เจ้าหน้าที่/i);
+    expect(body).toMatch(/รัฐ|ราชการ|Dashboard|เจ้าหน้าที่|Clerk Copilot/i);
   });
 
   test("shows overview tab by default", async ({ page }) => {
@@ -244,6 +251,36 @@ test.describe("Government Dashboard (/government)", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 
 test.describe("Additional Dashboards", () => {
+  test("back office hub loads suite overview", async ({ page }) => {
+    await goto(page, "/back-office");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/One Platform, Three Back-Office Dashboards|Clerk Copilot|Judge Workbench|AI Control Tower|Demo Path พร้อมใช้/);
+  });
+
+  test("clerk copilot dashboard loads", async ({ page }) => {
+    await goto(page, "/clerk-copilot");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/Clerk Copilot|ธุรการศาลแบบ end-to-end|Workflow Coverage/);
+  });
+
+  test("judge workbench dashboard loads", async ({ page }) => {
+    await goto(page, "/judge-workbench");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/Judge Workbench|เครื่องมือช่วยผู้พิพากษา|Judicial Support Modules/);
+  });
+
+  test("AI control tower dashboard loads", async ({ page }) => {
+    await goto(page, "/ai-control-tower");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/AI Control Tower|ศูนย์ควบคุม AI หลังบ้าน|Observability Snapshot|Demo Flow|Runtime Readiness Evidence|Trace Console/);
+  });
+
+  test("trace console loads runtime L0-L6 debug view", async ({ page }) => {
+    await goto(page, "/trace-console");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/Trace Console|L0-L6 Runtime Trace|Feynman Multi-Agent Engine|L6 Agent Breakdown/);
+  });
+
   test("citizen dashboard loads key modules", async ({ page }) => {
     await goto(page, "/citizen");
     const body = await page.textContent("body");
@@ -259,13 +296,19 @@ test.describe("Additional Dashboards", () => {
   test("judge dashboard loads key controls", async ({ page }) => {
     await goto(page, "/judge");
     const body = await page.textContent("body");
-    expect(body).toMatch(/แดชบอร์ดตุลาการ|ร่างคำพิพากษา|ตรวจสอบความเป็นธรรม|แม่แบบคำสั่ง AI/);
+    expect(body).toMatch(/แดชบอร์ดตุลาการ|ร่างคำพิพากษา|ตรวจสอบความเป็นธรรม|Judge Workbench|Judicial Trust Layer/);
   });
 
   test("IT dashboard loads architecture section", async ({ page }) => {
     await goto(page, "/it");
     const body = await page.textContent("body");
-    expect(body).toMatch(/ระบบคัดกรองความปลอดภัย 7 ชั้น|Security Layer|Bedrock|Audit/);
+    expect(body).toMatch(/ระบบคัดกรองความปลอดภัย 7 ชั้น|Security Layer|Bedrock|Audit|AI Control Tower/);
+  });
+
+  test("IT dashboard shows observability gap closures", async ({ page }) => {
+    await goto(page, "/it");
+    const body = await page.textContent("body");
+    expect(body).toMatch(/NitiBench Quick Benchmark|Responsible AI Snapshot|Data Classification & Access Matrix/);
   });
 });
 

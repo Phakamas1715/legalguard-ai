@@ -86,15 +86,20 @@ def _ollama_model() -> str:
 # ---------------------------------------------------------------------------
 
 
-async def call_llm(messages: list[dict], system: str = SYSTEM_PROMPT) -> str:
+async def call_llm(messages: list[dict], system: str = SYSTEM_PROMPT, max_tokens: int = 1024) -> str:
     """Single-shot LLM call.
 
     Provider chain: Bedrock Claude → Typhoon → SeaLLM → Anthropic → Ollama
+
+    Args:
+        messages: Chat messages to send.
+        system: System prompt.
+        max_tokens: Max output tokens. Use 512 for chatbot, 1024 for drafting.
     """
     # 1. Amazon Bedrock Claude (primary — data stays in AWS)
     if _bedrock_token():
         try:
-            result = await _call_bedrock(messages, system)
+            result = await _call_bedrock(messages, system, max_tokens)
             if result:
                 return result
         except Exception:
@@ -103,7 +108,7 @@ async def call_llm(messages: list[dict], system: str = SYSTEM_PROMPT) -> str:
     # 2. Typhoon (SCB 10X) — Thai-specific LLM
     if _typhoon_key():
         try:
-            result = await _call_typhoon(messages, system)
+            result = await _call_typhoon(messages, system, max_tokens)
             if result:
                 return result
         except Exception:
@@ -112,7 +117,7 @@ async def call_llm(messages: list[dict], system: str = SYSTEM_PROMPT) -> str:
     # 3. SeaLLM-7B-v2 — Southeast Asian LLM
     if _hf_token():
         try:
-            result = await _call_seallm(messages, system)
+            result = await _call_seallm(messages, system, max_tokens)
             if result:
                 return result
         except Exception:
@@ -121,7 +126,7 @@ async def call_llm(messages: list[dict], system: str = SYSTEM_PROMPT) -> str:
     # 4. Anthropic Claude (direct API fallback)
     if _anthropic_key():
         try:
-            result = await _call_anthropic(messages, system)
+            result = await _call_anthropic(messages, system, max_tokens)
             if result:
                 return result
         except Exception:
@@ -143,7 +148,7 @@ async def call_llm(messages: list[dict], system: str = SYSTEM_PROMPT) -> str:
 # ---------------------------------------------------------------------------
 
 
-async def _call_bedrock(messages: list[dict], system: str) -> str:
+async def _call_bedrock(messages: list[dict], system: str, max_tokens: int = 1024) -> str:
     """Call Amazon Bedrock Claude — data stays in ap-southeast-1."""
     try:
         import boto3
@@ -160,7 +165,7 @@ async def _call_bedrock(messages: list[dict], system: str) -> str:
 
         body = json.dumps({
             "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 1024,
+            "max_tokens": max_tokens,
             "system": system,
             "messages": bedrock_messages,
             "temperature": 0.3,
@@ -180,7 +185,7 @@ async def _call_bedrock(messages: list[dict], system: str) -> str:
         return ""
 
 
-async def _call_typhoon(messages: list[dict], system: str) -> str:
+async def _call_typhoon(messages: list[dict], system: str, max_tokens: int = 1024) -> str:
     """Call Typhoon v2 70B (SCB 10X) — Thai-optimised LLM."""
     async with httpx.AsyncClient(timeout=45) as client:
         resp = await client.post(
@@ -192,7 +197,7 @@ async def _call_typhoon(messages: list[dict], system: str) -> str:
             json={
                 "model": TYPHOON_CHAT_MODEL,
                 "messages": [{"role": "system", "content": system}, *messages],
-                "max_tokens": 1024,
+                "max_tokens": max_tokens,
                 "temperature": 0.3,
             },
         )
@@ -202,7 +207,7 @@ async def _call_typhoon(messages: list[dict], system: str) -> str:
         return ""
 
 
-async def _call_seallm(messages: list[dict], system: str) -> str:
+async def _call_seallm(messages: list[dict], system: str, max_tokens: int = 1024) -> str:
     """Call SeaLLM-7B-v2 via HuggingFace Inference API."""
     url = HF_INFERENCE_URL.format(model=SEALLM_MODEL)
     async with httpx.AsyncClient(timeout=45) as client:
@@ -215,7 +220,7 @@ async def _call_seallm(messages: list[dict], system: str) -> str:
             json={
                 "model": SEALLM_MODEL,
                 "messages": [{"role": "system", "content": system}, *messages],
-                "max_tokens": 1024,
+                "max_tokens": max_tokens,
                 "temperature": 0.3,
             },
         )
@@ -225,7 +230,7 @@ async def _call_seallm(messages: list[dict], system: str) -> str:
         return ""
 
 
-async def _call_anthropic(messages: list[dict], system: str) -> str:
+async def _call_anthropic(messages: list[dict], system: str, max_tokens: int = 1024) -> str:
     """Call Anthropic Claude direct API."""
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(
@@ -239,7 +244,7 @@ async def _call_anthropic(messages: list[dict], system: str) -> str:
                 "model": "claude-haiku-4-5-20251001",
                 "system": system,
                 "messages": messages,
-                "max_tokens": 1024,
+                "max_tokens": max_tokens,
             },
         )
         if resp.status_code == 200:

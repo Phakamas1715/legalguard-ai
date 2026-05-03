@@ -160,3 +160,11 @@ async def list_cse_constraints():
             "fairness": sum(1 for c in CSE_PDPA_CONSTRAINTS if c["category"] == "fairness"),
         },
     }
+
+
+@router.get("/access-matrix")
+async def get_access_matrix():
+    """Return runtime-authoritative classification/access matrix for IT dashboards."""
+    from app.services.access_policy_service import AccessPolicyService
+
+    return AccessPolicyService().get_matrix()

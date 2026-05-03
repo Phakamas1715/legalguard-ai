@@ -32,11 +32,13 @@ _cors_origins_str = os.getenv(
     "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:4173",
 )
 _cors_origins = [o.strip() for o in _cors_origins_str.split(",") if o.strip()]
+_local_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
 app.add_middleware(SecurityMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
+    allow_origin_regex=_local_origin_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-User-Role"],

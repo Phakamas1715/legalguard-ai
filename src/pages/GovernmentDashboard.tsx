@@ -23,91 +23,26 @@ import {
   Send,
   Shield,
   ShieldCheck,
+  Workflow,
 } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
 import { maskPII, PII_TYPE_LABELS, type PIISpan } from "@/lib/piiMasking";
 import heroCourthouseImg from "@/assets/hero-courthouse.jpg";
 import { toast } from "sonner";
-
+import ResearchAgentModule from "@/components/ResearchAgentModule";
+import BackOfficeBridgeBanner from "@/components/BackOfficeBridgeBanner";
+import SafetyPipelinePreview from "@/components/SafetyPipelinePreview";
+import {
+  apiClient,
+  type BottlenecksResponse,
+  type DashboardLiveResponse,
+  type DashboardSystemStatsResponse,
+  type RecentAuditResponse,
+  type RecentIngestionJobsResponse,
+  type ReleaseGuardResponse,
+} from "@/lib/apiClient";
 import { API_BASE } from "@/lib/runtimeConfig";
 
 type Tab = "overview" | "tools" | "draft" | "data" | "technical";
-
-interface DashboardSystemStats {
-  actual: {
-    pdf_files: number;
-    pdf_description: string;
-    mock_cases: number;
-    mock_cases_description: string;
-    hf_datasets: number;
-    hf_datasets_description: string;
-    audit_entries: number;
-    langgraph_agents: number;
-    anti_hallucination_layers: number;
-    pii_patterns: number;
-    api_endpoints: number;
-    backend_services: number;
-    total_tests: number;
-  };
-  targets: {
-    total_cases: number;
-    total_cases_note: string;
-    hit_at_3: number;
-    hit_at_3_note: string;
-    p95_latency_ms: number;
-    p95_latency_note: string;
-    cfs_target: number;
-    cfs_note: string;
-    honesty_score_target: number;
-    honesty_note: string;
-  };
-  phase: string;
-}
-
-interface DashboardLiveMetrics {
-  timestamp: string;
-  requests_1h: number;
-  requests_24h: number;
-  requests_by_action_1h: Record<string, number>;
-  requests_by_action_24h: Record<string, number>;
-  avg_confidence_1h: number;
-  cache_hit_rate_1h: number;
-  error_rate_1h: number;
-  ingestion_jobs_24h: number;
-  total_audit_entries: number;
-  system_health: Record<string, string>;
-  ai_metrics: {
-    avg_honesty_score: number;
-    hallucination_rate: number;
-    pii_leak_count: number;
-  };
-}
-
-interface ReleaseGuardResponse {
-  release_allowed: boolean;
-  checks: Array<{
-    id: string;
-    check: string;
-    required: boolean;
-    passed: boolean;
-    status: string;
-  }>;
-  total_checks: number;
-  passed: number;
-  failed: number;
-  required_all_passed: boolean;
-}
-
-interface BottlenecksResponse {
-  bottlenecks: Array<{
-    case_type: string;
-    avg_processing_days: number;
-    standard_days: number;
-    threshold_days: number;
-    sample_count: number;
-    contributing_factors?: string[];
-  }>;
-}
 
 interface OpenLawIngestResult {
   job_id: string;
@@ -121,36 +56,6 @@ interface OpenLawIngestResult {
   f_time: number;
   cfs_warning: boolean;
   status: string;
-}
-
-interface RecentAuditResponse {
-  entries: Array<{
-    id: string;
-    action: string;
-    query_preview: string;
-    result_count: number;
-    confidence: number | null;
-    agent_role: string | null;
-    entry_hash: string;
-    prev_hash: string;
-    created_at: string;
-    metadata: Record<string, unknown>;
-  }>;
-  chain_valid: boolean;
-  broken_at: number | null;
-}
-
-interface RecentIngestionJobsResponse {
-  jobs: Array<{
-    job_id: string;
-    source_code: string;
-    total_documents: number;
-    processed_documents: number;
-    failed_documents: number;
-    total_chunks: number;
-    error_log: Array<Record<string, unknown>>;
-    status: string;
-  }>;
 }
 
 const tabs: Array<{ id: Tab; label: string; icon: typeof BarChart3 }> = [
@@ -174,7 +79,37 @@ const toolRoutes = [
   { title: "คัดกรองคำฟ้อง", desc: "เชื่อมต่อ backend complaint classify / validate / export XML", route: "/complaint-form", icon: Scale },
   { title: "ค้นหากฎหมาย", desc: "ค้นหาผ่าน hybrid retrieval จาก backend โดยตรง", route: "/search?role=government", icon: BookOpen },
   { title: "วิเคราะห์คดี", desc: "ส่งเคสเข้าสู่โมดูล analyze สำหรับสรุปประเด็น", route: "/analyze", icon: Gavel },
-  { title: "Responsible AI", desc: "ตรวจ policy, governance, และ release guard", route: "/responsible-ai", icon: ShieldCheck },
+  { title: "กำกับการใช้ AI", desc: "ตรวจนโยบาย การกำกับดูแล และการปล่อยใช้งาน", route: "/responsible-ai", icon: ShieldCheck },
+];
+
+const governmentFeatureMenus = [
+  {
+    title: "ติดตามระบบ",
+    desc: "ดูภาพรวม runtime, bottleneck และสถานะระบบที่เจ้าหน้าที่ต้องรู้ก่อนเริ่มงาน",
+    icon: Activity,
+    items: [
+      { tab: "overview" as const, label: "ภาพรวม", note: "ดู metrics จริงและ health ของระบบ" },
+      { tab: "technical" as const, label: "PII + Audit", note: "ตรวจความปลอดภัยและ log ย้อนหลัง" },
+    ],
+  },
+  {
+    title: "ใช้เครื่องมือคดี",
+    desc: "เข้าถึงเครื่องมือค้น วิเคราะห์ และช่วยเตรียมร่างสำหรับงานธุรการและงานสนับสนุน",
+    icon: Workflow,
+    items: [
+      { tab: "tools" as const, label: "เครื่องมือจริง", note: "เปิดฟอร์มและเส้นทางทำงานหลัก" },
+      { tab: "draft" as const, label: "ร่างคำพิพากษา", note: "ทดลองโหมดช่วยร่างจาก backend" },
+    ],
+  },
+  {
+    title: "จัดการข้อมูล",
+    desc: "ดูแหล่งข้อมูลจริง งาน ingestion และ evidence ที่เกี่ยวกับข้อมูลอ้างอิง",
+    icon: Database,
+    items: [
+      { tab: "data" as const, label: "ข้อมูลจริง", note: "ดูเอกสาร แหล่งข้อมูล และ ingestion" },
+      { tab: "technical" as const, label: "PII + Audit", note: "ตรวจการคุ้มครองข้อมูลก่อนใช้งานต่อ" },
+    ],
+  },
 ];
 
 const GovernmentDashboard = () => {
@@ -183,8 +118,8 @@ const GovernmentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [systemStats, setSystemStats] = useState<DashboardSystemStats | null>(null);
-  const [liveMetrics, setLiveMetrics] = useState<DashboardLiveMetrics | null>(null);
+  const [systemStats, setSystemStats] = useState<DashboardSystemStatsResponse | null>(null);
+  const [liveMetrics, setLiveMetrics] = useState<DashboardLiveResponse | null>(null);
   const [releaseGuard, setReleaseGuard] = useState<ReleaseGuardResponse | null>(null);
   const [bottlenecks, setBottlenecks] = useState<BottlenecksResponse | null>(null);
   const [recentAudit, setRecentAudit] = useState<RecentAuditResponse | null>(null);
@@ -199,14 +134,6 @@ const GovernmentDashboard = () => {
   const [olLoading, setOlLoading] = useState(false);
   const [olResult, setOlResult] = useState<OpenLawIngestResult | null>(null);
 
-  const fetchJson = async <T,>(path: string): Promise<T> => {
-    const response = await fetch(`${API_BASE}${path}`);
-    if (!response.ok) {
-      throw new Error(`${path} ${response.status}`);
-    }
-    return response.json();
-  };
-
   const loadDashboardData = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
@@ -217,12 +144,12 @@ const GovernmentDashboard = () => {
 
     try {
       const [stats, live, guard, bottleneckData, auditData, jobsData] = await Promise.all([
-        fetchJson<DashboardSystemStats>("/dashboard/system-stats"),
-        fetchJson<DashboardLiveMetrics>("/dashboard/live"),
-        fetchJson<ReleaseGuardResponse>("/responsible-ai/release-guard"),
-        fetchJson<BottlenecksResponse>("/dashboard/bottlenecks"),
-        fetchJson<RecentAuditResponse>("/dashboard/audit/recent?limit=10"),
-        fetchJson<RecentIngestionJobsResponse>("/ingest/recent?limit=10"),
+        apiClient.getDashboardSystemStats(),
+        apiClient.getDashboardLive(),
+        apiClient.getReleaseGuard(),
+        apiClient.getBottlenecks(),
+        apiClient.getRecentAudit(10),
+        apiClient.getRecentIngestionJobs(10),
       ]);
 
       setSystemStats(stats);
@@ -356,11 +283,18 @@ const GovernmentDashboard = () => {
               <Building2 className="w-10 h-10 text-white" />
             </div>
             <div className="text-primary-foreground">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/70 bg-gold/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(255,183,0,0.24)]"
+              >
+                มุมมองเดิม (Legacy View)
+              </motion.div>
               <motion.h1 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="font-heading text-3xl md:text-4xl font-bold mb-1">
-                แดชบอร์ดเจ้าหน้าที่
+                แดชบอร์ดเจ้าหน้าที่ในมุมมองเดิม
               </motion.h1>
               <motion.p initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="opacity-90 text-sm md:text-base font-light">
-                หน้าเดียวสำหรับดู metrics จริงของระบบ, audit, และเครื่องมือ backend ที่เปิดใช้งานอยู่
+                มุมมองอ้างอิงของแดชบอร์ดเดิม สำหรับดู metrics จริงของระบบ, audit, และเครื่องมือ backend ที่เปิดใช้งานอยู่
               </motion.p>
             </div>
           </div>
@@ -371,7 +305,7 @@ const GovernmentDashboard = () => {
         <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <p className="text-xs text-muted-foreground flex items-center gap-2">
             <Shield className="w-3.5 h-3.5 text-primary" />
-            <span className="font-medium text-primary">บทบาท: เจ้าหน้าที่รัฐ / ธุรการศาล</span>
+            <span className="font-medium text-primary">บทบาท: เจ้าหน้าที่ศาล / ข้าราชการธุรการ</span>
             <span>หน้านี้ดึงข้อมูลจาก backend โดยตรง และแยกเป้าหมายในเอกสารออกจากตัวเลข runtime จริง</span>
           </p>
           <button
@@ -384,6 +318,56 @@ const GovernmentDashboard = () => {
             รีเฟรช metrics
           </button>
         </div>
+
+        <div className="mb-6">
+          <BackOfficeBridgeBanner
+            eyebrow="มุมมองเดิม (Legacy View)"
+            title="พื้นที่ช่วยงานธุรการคือหน้าหลักใหม่สำหรับงานธุรการแบบครบกระบวนงาน"
+            description="หน้านี้เป็นมุมมองเดิมสำหรับการอ้างอิงและเปรียบเทียบ ส่วนการใช้งานหลักควรเริ่มที่พื้นที่ช่วยงานธุรการ เพื่อรวมงานรับคำร้อง ตรวจเอกสาร จัดคิวงาน และช่วยจุดบริการไว้ในที่เดียว"
+            primaryAction={{ label: "เปิดพื้นที่ช่วยงานธุรการ", path: "/clerk-copilot", icon: Building2 }}
+            secondaryAction={{ label: "เปิดศูนย์รวมแดชบอร์ดหลังบ้าน", path: "/back-office" }}
+            tone="gold"
+          />
+        </div>
+
+        <section className="mb-6 rounded-[2rem] border border-border bg-card p-6 shadow-card">
+          <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">ทางลัดในมุมมองเดิม</p>
+              <h2 className="font-heading text-2xl font-black text-foreground">เปิดแท็บที่ต้องการอ้างอิงจากหน้านี้ได้โดยตรง</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                ลดเมนูซ้ำให้เหลือเพียงทางลัดไปยังแท็บหลักของแดชบอร์ดเดิม ส่วนงานประจำวันควรเริ่มจากหน้าธุรการหลัก
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+              แท็บปัจจุบัน: <span className="font-semibold text-foreground">{tabs.find((tab) => tab.id === activeTab)?.label ?? "ไม่ระบุ"}</span>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {governmentFeatureMenus.flatMap((menu) =>
+              menu.items.map((item) => (
+                <button
+                  key={`${menu.title}-${item.tab}-${item.label}`}
+                  type="button"
+                  onClick={() => setActiveTab(item.tab)}
+                  className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                    activeTab === item.tab
+                      ? "border-primary/25 bg-primary/5"
+                      : "border-border bg-muted/10 hover:bg-muted"
+                  }`}
+                >
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary/70">{menu.title}</p>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <span className="text-sm font-bold text-foreground">{item.label}</span>
+                    <Send className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
+                </button>
+              )),
+            )}
+          </div>
+        </section>
 
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {tabs.map((tab) => (
@@ -419,95 +403,35 @@ const GovernmentDashboard = () => {
               </div>
             )}
 
-            {activeTab === "overview" && systemStats && liveMetrics && releaseGuard && (
-              <div className="max-w-5xl mx-auto space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <StatCard icon={Database} value={String(systemStats.actual.pdf_files)} label="PDF จริงใน data/" color="text-primary" />
-                  <StatCard icon={Activity} value={String(liveMetrics.requests_1h)} label="Requests ใน 1 ชม." color="text-teal" />
-                  <StatCard icon={Clock} value={`${Math.round(systemStats.targets.p95_latency_ms)} ms`} label="Latency target จาก spec" color="text-accent-foreground" />
-                  <StatCard
-                    icon={releaseGuard.required_all_passed ? ShieldCheck : AlertTriangle}
-                    value={releaseGuard.required_all_passed ? "พร้อมใช้งาน" : "ต้องตรวจเพิ่ม"}
-                    label="Release Guard"
-                    color={releaseGuard.required_all_passed ? "text-teal" : "text-destructive"}
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-                    <h3 className="font-heading font-bold mb-4 flex items-center gap-2 text-primary">
-                      <BarChart3 className="w-5 h-5" /> สถานะระบบจริงจาก backend
-                    </h3>
-                    <div className="space-y-3">
-                      {healthRows.map(([label, value]) => (
-                        <StatusRow key={label} label={label} value={value} ok={value === "healthy"} />
-                      ))}
-                      <StatusRow
-                        label="Average confidence (1h)"
-                        value={`${Math.round(liveMetrics.avg_confidence_1h * 100)}%`}
-                        ok={liveMetrics.avg_confidence_1h >= 0.7}
-                      />
-                      <StatusRow
-                        label="Cache hit rate (1h)"
-                        value={`${Math.round(liveMetrics.cache_hit_rate_1h * 100)}%`}
-                        ok={liveMetrics.cache_hit_rate_1h >= 0.3}
-                      />
-                      <StatusRow
-                        label="Error rate (1h)"
-                        value={`${Math.round(liveMetrics.error_rate_1h * 100)}%`}
-                        ok={liveMetrics.error_rate_1h <= 0.05}
-                      />
+            {activeTab === "overview" && (
+              <div className="space-y-8">
+                {/* 🏛️ Strategic High-Risk Monitoring (R0-R5) */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <StatCard icon={ShieldCheck} value={liveMetrics ? String(liveMetrics.ai_metrics.pii_leak_count ?? 0) : "—"} label="การรั่วไหลของ PII / 1 ชม." color="text-teal" />
+                  <StatCard icon={BarChart3} value={liveMetrics ? `${Math.round(liveMetrics.ai_metrics.avg_honesty_score * 100)}%` : "—"} label="ดัชนีความซื่อสัตย์ของระบบ" color="text-gold" />
+                  <StatCard icon={Clock} value={liveMetrics ? `${Math.round(liveMetrics.error_rate_1h * 100)}%` : "—"} label="อัตราความผิดพลาด / 1 ชม." color="text-primary" />
+                  <div className="bg-navy-deep border border-gold/30 rounded-xl p-4 text-center shadow-lg shadow-gold/5 col-span-2 md:col-span-1">
+                    <div className="text-[10px] font-black text-gold/60 uppercase tracking-widest mb-1">Release Guard</div>
+                    <div className="text-3xl font-black text-white">
+                      {releaseGuard?.passed ? "ผ่าน" : releaseGuard ? "เฝ้าระวัง" : "—"}
+                    </div>
+                    <div className="text-[9px] text-white/40 mt-1 italic">
+                      {releaseGuard?.passed ? "พร้อมสาธิตตามหลักฐานปัจจุบัน" : "ตรวจจากข้อมูลรันจริงของระบบ"}
                     </div>
                   </div>
-
-                  <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-                    <h3 className="font-heading font-bold mb-4 flex items-center gap-2 text-primary">
-                      <ShieldCheck className="w-5 h-5" /> Governance snapshot
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="rounded-xl bg-muted/30 p-4">
-                        <p className="text-xs text-muted-foreground mb-1">Honesty score เฉลี่ย</p>
-                        <p className="text-2xl font-bold text-foreground">{Math.round(liveMetrics.ai_metrics.avg_honesty_score * 100)}%</p>
-                      </div>
-                      <div className="rounded-xl bg-muted/30 p-4">
-                        <p className="text-xs text-muted-foreground mb-1">Audit entries ทั้งหมด</p>
-                        <p className="text-2xl font-bold text-foreground">{liveMetrics.total_audit_entries}</p>
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-2 text-sm">
-                      <p className="font-medium text-foreground">{systemStats.phase}</p>
-                      <p className="text-muted-foreground">{systemStats.actual.pdf_description}</p>
-                      <p className="text-muted-foreground">{systemStats.targets.total_cases_note}</p>
-                    </div>
-                  </div>
+                  <StatCard icon={Activity} value={systemStats ? String(systemStats.actual.pdf_files) : "—"} label="จำนวน PDF ในระบบตอนนี้" color="text-muted-foreground" />
+                  <StatCard icon={Database} value={liveMetrics ? String(liveMetrics.total_audit_entries ?? 0) : "—"} label="รายการบันทึกการใช้งาน" color="text-teal" />
                 </div>
 
-                <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-                  <h3 className="font-heading font-bold mb-4 flex items-center gap-2 text-primary">
-                    <AlertCircle className="w-5 h-5" /> Bottleneck analysis
-                  </h3>
-                  {bottlenecks && bottlenecks.bottlenecks.length > 0 ? (
-                    <div className="space-y-3">
-                      {bottlenecks.bottlenecks.slice(0, 3).map((item) => (
-                        <div key={item.case_type} className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
-                          <p className="font-medium text-foreground">{item.case_type}</p>
-                          <p className="text-sm text-muted-foreground">
-                            เฉลี่ย {item.avg_processing_days} วัน จากมาตรฐาน {item.standard_days} วัน
-                          </p>
-                          {item.contributing_factors?.map((factor) => (
-                            <p key={factor} className="text-xs text-muted-foreground mt-1">
-                              - {factor}
-                            </p>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      ยังไม่มีข้อมูล audit เชิงเวลาเพียงพอสำหรับระบุ bottleneck ที่เชื่อถือได้
-                    </p>
-                  )}
-                </div>
+                <SafetyPipelinePreview
+                  eyebrow="ชั้นคุ้มครองข้อมูลและการกำกับดูแล"
+                  title="ทุกคำขอของเจ้าหน้าที่ผ่านชั้นคุ้มครองเดียวกัน"
+                  description="การตรวจ PII, การกำหนดเส้นทางคำขอ, การสืบค้นข้อมูล, การคัดกรองความเสี่ยง และการบันทึกย้อนหลัง ใช้ source เดียวจาก backend เพื่อลดการตีความคลาดเคลื่อนระหว่างหน้าแดชบอร์ด"
+                  primaryAction={{ label: "เปิดพื้นที่ช่วยงานธุรการ", path: "/clerk-copilot" }}
+                  secondaryAction={{ label: "ดูศูนย์ควบคุม AI", path: "/ai-control-tower" }}
+                />
+
+                <ResearchAgentModule />
               </div>
             )}
 
@@ -535,9 +459,9 @@ const GovernmentDashboard = () => {
                     <CheckCircle2 className="w-5 h-5" /> หลักการของหน้าเจ้าหน้าที่ในรอบนี้
                   </h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>- หน้า dashboard นี้ไม่แสดงตัวเลขเป้าหมายปะปนกับตัวเลข runtime โดยไม่ติดป้ายกำกับ</li>
-                    <li>- การ ingest OpenLaw เรียกผ่าน backend endpoint จริง ไม่ fetch ตรงจาก browser แล้วแปลผลเอง</li>
-                    <li>- งาน complaint, search และ draft ถูกโยงไปยังโมดูลที่มี backend รองรับแล้ว</li>
+                    <li>- หน้าแดชบอร์ดนี้ไม่แสดงตัวเลขเป้าหมายปะปนกับตัวเลขรันจริงโดยไม่ติดป้ายกำกับ</li>
+                    <li>- การนำเข้าข้อมูล OpenLaw เรียกผ่านปลายทาง backend จริง ไม่ดึงตรงจากเบราว์เซอร์แล้วแปลผลเอง</li>
+                    <li>- งานคัดกรองคำฟ้อง ค้นข้อมูล และร่างเอกสารถูกเชื่อมไปยังโมดูลที่มี backend รองรับแล้ว</li>
                   </ul>
                 </div>
               </div>
@@ -602,15 +526,15 @@ const GovernmentDashboard = () => {
                     </div>
                     <div className="rounded-xl bg-teal/5 p-4 text-center">
                       <div className="text-2xl font-bold text-teal">{systemStats.actual.hf_datasets}</div>
-                      <div className="text-[11px] text-muted-foreground">HF datasets</div>
+                      <div className="text-[11px] text-muted-foreground">ชุดข้อมูลจาก Hugging Face</div>
                     </div>
                     <div className="rounded-xl bg-accent/5 p-4 text-center">
                       <div className="text-2xl font-bold text-accent-foreground">{systemStats.actual.backend_services}</div>
-                      <div className="text-[11px] text-muted-foreground">Backend services</div>
+                      <div className="text-[11px] text-muted-foreground">บริการฝั่งระบบหลังบ้าน</div>
                     </div>
                     <div className="rounded-xl bg-secondary p-4 text-center">
                       <div className="text-2xl font-bold text-foreground">{systemStats.actual.total_tests}</div>
-                      <div className="text-[11px] text-muted-foreground">Tests ในระบบ</div>
+                      <div className="text-[11px] text-muted-foreground">ชุดทดสอบในระบบ</div>
                     </div>
                   </div>
                   <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground space-y-1">
@@ -647,10 +571,10 @@ const GovernmentDashboard = () => {
 
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
                   <h3 className="font-heading font-bold mb-2 flex items-center gap-2 text-primary">
-                    <Database className="w-5 h-5" /> OpenLaw ingestion ผ่าน backend
+                    <Database className="w-5 h-5" /> นำเข้าข้อมูล OpenLaw ผ่านระบบหลังบ้าน
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    ปุ่มนี้เรียก `POST /api/v1/ingest/openlaw` และให้ backend เป็นผู้ fetch, คัดกรอง, และ index เอกสาร
+                    ปุ่มนี้เรียก `POST /api/v1/ingest/openlaw` และให้ระบบหลังบ้านเป็นผู้ดึง คัดกรอง และจัดทำดัชนีเอกสาร
                   </p>
                   <div className="grid md:grid-cols-3 gap-3 mb-4">
                     <div className="md:col-span-2">
@@ -681,16 +605,16 @@ const GovernmentDashboard = () => {
                     className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-navy-deep disabled:opacity-50"
                   >
                     {olLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-                    {olLoading ? "กำลัง ingest..." : "เริ่ม ingest"}
+                    {olLoading ? "กำลังนำเข้าข้อมูล..." : "เริ่มนำเข้าข้อมูล"}
                   </button>
 
                   {olResult && (
                     <div className="mt-4 rounded-xl border border-teal/20 bg-teal/5 p-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                        <MiniMetric label="Fetched" value={String(olResult.fetched_documents)} />
-                        <MiniMetric label="Chunks" value={String(olResult.ingested_chunks)} />
-                        <MiniMetric label="Failed" value={String(olResult.failed_documents)} />
-                        <MiniMetric label="CFS" value={`${Math.round(olResult.cfs * 100)}%`} />
+                        <MiniMetric label="ดึงได้" value={String(olResult.fetched_documents)} />
+                        <MiniMetric label="ช่วงข้อมูล" value={String(olResult.ingested_chunks)} />
+                        <MiniMetric label="ล้มเหลว" value={String(olResult.failed_documents)} />
+                        <MiniMetric label="คะแนน CFS" value={`${Math.round(olResult.cfs * 100)}%`} />
                       </div>
                       <p className="text-sm text-foreground mb-1">สถานะ: {olResult.status}</p>
                       <p className="text-xs text-muted-foreground">
@@ -702,18 +626,18 @@ const GovernmentDashboard = () => {
 
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
                   <h3 className="font-heading font-bold mb-4 flex items-center gap-2 text-primary">
-                    <Clock className="w-5 h-5" /> Recent ingestion jobs
+                    <Clock className="w-5 h-5" /> งานนำเข้าข้อมูลล่าสุด
                   </h3>
                   {recentJobs && recentJobs.jobs.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead className="bg-muted">
                           <tr>
-                            <th className="px-4 py-3 text-left font-medium">Job</th>
-                            <th className="px-4 py-3 text-left font-medium">Source</th>
+                            <th className="px-4 py-3 text-left font-medium">งาน</th>
+                            <th className="px-4 py-3 text-left font-medium">แหล่งข้อมูล</th>
                             <th className="px-4 py-3 text-left font-medium">สถานะ</th>
-                            <th className="px-4 py-3 text-left font-medium">Documents</th>
-                            <th className="px-4 py-3 text-left font-medium">Chunks</th>
+                            <th className="px-4 py-3 text-left font-medium">เอกสาร</th>
+                            <th className="px-4 py-3 text-left font-medium">ช่วงข้อมูล</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -834,8 +758,8 @@ const GovernmentDashboard = () => {
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                     <MiniMetric label="Checks" value={String(releaseGuard.total_checks)} />
-                    <MiniMetric label="Passed" value={String(releaseGuard.passed)} />
-                    <MiniMetric label="Failed" value={String(releaseGuard.failed)} />
+                    <MiniMetric label="Passed" value={String(releaseGuard.passed_checks)} />
+                    <MiniMetric label="Failed" value={String(releaseGuard.failed_checks)} />
                     <MiniMetric label="Required" value={releaseGuard.required_all_passed ? "PASS" : "FAIL"} />
                   </div>
                   <div className="space-y-2">

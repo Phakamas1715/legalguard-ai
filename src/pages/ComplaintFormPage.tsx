@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useBackendStatus } from "@/hooks/useBackendStatus";
 import { loadWorkspace, saveWorkspace, WORKSPACE_STORAGE_KEYS } from "@/lib/flowWorkspace";
 import { memory } from "@/lib/layeredMemory";
+import { createFormalDocumentNumber, downloadWordDocument } from "@/lib/wordExport";
 
 const CASE_TYPES = [
   { value: "civil", label: "คดีแพ่ง", desc: "สัญญา ละเมิด หนี้สิน มรดก" },
@@ -435,6 +436,88 @@ const ComplaintFormPage = () => {
     }
   };
 
+  const handleExportWord = () => {
+    if (!formData.plaintiff || !formData.defendant || !formData.description) {
+      toast.error("กรุณากรอกข้อมูลสำคัญให้ครบก่อนส่งออก Word");
+      return;
+    }
+
+    downloadWordDocument({
+      fileName: `legalguard-complaint-${normalizeCaseType(formData.caseType || "civil")}`,
+      title: "ร่างคำฟ้องเบื้องต้น",
+      subtitle: "เอกสารฉบับนี้จัดทำเพื่อประกอบการตรวจทานก่อนใช้งานจริง",
+      header: {
+        sealText: "ตราสำหรับเอกสารร่างคำฟ้อง",
+        organization: "LegalGuard AI",
+        suborganization: "ชุดเอกสารช่วยเตรียมคำฟ้องและการตรวจทานก่อนยื่น",
+        documentClass: "เอกสารร่างเพื่อประกอบการพิจารณา",
+      },
+      metaRows: [
+        { label: "เลขที่เอกสาร", value: createFormalDocumentNumber("LG-CMP") },
+        { label: "เลขรับเอกสาร", value: createFormalDocumentNumber("RCV-CMP") },
+        { label: "วันที่จัดทำ", value: new Date().toLocaleDateString("th-TH") },
+        { label: "เรื่อง", value: `ร่างคำฟ้อง${CASE_TYPES.find((c) => c.value === formData.caseType)?.label || ""}` },
+        { label: "เรียน", value: COURTS.find((c) => c.value === formData.court)?.label || "ศาลที่เกี่ยวข้อง" },
+      ],
+      sections: [
+        {
+          heading: "ข้อมูลคดี",
+          bullets: [
+            `ผู้ฟ้องคดี: ${formData.plaintiff || "-"}`,
+            `ผู้ถูกฟ้อง: ${formData.defendant || "-"}`,
+            `ประเภทคดี: ${CASE_TYPES.find((c) => c.value === formData.caseType)?.label || "-"}`,
+            `ศาลที่เกี่ยวข้อง: ${COURTS.find((c) => c.value === formData.court)?.label || "-"}`,
+            `สถานที่เกิดเหตุ: ${formData.location || "-"}`,
+          ],
+        },
+        {
+          heading: "ข้อเท็จจริงโดยสรุป",
+          body: formData.description || "-",
+        },
+        {
+          heading: "สรุปจากระบบ",
+          body: analysis?.verify.summary || aiSuggestion?.summary || "ยังไม่มีผลวิเคราะห์จากระบบในรอบล่าสุด",
+        },
+        {
+          heading: "กฎหมายที่เกี่ยวข้อง",
+          bullets: analysis?.verify.cited_statutes?.length
+            ? analysis.verify.cited_statutes
+            : aiSuggestion?.statutes?.length
+              ? aiSuggestion.statutes
+              : ["ยังไม่มีกฎหมายที่ระบบอ้างอิงในรอบล่าสุด"],
+        },
+        {
+          heading: "ร่างคำฟ้องเบื้องต้น",
+          body: analysis?.draft.draft_text || "ยังไม่มีร่างคำฟ้องจาก backend ในรอบล่าสุด",
+        },
+        {
+          heading: "ข้อควรระวัง",
+          bullets: [
+            "เอกสารนี้เป็นร่างเบื้องต้นจากระบบ AI ต้องผ่านการตรวจทานโดยมนุษย์ก่อนใช้งานจริง",
+            "ควรตรวจสอบข้อเท็จจริง รายชื่อคู่ความ ศาล และข้อกฎหมายให้ถูกต้องก่อนยื่น",
+          ],
+        },
+      ],
+      signatories: [
+        {
+          nameLine: "(ผู้จัดทำคำฟ้องเบื้องต้น)",
+          titleLine: "ผู้ยื่นคำร้อง / ผู้เตรียมข้อมูล",
+        },
+        {
+          nameLine: "(ผู้ตรวจทานเอกสาร)",
+          titleLine: "ผู้รับรองความครบถ้วนของข้อมูลก่อนยื่น",
+        },
+        {
+          nameLine: "(ที่ปรึกษากฎหมาย / ผู้มีอำนาจรับรอง)",
+          titleLine: "ลงชื่อรับรองก่อนใช้งานจริง",
+          note: "หมายเหตุ: เอกสารฉบับนี้ยังต้องตรวจสอบโดยผู้มีอำนาจหรือที่ปรึกษากฎหมายก่อนใช้งาน",
+        },
+      ],
+    });
+
+    toast.success("ส่งออกร่างคำฟ้องเป็นไฟล์ Word สำเร็จ");
+  };
+
   const stepLabels = ["ข้อมูลเบื้องต้น", "ตรวจสอบ / เลือกประเภท", "ยืนยัน / ส่งออก"];
 
   return (
@@ -832,6 +915,10 @@ const ComplaintFormPage = () => {
                   <CardFooter className="flex flex-col sm:flex-row gap-3">
                     <Button variant="outline" onClick={() => setStep(2)} className="sm:mr-auto">
                       <ArrowLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
+                    </Button>
+                    <Button variant="outline" onClick={handleExportWord}>
+                      <Download className="w-4 h-4 mr-2" />
+                      ส่งออกร่างคำฟ้อง Word
                     </Button>
                     <Button variant="outline" onClick={handleExportXml} disabled={xmlLoading}>
                       {xmlLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}

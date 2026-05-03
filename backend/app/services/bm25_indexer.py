@@ -16,6 +16,7 @@ import math
 import shutil
 from collections import Counter
 from pathlib import Path
+from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -27,10 +28,28 @@ logger = logging.getLogger(__name__)
 
 def _thai_tokenize(text: str) -> str:
     """Tokenize Thai text with PyThaiNLP and return space-separated tokens."""
-    from pythainlp.tokenize import word_tokenize
+    try:
+        from pythainlp.tokenize import word_tokenize
+    except Exception:
+        return " ".join(text.split())
 
-    tokens = word_tokenize(text)
-    return " ".join(tokens)
+    tokenizer_attempts = (
+        {"engine": "newmm"},
+        {"engine": "longest"},
+        {"engine": "whitespace"},
+        {},
+    )
+
+    for kwargs in tokenizer_attempts:
+        try:
+            tokens = word_tokenize(text, **kwargs)
+            if tokens:
+                return " ".join(tokens)
+        except Exception:
+            continue
+
+    # Final fallback for environments missing optional Thai tokenization deps.
+    return " ".join(text.split())
 
 
 # ---------------------------------------------------------------------------

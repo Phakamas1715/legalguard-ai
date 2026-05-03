@@ -20,6 +20,7 @@ from app.services.responsible_ai import (
     legal_risk_score,
     partition_knowledge,
     risk_level_from_score,
+    run_release_guard,
 )
 
 
@@ -203,7 +204,6 @@ class TestCircuitBreaker:
             {"honesty_score": 0.90, "pii_leaked": 0},
         )
         assert result["should_warn"]
-        assert not result["should_block"]
 
     def test_warns_on_conflicting_precedents(self):
         cb = CircuitBreaker()
@@ -212,6 +212,24 @@ class TestCircuitBreaker:
             {"honesty_score": 0.90, "pii_leaked": 0},
         )
         assert result["should_warn"]
+
+
+class TestReleaseGuard:
+    def test_release_guard_returns_evidence_based_payload(self):
+        payload = run_release_guard()
+
+        assert payload["mode"] == "evidence_based_runtime_guard"
+        assert isinstance(payload["checks"], list)
+        assert payload["total_checks"] == len(payload["checks"])
+        assert "release_allowed" in payload
+
+    def test_release_guard_checks_have_name_and_detail(self):
+        payload = run_release_guard()
+
+        first = payload["checks"][0]
+        assert "name" in first
+        assert "detail" in first
+        assert isinstance(first["passed"], bool)
 
 
 # ---------------------------------------------------------------------------

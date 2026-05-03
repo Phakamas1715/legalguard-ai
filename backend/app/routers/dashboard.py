@@ -82,6 +82,18 @@ async def get_live_metrics():
     return _dashboard_service.get_live_metrics()
 
 
+@router.get("/safety-pipeline")
+async def get_safety_pipeline():
+    """Return backend-backed architecture metadata for the 7-layer safety pipeline."""
+    return _dashboard_service.get_safety_pipeline()
+
+
+@router.get("/agentic-architecture")
+async def get_agentic_architecture():
+    """Return backend-backed metadata for Responsible AI Agentic Architecture."""
+    return _dashboard_service.get_agentic_architecture()
+
+
 @router.get("/audit/recent")
 async def get_recent_audit_entries(
     limit: int = Query(20, ge=1, le=100),

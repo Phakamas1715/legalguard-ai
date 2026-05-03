@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackOfficeBridgeBanner from "@/components/BackOfficeBridgeBanner";
 import {
   Building2, Shield, FileText, BarChart3, Clock, Database,
   ShieldCheck, AlertTriangle, CheckCircle2, Hash, Send, Loader2, Scale,
@@ -12,18 +13,89 @@ import ReactMarkdown from "react-markdown";
 import { getAuditStats, getAuditEntries, verifyChainIntegrity } from "@/lib/auditLog";
 import { maskPII, PII_TYPE_LABELS, type PIISpan } from "@/lib/piiMasking";
 import heroCourthouseImg from "@/assets/hero-courthouse.jpg";
+import SafetyPipelinePreview from "@/components/SafetyPipelinePreview";
 
 type Tab = "overview" | "tools" | "triage" | "draft" | "data" | "technical" | "transcribe";
 
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, type DashboardLiveResponse, type DashboardSystemStatsResponse } from "@/lib/apiClient";
 import { toast } from "sonner";
 
 import { API_BASE } from "@/lib/runtimeConfig";
+
+const judgePrinciples = [
+  {
+    title: "มนุษย์กำกับทุกขั้น",
+    description: "ระบบช่วยค้น ช่วยสรุป และช่วยเตรียมร่างเท่านั้น การวินิจฉัยยังเป็นหน้าที่ของผู้พิพากษา",
+    icon: Scale,
+  },
+  {
+    title: "อ้างอิงก่อนใช้งาน",
+    description: "ผลลัพธ์ที่ใช้ในงานตุลาการควรตรวจสอบที่มาได้เสมอ ทั้งมาตรา แนวคำพิพากษา และหลักฐานอ้างอิง",
+    icon: BookOpen,
+  },
+  {
+    title: "ตรวจสอบย้อนหลังได้",
+    description: "ทุกการใช้งานต้องตรวจสอบย้อนหลังได้ เพื่อสร้างความเชื่อมั่นต่อทั้งผู้ใช้และผู้กำกับดูแล",
+    icon: ShieldCheck,
+  },
+];
+
+const judgeSupportScope = [
+  "สรุปข้อเท็จจริงและประเด็นสำคัญของสำนวน",
+  "ค้นคดีคล้ายและแนวคำพิพากษาที่เกี่ยวข้อง",
+  "ช่วยจัดโครงสร้างร่างเอกสารเบื้องต้น",
+  "ตรวจข้อมูลอ่อนไหวก่อนเผยแพร่หรือส่งต่อ",
+];
+
+const judgeBoundaries = [
+  "ไม่ชี้ขาดผลคดีแทนผู้พิพากษา",
+  "ไม่แทนการตีความกฎหมายขั้นสุดท้าย",
+  "ไม่ควรใช้ผลลัพธ์โดยไม่ตรวจสอบ citation และบริบท",
+  "กรณีเสี่ยงสูงต้องใช้เป็นข้อมูลประกอบเท่านั้น",
+];
+
+const judgeFeatureMenus = [
+  {
+    title: "ดูภาพรวมการใช้งาน",
+    desc: "เริ่มจากภาพรวม หลักการกำกับ และสถานะความพร้อมของระบบสำหรับงานตุลาการ",
+    icon: BarChart3,
+    items: [
+      { tab: "overview" as const, label: "ภาพรวม", note: "ดูภาพรวม metrics และขอบเขตการใช้งาน" },
+      { tab: "triage" as const, label: "คุ้มครองข้อมูล (PDPA)", note: "ตรวจข้อมูลอ่อนไหวก่อนประมวลผล" },
+    ],
+  },
+  {
+    title: "ใช้เครื่องมือสนับสนุนคดี",
+    desc: "เข้าถึงเครื่องมือค้นกฎหมาย ค้นคดีคล้าย และช่วยจัดเตรียมเนื้อหาประกอบการพิจารณา",
+    icon: Gavel,
+    items: [
+      { tab: "tools" as const, label: "เครื่องมือ", note: "เปิดเครื่องมือช่วยค้นและค้นคว้า" },
+      { tab: "draft" as const, label: "ร่างคำพิพากษา", note: "ใช้ระบบช่วยร่างภายใต้ human oversight" },
+    ],
+  },
+  {
+    title: "ตรวจหลักฐานอ้างอิง",
+    desc: "ดูแหล่งข้อมูล ถอดเสียง และตรวจสอบความพร้อมของข้อมูลก่อนนำไปใช้อ้างอิง",
+    icon: Database,
+    items: [
+      { tab: "data" as const, label: "แหล่งข้อมูล", note: "ตรวจแหล่งข้อมูลและ ingestion ที่เกี่ยวข้อง" },
+      { tab: "transcribe" as const, label: "ถอดความเสียง", note: "แปลงเสียงเป็นข้อความเพื่อใช้ประกอบสำนวน" },
+    ],
+  },
+];
+
+const healthLabel = (value?: string) => {
+  if (value === "healthy") return "พร้อมใช้งาน";
+  if (value === "warning") return "เฝ้าระวัง";
+  return "ไม่มีข้อมูล";
+};
 
 const JudgeDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [chainValid, setChainValid] = useState<boolean | null>(null);
+  const [systemStats, setSystemStats] = useState<DashboardSystemStatsResponse | null>(null);
+  const [liveMetrics, setLiveMetrics] = useState<DashboardLiveResponse | null>(null);
   const [auditEntries, setAuditEntries] = useState(getAuditEntries().slice(0, 20));
   const [draftInput, setDraftInput] = useState("");
   const [draftResult, setDraftResult] = useState("");
@@ -39,7 +111,11 @@ const JudgeDashboard = () => {
     cfs: number; status: string;
   } | null>(null);
 
-  useEffect(() => { verifyChainIntegrity().then((r) => setChainValid(r.valid)); }, []);
+  useEffect(() => {
+    verifyChainIntegrity().then((r) => setChainValid(r.valid));
+    void apiClient.getDashboardSystemStats().then(setSystemStats).catch(() => setSystemStats(null));
+    void apiClient.getDashboardLive().then(setLiveMetrics).catch(() => setLiveMetrics(null));
+  }, []);
 
   const runDraft = async () => {
     if (!draftInput.trim() || draftLoading) return;
@@ -111,78 +187,185 @@ const JudgeDashboard = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80 md:opacity-0 mix-blend-multiply"></div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-lg">
-              <Building2 className="w-10 h-10 text-white" />
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-lg">
+                <Building2 className="w-10 h-10 text-white" />
+              </div>
+              <div className="text-primary-foreground">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/70 bg-gold/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(255,183,0,0.24)]"
+                >
+                  มุมมองเดิม (Legacy View)
+                </motion.div>
+                <motion.h1 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="font-heading text-3xl md:text-4xl font-bold mb-1">
+                  แดชบอร์ดตุลาการในมุมมองเดิม
+                </motion.h1>
+                <motion.p initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="opacity-90 text-sm md:text-base font-light max-w-2xl">
+                  มุมมองอ้างอิงของพื้นที่ทำงานเดิมสำหรับผู้พิพากษา ที่ออกแบบให้ AI ช่วยค้น ช่วยสรุป และช่วยตรวจทาน โดยไม่ล้ำเส้นดุลยพินิจ
+                </motion.p>
+              </div>
             </div>
-            <div className="text-primary-foreground">
-              <motion.h1 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="font-heading text-3xl md:text-4xl font-bold mb-1">
-                แดชบอร์ดตุลาการ
-              </motion.h1>
-              <motion.p initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="opacity-90 text-sm md:text-base font-light">
-                เครื่องมืออัจฉริยะสำหรับผู้พิพากษา ช่วยยกร่างและพิจารณาคดีด้วย AI
-              </motion.p>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                { label: "ขอบเขตการใช้งาน", value: "ตัวช่วยประกอบการพิจารณา" },
+                { label: "โหมดความเชื่อถือ", value: "อ้างอิง + ตรวจสอบย้อนหลัง" },
+                { label: "หลักการสำคัญ", value: "มนุษย์กำกับทุกขั้น" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-md">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/60">{item.label}</p>
+                  <p className="mt-1 text-sm font-bold text-white">{item.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 pb-8 flex-1">
-
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {tabs.map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap shadow-sm border ${
-                activeTab === tab.id 
-                  ? "bg-navy-deep text-white border-gold shadow-gold/20" 
-                  : "bg-card border-border text-muted-foreground hover:bg-muted"
-              }`}>
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? "text-gold" : ""}`} /> {tab.label}
-            </button>
-          ))}
+        <div className="mb-6">
+          <BackOfficeBridgeBanner
+            eyebrow="มุมมองเดิม (Legacy View)"
+            title="พื้นที่ช่วยงานผู้พิพากษาคือหน้าหลักใหม่สำหรับการค้น สรุป และเตรียมร่าง"
+            description="หน้านี้เป็นมุมมองเดิมสำหรับการอ้างอิงและเปรียบเทียบ ส่วนการใช้งานหลักควรเริ่มที่พื้นที่ช่วยงานผู้พิพากษา เพื่อให้เข้าสู่ฟีเจอร์ตามบทบาทได้ตรงกว่าและลดความซ้ำซ้อนของเมนู"
+            primaryAction={{ label: "เปิดพื้นที่ช่วยงานผู้พิพากษา", path: "/judge-workbench", icon: Gavel }}
+            secondaryAction={{ label: "เปิดศูนย์รวมแดชบอร์ดหลังบ้าน", path: "/back-office" }}
+            tone="gold"
+          />
         </div>
 
-        {/* Role-specific access notice */}
-        <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 mb-6">
-          <p className="text-xs text-muted-foreground flex items-center gap-2">
-            <Shield className="w-3.5 h-3.5 text-primary" />
-            <span className="font-medium text-primary">บทบาท: ตุลาการ / ผู้พิพากษา</span> — สิทธิ์เข้าถึง: ร่างคำพิพากษา, ค้นหาฎีกา, แม่แบบคำสั่ง, ตรวจสอบความเป็นธรรม
-          </p>
-        </div>
+        <section className="mb-6 rounded-[2rem] border border-border bg-card p-6 shadow-card">
+          <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">ทางลัดในมุมมองเดิม</p>
+              <h2 className="font-heading text-2xl font-black text-foreground">เปิดแท็บอ้างอิงของแดชบอร์ดเดิมได้โดยตรง</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                ลดเมนูซ้ำให้เหลือเพียงทางลัดไปยังแท็บสำคัญของแดชบอร์ดเดิม ส่วนการใช้งานประจำวันควรเริ่มจากพื้นที่ช่วยงานผู้พิพากษา
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+              หมวดปัจจุบัน: <span className="font-semibold text-foreground">{tabs.find((tab) => tab.id === activeTab)?.label ?? "ไม่ระบุ"}</span>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {judgeFeatureMenus.flatMap((menu) =>
+              menu.items.map((item) => (
+                <button
+                  key={`${menu.title}-${item.tab}-${item.label}`}
+                  type="button"
+                  onClick={() => setActiveTab(item.tab)}
+                  className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                    activeTab === item.tab
+                      ? "border-primary/25 bg-primary/5"
+                      : "border-border bg-muted/10 hover:bg-muted"
+                  }`}
+                >
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary/70">{menu.title}</p>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <span className="text-sm font-bold text-foreground">{item.label}</span>
+                    <Send className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
+                </button>
+              )),
+            )}
+          </div>
+        </section>
 
         {/* ภาพรวม — ภาษาเข้าใจง่าย ไม่มีศัพท์เทคนิค */}
         {activeTab === "overview" && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard icon={Database} value={`~${188}`} label="เอกสาร PDF" color="text-primary" />
-              <StatCard icon={FileText} value="25" label="คดีตัวอย่าง" color="text-teal" />
-              <StatCard icon={Clock} value="< 2 วินาที" label="เวลาค้นหาเฉลี่ย" color="text-accent-foreground" />
-              <StatCard icon={ShieldCheck} value="ปลอดภัย" label="ข้อมูลเก็บในไทย" color="text-teal" />
+              <StatCard icon={Database} value={systemStats ? String(systemStats.actual.pdf_files) : "—"} label="PDF ที่มีในระบบตอนนี้" color="text-primary" />
+              <StatCard icon={FileText} value={systemStats ? String(systemStats.actual.mock_cases) : "—"} label="ชุดคดีตัวอย่าง" color="text-teal" />
+              <StatCard icon={Clock} value={liveMetrics ? String(liveMetrics.requests_by_action_1h.search ?? 0) : "—"} label="การค้นหาชั่วโมงล่าสุด" color="text-accent-foreground" />
+              <StatCard icon={ShieldCheck} value={chainValid === null ? "รอตรวจ" : chainValid ? "ยืนยันแล้ว" : "เฝ้าระวัง"} label="สถานะ audit chain" color="text-teal" />
             </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {judgePrinciples.map((item) => (
+                <div key={item.title} className="rounded-[1.75rem] border border-border bg-card p-6 shadow-card">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-4 font-heading text-xl font-bold text-foreground">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <SafetyPipelinePreview
+              eyebrow="Judicial Trust Layer"
+              title="ผลลัพธ์สำหรับผู้พิพากษาผ่านรั้วคุมความเสี่ยงก่อนเสมอ"
+              description="ฝั่งตุลาการจะเห็นเฉพาะผลที่ผ่าน privacy, guardrails, multi-agent review และ audit chain แล้ว เพื่อให้ AI ช่วยงานซ้ำโดยไม่ล้ำเส้นดุลยพินิจ"
+              primaryAction={{ label: "เปิดพื้นที่ช่วยงานผู้พิพากษา", path: "/judge-workbench" }}
+              secondaryAction={{ label: "ดูคอนโซลติดตามการทำงาน", path: "/trace-console" }}
+              compact
+            />
+
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-teal" /> สถานะระบบ</h3>
+                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-teal" /> สถานะความพร้อม</h3>
                 <div className="space-y-4">
-                  <StatusRow label="ระบบค้นหา" value="พร้อมใช้งาน" ok />
-                  <StatusRow label="ระบบร่างเอกสาร" value="พร้อมใช้งาน" ok />
-                  <StatusRow label="ปกป้องข้อมูลส่วนบุคคล" value="เปิดใช้งาน" ok />
+                  <StatusRow label="ระบบค้นหา" value={healthLabel(liveMetrics?.system_health.search_pipeline)} ok={liveMetrics?.system_health.search_pipeline === "healthy"} />
+                  <StatusRow label="ระบบร่างเอกสาร" value={healthLabel(liveMetrics?.system_health.llm)} ok={liveMetrics?.system_health.llm === "healthy"} />
+                  <StatusRow label="ปกป้องข้อมูลส่วนบุคคล" value={liveMetrics ? `ไม่พบการรั่วไหล / 1h (${liveMetrics.ai_metrics.pii_leak_count ?? 0})` : "ไม่มีข้อมูล"} ok={liveMetrics ? (liveMetrics.ai_metrics.pii_leak_count ?? 0) === 0 : false} />
                   <StatusRow label="บันทึกการใช้งาน" value={chainValid === null ? "ตรวจสอบ..." : chainValid ? "ปกติ" : "มีปัญหา"} ok={chainValid === true} />
-                  <StatusRow label="ความเป็นธรรมของผลค้นหา" value="ผ่านเกณฑ์" ok />
+                  <StatusRow label="ความเชื่อมั่นของผลค้นหา" value={liveMetrics ? `${Math.round(liveMetrics.ai_metrics.avg_honesty_score * 100)}%` : "ไม่มีข้อมูล"} ok={liveMetrics ? liveMetrics.ai_metrics.avg_honesty_score >= 0.8 : false} />
                 </div>
               </div>
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-card md:col-span-2">
-                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> สถิติคดีในสัปดาห์นี้</h3>
-                <div className="h-40 flex items-end justify-around gap-2 px-4 pb-2 border-b border-border mb-4">
-                  {[65, 40, 85, 30, 95, 55, 78].map((h, i) => (
-                    <div key={i} className="bg-primary/20 hover:bg-primary/40 transition-colors w-full rounded-t-md relative group">
-                      <div style={{ height: `${h}%` }} className="bg-primary rounded-t-md" />
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[11px] font-bold transition-opacity">{h}%</div>
+
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> ระบบช่วยอะไร</h3>
+                <div className="space-y-3">
+                  {judgeSupportScope.map((item) => (
+                    <div key={item} className="flex items-start gap-3 rounded-xl bg-muted/30 px-4 py-3">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-teal" />
+                      <p className="text-sm text-muted-foreground">{item}</p>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between text-[11px] text-muted-foreground px-2">
-                  <span>จ.</span><span>อ.</span><span>พ.</span><span>พฤ.</span><span>ศ.</span><span>ส.</span><span>อา.</span>
+              </div>
+
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-accent-foreground" /> ระบบไม่ทำแทน</h3>
+                <div className="space-y-3">
+                  {judgeBoundaries.map((item) => (
+                    <div key={item} className="flex items-start gap-3 rounded-xl bg-muted/30 px-4 py-3">
+                      <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-accent-foreground" />
+                      <p className="text-sm text-muted-foreground">{item}</p>
+                    </div>
+                  ))}
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h3 className="font-heading font-bold flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> ภาพรวมภาระงานรายสัปดาห์</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    ใช้ดูสัญญาณ workload และช่วงเวลาที่การค้นหรือการเตรียมร่างเอกสารมีความหนาแน่นสูงขึ้น
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/20 px-4 py-2 text-xs font-medium text-muted-foreground">
+                  ตัวอย่างภาพรวมเพื่อใช้สื่อสารแนวคิด dashboard สำหรับตุลาการ
+                </div>
+              </div>
+              <div className="mt-6 h-40 flex items-end justify-around gap-2 px-4 pb-2 border-b border-border mb-4">
+                {[65, 40, 85, 30, 95, 55, 78].map((h, i) => (
+                  <div key={i} className="bg-primary/20 w-full rounded-t-md relative group">
+                    <div style={{ height: `${h}%` }} className="bg-primary rounded-t-md transition-all" />
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[11px] font-bold transition-opacity">{h}%</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground px-2">
+                <span>จ.</span><span>อ.</span><span>พ.</span><span>พฤ.</span><span>ศ.</span><span>ส.</span><span>อา.</span>
               </div>
             </div>
           </div>
@@ -195,10 +378,9 @@ const JudgeDashboard = () => {
               { icon: FileText, title: "ร่างคำพิพากษา", desc: "AI ช่วยยกร่าง + อ้างอิงฎีกาและตัวบท", action: () => setActiveTab("draft"), color: "bg-teal/10 text-teal" },
               { icon: Mic, title: "ถอดความเสียงพยาน", desc: "แปลงเสียงไต่สวนพยานบนบัลลังก์", action: () => setActiveTab("transcribe"), color: "bg-secondary text-foreground", badge: "ใหม่" },
               { icon: BookOpen, title: "ค้นหาฎีกา", desc: "ค้นหาคำพิพากษาที่เกี่ยวข้อง", action: () => navigate("/search?role=government"), color: "bg-accent/10 text-accent-foreground" },
-              { icon: ShieldCheck, title: "ตรวจสอบความเป็นธรรม", desc: "ตรวจสอบ Bias ด้วย Responsible AI", action: () => navigate("/responsible-ai"), color: "bg-primary/10 text-primary" },
+              { icon: ShieldCheck, title: "ตรวจสอบความเป็นธรรม", desc: "ตรวจความเสี่ยงเรื่องอคติด้วยระบบกำกับ AI", action: () => navigate("/responsible-ai"), color: "bg-primary/10 text-primary" },
               { icon: BarChart3, title: "สถิติคดีประจำวัน", desc: "ดูสถานะคดีในความรับผิดชอบ", action: () => setActiveTab("overview"), color: "bg-primary/5 text-primary" },
               { icon: Database, title: "แหล่งข้อมูล", desc: "ดึงข้อมูล OpenLaw มาตรฐานล่าสุด", action: () => setActiveTab("data"), color: "bg-teal/5 text-teal" },
-              { icon: Scale, title: "แม่แบบคำสั่ง AI", desc: "รวม Prompt สำหรับช่วยตัดสิน", action: () => navigate("/prompts"), color: "bg-accent/10 text-accent-foreground" },
             ].map((t, i) => (
               <motion.button key={t.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                 onClick={t.action} className="bg-card border border-border rounded-2xl p-5 text-left hover:shadow-card-hover transition-shadow relative">
@@ -219,43 +401,43 @@ const JudgeDashboard = () => {
             <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-heading font-bold flex items-center gap-2 text-primary">
-                  <Mic className="w-6 h-6" /> ระบบ AI ถอดความเสียง (Legal Speech-to-Text)
+                  <Mic className="w-6 h-6" /> ระบบช่วยถอดความเสียงการพิจารณา
                 </h3>
-                <span className="text-[10px] bg-gold/10 text-gold border border-gold/20 px-2 py-1 rounded font-bold">READY FOR COURTROOM</span>
+                <span className="text-[10px] bg-gold/10 text-gold border border-gold/20 px-2 py-1 rounded font-bold">พร้อมสาธิต</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">แปลงเสียงคำให้การบนบัลลังก์ศาลเป็นข้อความอัตโนมัติแบบ Real-time พร้อมคัดกรองศัพท์กฎหมายเฉพาะทาง</p>
+              <p className="text-sm text-muted-foreground mb-6">แปลงเสียงคำให้การหรือการไต่สวนเป็นข้อความ เพื่อช่วยจัดทำบันทึกเบื้องต้น โดยยังต้องมีการตรวจทานก่อนใช้งานจริง</p>
               
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-1 space-y-4">
                   <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Audio Input Source</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">แหล่งสัญญาณเสียง</p>
                     <select className="w-full bg-card border border-border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-primary">
-                      <option>Microphone (Built-in)</option>
-                      <option>Courtroom Mixer (Line-in)</option>
-                      <option>External USB Mic</option>
+                      <option>ไมโครโฟนในเครื่อง</option>
+                      <option>ชุดผสมเสียงห้องพิจารณา</option>
+                      <option>ไมโครโฟน USB ภายนอก</option>
                     </select>
                   </div>
                   <div className="p-4 bg-teal/5 rounded-xl border border-teal/20">
-                    <p className="text-[10px] font-bold text-teal uppercase mb-2">AI Precision Mode</p>
+                    <p className="text-[10px] font-bold text-teal uppercase mb-2">โหมดช่วยอ่านศัพท์กฎหมาย</p>
                     <div className="flex items-center gap-2">
                        <CheckCircle2 className="w-4 h-4 text-teal" />
-                       <span className="text-xs font-bold font-heading">Legal Terminology Enabled</span>
+                       <span className="text-xs font-bold font-heading">เปิดคลังศัพท์กฎหมายเฉพาะทาง</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="md:col-span-2 border-2 border-dashed border-border rounded-2xl p-10 text-center bg-muted/20 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center group cursor-pointer">
-                  <motion.div 
-                    animate={{ scale: [1, 1.1, 1] }} 
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 shadow-xl"
-                  >
-                    <Mic className="w-10 h-10 text-primary" />
-                  </motion.div>
-                  <h4 className="font-bold text-lg mb-2">คลิกเพื่อเริ่มบันทึกการพิจารณาคดี</h4>
-                  <p className="text-xs text-muted-foreground max-w-[200px]">รองรับการทำงานแบบ Live Stream ส่งข้อความไปยังหน้าจาตุลาการทันที</p>
+              <div className="md:col-span-2 border-2 border-dashed border-border rounded-2xl p-10 text-center bg-muted/20 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center group cursor-pointer">
+                <motion.div 
+                  animate={{ scale: [1, 1.1, 1] }} 
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 shadow-xl"
+                >
+                  <Mic className="w-10 h-10 text-primary" />
+                </motion.div>
+                  <h4 className="font-bold text-lg mb-2">เริ่มถอดความการพิจารณาคดี</h4>
+                  <p className="text-xs text-muted-foreground max-w-[260px]">ใช้สำหรับช่วยจัดทำบันทึกข้อความจากการไต่สวนหรือคำให้การ โดยยังต้องตรวจทานก่อนใช้งานจริง</p>
                   <button className="mt-6 bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
-                    Start Live Transcription
+                    เริ่มถอดความ
                   </button>
                 </div>
               </div>
@@ -325,7 +507,7 @@ const JudgeDashboard = () => {
                 className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y" />
               {/* Example draft inputs */}
               <div className="mt-2 mb-3">
-                <p className="text-[11px] text-muted-foreground mb-1.5">💡 ตัวอย่างข้อเท็จจริง</p>
+                <p className="text-[11px] text-muted-foreground mb-1.5">ตัวอย่างข้อเท็จจริง</p>
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     { label: "กู้ยืมเงิน", text: "โจทก์ฟ้องว่าจำเลยกู้ยืมเงินจำนวน 300,000 บาท ทำสัญญากู้ยืมลงวันที่ 15 มี.ค. 2567 กำหนดชำระคืนภายใน 1 ปี พร้อมดอกเบี้ยร้อยละ 7.5 ต่อปี ครบกำหนดแล้วจำเลยไม่ชำระ ทวงถาม 3 ครั้งแล้วเพิกเฉย ขอให้ศาลพิพากษาให้จำเลยชำระเงินต้นพร้อมดอกเบี้ย" },

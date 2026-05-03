@@ -15,6 +15,69 @@
 
 export type LayerName = "L0" | "L1" | "L2" | "L3" | "L4" | "L5" | "L6";
 
+export const LAYER_ORDER: LayerName[] = ["L0", "L1", "L2", "L3", "L4", "L5", "L6"];
+
+export const LAYER_METADATA: Record<
+  LayerName,
+  {
+    title: string;
+    description: string;
+    owner: string;
+    runtime: string;
+    feynmanStage: "outside" | "entry" | "core";
+  }
+> = {
+  L0: {
+    title: "Query Router",
+    description: "วิเคราะห์ intent และวางแผนเส้นทางการประมวลผล",
+    owner: "Routing Layer",
+    runtime: "LegalGuard Query Planner",
+    feynmanStage: "outside",
+  },
+  L1: {
+    title: "Retrieval Context",
+    description: "ดึง context จาก memory และ knowledge hints ที่เกี่ยวข้อง",
+    owner: "Knowledge Layer",
+    runtime: "Memory + Retrieval Context",
+    feynmanStage: "outside",
+  },
+  L2: {
+    title: "Quality Filter",
+    description: "คัดกรอง query, ปกปิด PII และตรวจสิทธิ์การเข้าถึง",
+    owner: "Trust Layer",
+    runtime: "PII Masking + Access Gate",
+    feynmanStage: "outside",
+  },
+  L3: {
+    title: "Fairness Baseline",
+    description: "ประเมิน fairness baseline ก่อนส่งต่อเข้าชั้นความปลอดภัย",
+    owner: "Risk Layer",
+    runtime: "CFS Baseline",
+    feynmanStage: "outside",
+  },
+  L4: {
+    title: "Hybrid Reranking",
+    description: "ประเมิน latent relevance และจัดลำดับความสำคัญของประเด็น",
+    owner: "Inference Layer",
+    runtime: "LeJEPA + Hybrid Scoring",
+    feynmanStage: "outside",
+  },
+  L5: {
+    title: "Safety Gate",
+    description: "ตรวจ governance, audit integrity และ risk posture",
+    owner: "Governance Layer",
+    runtime: "RAAIA Safety Gate",
+    feynmanStage: "entry",
+  },
+  L6: {
+    title: "Multi-Agent",
+    description: "ประมวลผล reasoning และ consensus ของหลายเอเจนต์",
+    owner: "Agent Layer",
+    runtime: "Feynman Multi-Agent Engine",
+    feynmanStage: "core",
+  },
+};
+
 export interface SpanAttributes {
   layer: LayerName;
   operation: string;
@@ -191,6 +254,27 @@ export class LegalTracer {
   }
 
   /**
+   * Attach additional attributes to an existing span.
+   */
+  public addSpanAttributes(
+    traceId: string,
+    spanId: string,
+    attrs: Record<string, string | number | boolean | undefined>
+  ): Span | null {
+    const spans = this.traces.get(traceId);
+    if (!spans) return null;
+
+    const span = spans.find((s) => s.spanId === spanId);
+    if (!span) return null;
+
+    span.attributes = {
+      ...span.attributes,
+      ...attrs,
+    };
+    return span;
+  }
+
+  /**
    * Finalize and export a complete trace.
    */
   public finishTrace(traceId: string): TraceResult | null {
@@ -213,7 +297,11 @@ export class LegalTracer {
     // Layer breakdown
     const layerBreakdown: Record<LayerName, number> = {} as Record<LayerName, number>;
     for (const layer of Object.keys(LAYER_BUDGETS) as LayerName[]) {
-      const layerSpans = spans.filter((s) => s.layer === layer && s.duration !== undefined);
+      const layerSpans = spans.filter((s) => {
+        if (s.layer !== layer || s.duration === undefined) return false;
+        const parent = s.parentSpanId ? spans.find((candidate) => candidate.spanId === s.parentSpanId) : null;
+        return parent?.layer !== layer;
+      });
       layerBreakdown[layer] = layerSpans.reduce((sum, s) => sum + (s.duration ?? 0), 0);
     }
 

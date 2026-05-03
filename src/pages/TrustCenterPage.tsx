@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   Activity,
+  AlertTriangle,
   BadgeCheck,
   Clock3,
   Database,
@@ -164,51 +165,6 @@ interface RetryChainResponse {
   metrics: RetryChainMetrics | null;
 }
 
-const MOCK_LIVE: LiveMetricsPayload = {
-  requests_1h: 12,
-  requests_24h: 188,
-  avg_confidence_1h: 0.87,
-  cache_hit_rate_1h: 0.31,
-  error_rate_1h: 0.01,
-  total_audit_entries: 256,
-  system_health: {
-    api: "healthy",
-    search_pipeline: "healthy",
-    audit: "healthy",
-    governance: "healthy",
-  },
-  ai_metrics: {
-    avg_honesty_score: 0.91,
-    hallucination_rate: 0.01,
-    pii_leak_count: 0,
-  },
-};
-
-const MOCK_RELEASE: ReleaseGuardPayload = {
-  release_allowed: true,
-  checks: [
-    { name: "PII Masking", detail: "ปกปิดข้อมูลส่วนบุคคลผ่านเกณฑ์", passed: true },
-    { name: "Audit Integrity", detail: "hash chain ถูกต้อง", passed: true },
-    { name: "Risk Tier Caps", detail: "confidence cap ทำงานครบ", passed: true },
-    { name: "Governance Checks", detail: "release guard พร้อมใช้งาน", passed: true },
-  ],
-};
-
-const MOCK_AUDIT: RecentAuditPayload = {
-  chain_valid: true,
-  entries: [
-    { id: "1", action: "search", query_preview: "ค้นหาคดีฉ้อโกง", confidence: 0.84, agent_role: "researcher", created_at: "ล่าสุด" },
-    { id: "2", action: "chat", query_preview: "ถามขั้นตอนการฟ้องคดี", confidence: 0.76, agent_role: "assistant", created_at: "ล่าสุด" },
-    { id: "3", action: "complaint_verification", query_preview: "ตรวจคำฟ้องคดีแพ่ง", confidence: 0.91, agent_role: "reviewer", created_at: "ล่าสุด" },
-  ],
-};
-
-const MOCK_TLAGF: TlagfPayload[] = [
-  { pillar: "transparency", name_th: "ความโปร่งใส", score: 0.92, status: "active", details: "แสดงความเชื่อถือและ source traceability" },
-  { pillar: "privacy", name_th: "ความเป็นส่วนตัว", score: 0.97, status: "active", details: "PII masking + PDPA-by-default" },
-  { pillar: "accountability", name_th: "ความรับผิดชอบ", score: 0.95, status: "active", details: "audit log + release guard" },
-];
-
 const WORKSPACE_LABELS: Record<WorkspaceFlow, string> = {
   search: "Search Workspace",
   chat: "Chat Workspace",
@@ -259,11 +215,12 @@ const downloadJson = (payload: unknown, filename: string) => {
 const TrustCenterPage = () => {
   const backendStatus = useBackendStatus();
   const importInputRef = useRef<HTMLInputElement>(null);
-  const [liveMetrics, setLiveMetrics] = useState<LiveMetricsPayload>(MOCK_LIVE);
-  const [releaseGuard, setReleaseGuard] = useState<ReleaseGuardPayload>(MOCK_RELEASE);
-  const [recentAudit, setRecentAudit] = useState<RecentAuditPayload>(MOCK_AUDIT);
-  const [tlagf, setTlagf] = useState<TlagfPayload[]>(MOCK_TLAGF);
+  const [liveMetrics, setLiveMetrics] = useState<LiveMetricsPayload | null>(null);
+  const [releaseGuard, setReleaseGuard] = useState<ReleaseGuardPayload | null>(null);
+  const [recentAudit, setRecentAudit] = useState<RecentAuditPayload | null>(null);
+  const [tlagf, setTlagf] = useState<TlagfPayload[]>([]);
   const [jobs, setJobs] = useState<IngestionJob[]>([]);
+  const [overviewError, setOverviewError] = useState("");
   const [memoryStats, setMemoryStats] = useState<MemoryStats>(() => memory.getStats());
   const [workspaceSummaries, setWorkspaceSummaries] = useState<WorkspaceSummary[]>(() => listWorkspaceSummaries());
   const [selectedAuditEntryId, setSelectedAuditEntryId] = useState("");
@@ -282,6 +239,7 @@ const TrustCenterPage = () => {
   }, []);
 
   const loadOverview = useCallback(async () => {
+    setOverviewError("");
     try {
       const [liveResp, releaseResp, auditResp, tlagfResp, jobsResp] = await Promise.all([
         fetch(`${API_BASE}/dashboard/live`).catch(() => null),
@@ -316,8 +274,11 @@ const TrustCenterPage = () => {
             : (payload.jobs[0]?.job_id || "")
         ));
       }
+      if (!liveResp?.ok && !releaseResp?.ok && !auditResp?.ok && !tlagfResp?.ok && !jobsResp?.ok) {
+        setOverviewError("Trust Center ยังไม่สามารถยืนยันสถานะจาก backend ได้ จึงไม่แสดงคะแนนหรือสถานะจำลองแทนข้อมูลจริง");
+      }
     } catch {
-      // Keep fallback data for resilient trust display.
+      setOverviewError("Trust Center ยังไม่สามารถยืนยันสถานะจาก backend ได้ จึงไม่แสดงคะแนนหรือสถานะจำลองแทนข้อมูลจริง");
     } finally {
       refreshGovernance();
     }
@@ -377,8 +338,8 @@ const TrustCenterPage = () => {
   }, [selectedJobId]);
 
   const passedChecks = useMemo(
-    () => releaseGuard.checks.filter((check) => check.passed).length,
-    [releaseGuard.checks],
+    () => releaseGuard?.checks.filter((check) => check.passed).length ?? 0,
+    [releaseGuard],
   );
 
   const selectedJob = useMemo(
@@ -463,18 +424,30 @@ const TrustCenterPage = () => {
           </div>
         </section>
 
+        {overviewError ? (
+          <section className="mb-8 rounded-[2rem] border border-destructive/20 bg-destructive/5 p-5">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive" />
+              <div>
+                <p className="text-sm font-semibold text-destructive">Trust Center ยังยืนยันสถานะจากระบบหลักไม่ได้</p>
+                <p className="mt-1 text-sm text-destructive/90">{overviewError}</p>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <section className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <TrustMetricCard
             icon={<Activity className="h-4 w-4 text-primary" />}
             title="Operational Readiness"
-            value={`${liveMetrics.requests_1h} req / 1h`}
-            note={`Error rate ${(liveMetrics.error_rate_1h * 100).toFixed(1)}% · Cache ${(liveMetrics.cache_hit_rate_1h * 100).toFixed(0)}%`}
+            value={liveMetrics ? `${liveMetrics.requests_1h} req / 1h` : "Unavailable"}
+            note={liveMetrics ? `Error rate ${(liveMetrics.error_rate_1h * 100).toFixed(1)}% · Cache ${(liveMetrics.cache_hit_rate_1h * 100).toFixed(0)}%` : "ต้องใช้ backend metrics จริงเพื่อยืนยันสถานะ"}
           />
           <TrustMetricCard
             icon={<Hash className="h-4 w-4 text-teal" />}
             title="Audit Integrity"
-            value={recentAudit.chain_valid ? "Chain Valid" : "Needs Review"}
-            note={`${liveMetrics.total_audit_entries} audit entries tracked`}
+            value={recentAudit ? (recentAudit.chain_valid ? "Chain Valid" : "Needs Review") : "Unavailable"}
+            note={liveMetrics ? `${liveMetrics.total_audit_entries} audit entries tracked` : "ยังไม่พบ audit snapshot จาก backend"}
           />
           <TrustMetricCard
             icon={<Database className="h-4 w-4 text-accent-foreground" />}
@@ -485,8 +458,8 @@ const TrustCenterPage = () => {
           <TrustMetricCard
             icon={<BadgeCheck className="h-4 w-4 text-primary" />}
             title="Governance Guard"
-            value={`${passedChecks}/${releaseGuard.checks.length} checks passed`}
-            note={`Honesty ${(liveMetrics.ai_metrics.avg_honesty_score * 100).toFixed(0)}% · PII leaks ${liveMetrics.ai_metrics.pii_leak_count}`}
+            value={releaseGuard ? `${passedChecks}/${releaseGuard.checks.length} checks passed` : "Unavailable"}
+            note={liveMetrics ? `Honesty ${(liveMetrics.ai_metrics.avg_honesty_score * 100).toFixed(0)}% · PII leaks ${liveMetrics.ai_metrics.pii_leak_count}` : "ยังไม่พบ governance metrics จาก backend"}
           />
         </section>
 
@@ -494,19 +467,21 @@ const TrustCenterPage = () => {
           <div className="xl:col-span-3 space-y-6">
             <Panel title="System Health" icon={<Workflow className="h-5 w-5 text-primary" />}>
               <div className="grid gap-3 sm:grid-cols-2">
-                {Object.entries(liveMetrics.system_health).map(([service, status]) => (
+                {liveMetrics ? Object.entries(liveMetrics.system_health).map(([service, status]) => (
                   <div key={service} className="rounded-2xl border border-border bg-muted/30 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{service}</p>
                     <p className={`mt-1 text-sm font-bold ${status === "healthy" ? "text-teal" : "text-destructive"}`}>{status}</p>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-sm text-muted-foreground">ยังไม่มี system health จาก backend</p>
+                )}
               </div>
             </Panel>
 
             <Panel title="Recent Audit Signals" icon={<Eye className="h-5 w-5 text-teal" />}>
               <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
                 <div className="space-y-3">
-                  {recentAudit.entries.map((entry) => (
+                  {recentAudit?.entries.map((entry) => (
                     <button
                       key={entry.id}
                       type="button"
@@ -526,7 +501,7 @@ const TrustCenterPage = () => {
                         confidence {entry.confidence !== null ? `${Math.round(entry.confidence * 100)}%` : "n/a"} · {entry.created_at}
                       </p>
                     </button>
-                  ))}
+                  )) ?? <p className="text-sm text-muted-foreground">ยังไม่มี audit rows จาก backend</p>}
                 </div>
 
                 <div className="rounded-2xl border border-border bg-muted/20 p-4">
@@ -538,7 +513,7 @@ const TrustCenterPage = () => {
                     <div className="space-y-3">
                       <div className="flex justify-end">
                         <Link
-                          to={`/it?audit=${encodeURIComponent(selectedAuditEntry.id)}`}
+                          to={`/it-legacy?audit=${encodeURIComponent(selectedAuditEntry.id)}`}
                           className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
                         >
                           <Eye className="h-3.5 w-3.5" />
@@ -570,7 +545,7 @@ const TrustCenterPage = () => {
           <div className="xl:col-span-2 space-y-6">
             <Panel title="Privacy & Governance" icon={<Lock className="h-5 w-5 text-accent-foreground" />}>
               <div className="space-y-3">
-                {tlagf.map((pillar) => (
+                {tlagf.length > 0 ? tlagf.map((pillar) => (
                   <div key={pillar.pillar} className="rounded-2xl border border-border bg-muted/20 px-4 py-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-foreground">{pillar.name_th}</p>
@@ -578,13 +553,13 @@ const TrustCenterPage = () => {
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{pillar.details}</p>
                   </div>
-                ))}
+                )) : <p className="text-sm text-muted-foreground">ยังไม่มี governance pillars จาก backend</p>}
               </div>
             </Panel>
 
             <Panel title="Release Guard" icon={<Shield className="h-5 w-5 text-primary" />}>
               <div className="space-y-3">
-                {releaseGuard.checks.map((check, index) => (
+                {releaseGuard?.checks.map((check, index) => (
                   <div key={`${check.name ?? check.check}-${index}`} className="rounded-2xl border border-border bg-muted/20 px-4 py-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-foreground">{check.name ?? check.check ?? "guard_check"}</p>
@@ -594,7 +569,7 @@ const TrustCenterPage = () => {
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{check.detail ?? check.status ?? "พร้อมใช้งาน"}</p>
                   </div>
-                ))}
+                )) ?? <p className="text-sm text-muted-foreground">ยังไม่มี release guard checks จาก backend</p>}
               </div>
             </Panel>
           </div>
@@ -644,7 +619,7 @@ const TrustCenterPage = () => {
                   <div className="space-y-4">
                     <div className="flex justify-end">
                       <Link
-                        to={`/it?job=${encodeURIComponent(selectedJob.job_id)}`}
+                        to={`/it-legacy?job=${encodeURIComponent(selectedJob.job_id)}`}
                         className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
                       >
                         <GitBranch className="h-3.5 w-3.5" />
@@ -813,7 +788,7 @@ const TrustCenterPage = () => {
               <div className="space-y-3">
                 <SummaryMiniCard label="Memory Tokens" value={`${memoryStats.totalTokensEstimate}`} />
                 <SummaryMiniCard label="Evictions" value={`${memoryStats.evictionsTotal}`} />
-                <SummaryMiniCard label="Audit Chain" value={recentAudit.chain_valid ? "valid" : "review"} />
+                <SummaryMiniCard label="Audit Chain" value={recentAudit ? (recentAudit.chain_valid ? "valid" : "review") : "unavailable"} />
                 <SummaryMiniCard label="Lineage Selected" value={selectedJobId || "—"} mono />
               </div>
             </Panel>

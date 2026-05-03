@@ -1,0 +1,617 @@
+# 📋 เตรียมตัวเข้าพบ Mentor — ทีม Honest Predictor
+## ETDA Responsible AI Innovation Hackathon 2026 — Challenge 3
+
+---
+
+## 👥 Mentor Profiles + สิ่งที่ควรปรึกษาแต่ละท่าน
+
+### 1. ดร.ระดาภัทร จงธรรมคุณ — ที่ปรึกษาสำนักงานศาลปกครอง
+
+ความเชี่ยวชาญ: กระบวนการทำงานของศาลปกครอง
+
+สิ่งที่ระบบเราสอดคล้อง:
+- รองรับข้อมูลศาลปกครอง (Set B) ครบ: แบบฟอร์ม ปค.1, คู่มือ, FAQ, ระเบียบ, พ.ร.บ.จัดตั้งศาลปกครอง
+- Complaint Validation ตรวจองค์ประกอบ มาตรา 56, เขตอำนาจศาล, ส่วนได้เสีย, ระยะเวลา 90 วัน
+- Case Classification แยก "คดีปกครอง" จาก "คดีแพ่ง/อาญา" อัตโนมัติ
+- Role label ปรับแล้ว: "ผู้พิพากษา / ตุลาการศาลปกครอง"
+
+ควรถาม:
+- ขั้นตอนรับคำฟ้อง ปค.1 ในทางปฏิบัติจริง มีจุดไหนที่ AI ช่วยได้มากที่สุด?
+- เกณฑ์ตรวจสอบคำฟ้อง (B4.1-B4.7) ที่ยังรอจากศาล — มีแนวทางได้ข้อมูลเร็วขึ้นไหม?
+- ตุลาการศาลปกครองมีท่าทีต่อ AI ยังไง? ต่างจากผู้พิพากษาศาลยุติธรรมไหม?
+- Landmark Cases (B5.4) ที่สำคัญที่สุด 10 คดี คืออะไร?
+
+---
+
+### 2. ดร.ศักดิ์ เสกขุนทด — ที่ปรึกษาอาวุโส ETDA
+
+ความเชี่ยวชาญ: Responsible AI + แนวปฏิบัติ 12 ประการ AI ในกระบวนการยุติธรรม
+
+สิ่งที่ระบบเราสอดคล้อง:
+- RAAIA 3.1 Framework: Risk Tier R0-R5, Honesty Score 6 มิติ, Circuit Breaker
+- Anti-Hallucination 7 ชั้น (RAG → Citation Verify → Guardrails → Debate → CBB → Flag → "ไม่รู้")
+- สอดคล้องคำแนะนำประธานศาลฎีกา 2568 ทุกข้อ
+- CFS Fairness Score ตรวจ bias 5 มิติ
+- CAL-130 Audit Log SHA-256 Hash Chain
+- AI Disclosure: ทุก response มี disclaimer + Confidence Badge
+
+ควรถาม:
+- แนวปฏิบัติ 12 ประการของท่าน — ระบบเราตอบครบทุกข้อหรือยัง? ขาดข้อไหน?
+- ETDA มองว่า Responsible AI ในศาลควรมี certification หรือ standard อะไรเพิ่ม?
+- Risk Tier R5 (AI ห้ามตัดสินคดี) — ท่านเห็นด้วยกับเส้นแบ่งนี้ไหม? ควรปรับตรงไหน?
+- Honesty Score + Circuit Breaker — approach นี้เพียงพอสำหรับ legal domain ไหม?
+- กรรมการจะให้น้ำหนัก Responsible AI มากแค่ไหนในการตัดสิน?
+
+---
+
+### 3. คุณสุราสินี มิทอง — Associate Director, KPMG Thailand
+
+ความเชี่ยวชาญ: AI Governance, Data Governance, Responsible AI consulting
+
+สิ่งที่ระบบเราสอดคล้อง:
+- Data Classification 4 ระดับ (สาธารณะ/ภายใน/ลับ/ลับมาก)
+- PII Masking 9 รูปแบบ ก่อนส่ง LLM ทุกครั้ง (PDPA compliance)
+- Role-based Access Control (citizen/lawyer/government/judge)
+- GLUE-RAAIA Governance Fusion Score
+- Legal Risk Score (P_risk)
+- Ethical Feedback Loop
+- Data Processing Register (บันทึก data flow ทั้งหมด)
+
+ควรถาม:
+- Data Governance framework ของเรา (4 ระดับ + PII Masking + Audit) เพียงพอสำหรับหน่วยงานรัฐไหม?
+- PDPA compliance — มีจุดไหนที่เรายังขาด?
+- AI Governance ในองค์กรขนาดใหญ่ (ศาล 262 แห่ง) ต้องมีอะไรเพิ่มจาก technical controls?
+- KPMG เห็น trend อะไรเรื่อง AI Governance ในภาครัฐไทย?
+- Governance Score ของเรา (GLUE-RAAIA Fusion) — approach นี้สมเหตุสมผลไหม?
+
+---
+
+### 4. คุณสถาพน พัฒนะคูหา — CEO, Guardian AI Lab
+
+ความเชี่ยวชาญ: Enterprise AI Solution สำหรับหน่วยงานรัฐ, ที่ปรึกษา AI แห่งชาติ
+
+สิ่งที่ระบบเราสอดคล้อง:
+- LangGraph Multi-Agent (5 agents: Manager/Researcher/Reviewer/Compliance/Drafter)
+- Anti-Collusion Debate Protocol (Commit-Reveal SHA-256)
+- Confidence-Bounded Bayesian Framework
+- Strategic Dishonesty Detection
+- Missing Data Penalty (Unknown Unknowns)
+- Phase 3 Roadmap: LatentMAS optimization
+
+ควรถาม:
+- Enterprise AI สำหรับหน่วยงานรัฐ — อะไรคือ blocker ใหญ่สุดในการ deploy จริง?
+- Multi-Agent Debate approach ของเรา — ท่านเห็นว่า practical ไหมสำหรับ production?
+- Guardian AI Lab มีประสบการณ์กับ legal domain ไหม? มี insight อะไร?
+- ถ้าจะ scale จาก hackathon → production ในศาลจริง ต้องเตรียมอะไรบ้าง?
+- AI แห่งชาติมีแผนเรื่อง Legal AI ไหม? ระบบเราสอดคล้องกับทิศทางนั้นไหม?
+
+---
+
+### 5. คุณศาศวัต นธการกิจกุล (Net) — Data & AI Solutions Lead, AWS Thailand
+
+ความเชี่ยวชาญ: AI Infrastructure, Cloud Strategy, AWS Services
+
+สิ่งที่ระบบเราสอดคล้อง:
+- ออกแบบบน AWS ทั้งหมด: Bedrock Claude, S3, ECR, EKS, RDS, ElastiCache, KMS, WAF
+- Bedrock Claude ทำงานแล้ว (Bearer Token)
+- Ollama Local Fallback เมื่อ cloud ล่ม
+- Multi-AZ design สำหรับ HA
+- Cost estimation: $690/เดือน (Reserved)
+
+ควรถาม:
+- Bedrock Claude 3.5 Sonnet available ใน ap-southeast-1 ไหม?
+- Bedrock Guardrails — content filter block คำศัพท์กฎหมายไทย (ฆ่า, ข่มขืน) ไหม? config ยังไง?
+- Titan Embeddings รองรับ Thai ดีแค่ไหน เทียบ OpenAI?
+- Sandbox account มี limit อะไร? EKS/RDS Multi-AZ สร้างได้ไหม?
+- KMS CMK setup สำหรับ data sovereignty ทำยังไง?
+- มี hackathon credits หรือ AWS support พิเศษไหม?
+- Cognito รองรับ ThaID เป็น external OIDC provider ได้ไหม?
+- แนะนำ EKS หรือ ECS Fargate สำหรับ hackathon?
+
+---
+
+### 5.1 คำถามเชิงลึกจัดกลุ่มสำหรับคุณศาศวัต (Net) — Data & AI Solutions Lead, AWS Thailand
+
+ท่าน Net เชี่ยวชาญ AI Infrastructure, Cloud Strategy, Bedrock ecosystem และมีประสบการณ์ช่วย enterprise/GovTech deploy AI บน AWS ในไทย
+คำถามจัดกลุ่มตามหัวข้อ เลือก 3-5 ข้อหลัก + สำรอง
+
+#### กลุ่ม A: Bedrock & LLM Strategy สำหรับ Legal-Tech
+
+1. **Bedrock Model Selection สำหรับภาษาไทยเชิงกฎหมาย**
+   เราใช้ Bedrock Claude เป็น LLM หลักอยู่ (Bearer Token) และออกแบบ fallback chain: Bedrock → Typhoon → SeaLLM → Ollama
+   อยากทราบว่า ในปี 2026 Bedrock มี model ไหนที่ optimize สำหรับ Thai legal text โดยเฉพาะ? และ Claude 3.5 Sonnet available ใน ap-southeast-1 เต็มรูปแบบแล้วหรือยัง?
+
+2. **Bedrock Guardrails กับคำศัพท์กฎหมายไทย**
+   Legal domain มีคำที่ content filter อาจ block ผิด เช่น "ฆ่า", "ข่มขืน", "ฉ้อโกง", "ยาเสพติด" ซึ่งเป็นคำที่ต้องใช้ในบริบทกฎหมาย — Bedrock Guardrails สามารถ config custom word list หรือ contextual filter ได้ไหม? มี best practice สำหรับ Legal use case ไหม?
+
+3. **Bedrock Knowledge Base vs Custom RAG**
+   เราเลือกสร้าง custom RAG (FAISS + BM25 + LeJEPA Reranking) เพราะต้องการ Thai chunking เฉพาะทาง + Multi-Agent Debate ที่ Bedrock KB ไม่รองรับ — ท่านเห็นด้วยกับ approach นี้ไหม? หรือควรใช้ Bedrock KB เสริม custom RAG เพื่อลด operational overhead?
+
+#### กลุ่ม B: Infrastructure & Deployment สำหรับ Legal Domain
+
+4. **EKS vs ECS Fargate สำหรับ Hackathon → Production**
+   เราออกแบบ EKS 2-8 pods + HPA แต่สำหรับ hackathon demo อาจ overkill — ท่านแนะนำ ECS Fargate สำหรับ demo แล้วค่อย migrate ไป EKS ตอน production ไหม? หรือเริ่ม EKS เลยดีกว่า?
+
+5. **Sandbox Account Limits**
+   Hackathon sandbox มี limit อะไรบ้าง? สร้าง EKS cluster + RDS Multi-AZ + ElastiCache ได้ไหม? ถ้าไม่ได้ มี workaround อะไรสำหรับ demo วัน pitch?
+
+6. **Data Sovereignty & Region Strategy**
+   ข้อมูลศาลต้องอยู่ในไทย — ap-southeast-1 (สิงคโปร์) เพียงพอสำหรับ data sovereignty ตามกฎหมายไทยไหม? หรือต้องรอ Bangkok region? KMS CMK setup สำหรับให้ศาลถือกุญแจเองทำยังไง?
+
+#### กลุ่ม C: AI Services & Optimization
+
+7. **Titan Embeddings สำหรับ Thai Legal Text**
+   เราใช้ OpenAI embeddings อยู่ แต่อยากย้ายมา Titan เพื่อลด dependency — Titan Embeddings v2 รองรับ Thai ดีแค่ไหน? มี benchmark เทียบ OpenAI สำหรับ non-English text ไหม? โดยเฉพาะ legal terminology ที่มีศัพท์เฉพาะเยอะ
+
+8. **Textract สำหรับเอกสารศาลไทย**
+   เราใช้ PyMuPDF + EasyOCR สำหรับ PDF extraction — Textract รองรับเอกสารศาลไทย (ที่มีทั้งภาษาไทย + ตาราง + ลายเซ็น + ตราประทับ) ได้ดีแค่ไหน? คุ้มค่าที่จะเปลี่ยนไหม?
+
+9. **Cost Optimization สำหรับ Legal AI**
+   เราประมาณ $690/เดือน (Reserved) — มีวิธี optimize เพิ่มไหม? เช่น Bedrock batch inference, Savings Plans, หรือ Graviton instances สำหรับ inference workload?
+
+#### กลุ่ม D: Go-to-Market & AWS Support
+
+10. **AWS Programs สำหรับ GovTech / Legal-Tech Startup**
+    หลัง hackathon ถ้าจะต่อยอดเป็น production — AWS มี program อะไรบ้าง? เช่น AWS Activate, GovTech accelerator, Public Sector credits? มี reference architecture สำหรับ Legal-Tech ไหม?
+
+11. **Cognito + ThaID Integration**
+    ระบบออกแบบให้ใช้ Cognito + ThaID เป็น external OIDC provider — ท่านเคยเห็น implementation จริงไหม? มี gotcha อะไรที่ควรระวัง?
+
+#### กลุ่ม E: คำถามเชื่อมโยง (Connection)
+
+12. **Legal-Tech บน AWS ในไทย**
+    ท่านเห็น Legal-Tech startup อื่นที่ deploy บน AWS ในไทยไหม? มี community หรือ use case ที่น่าสนใจที่เราควรศึกษา?
+
+13. **ถ้า LegalGuard AI อยากร่วมมือกับ AWS Thailand**
+    จุดไหนที่น่าสนใจที่สุด? เช่น case study, co-marketing กับหน่วยงานรัฐ, หรือ SA support สำหรับ architecture review?
+
+---
+
+## 📊 Deep Mapping: ทบทวนระบบทั้งหมด ↔ Mentor 3 ท่าน (โจทย์จากผู้จัด)
+
+---
+
+### 🔵 คุณสุราสินี มิทอง (KPMG) — Responsible AI + Data Governance
+
+ท่านจะสนใจ: ระบบเรามี governance framework อะไร ครบไหม ใช้ได้จริงกับหน่วยงานรัฐไหม
+
+| ส่วนของระบบ | สิ่งที่สร้างแล้ว | สอดคล้องยังไง | จุดที่ควรถาม |
+|------------|----------------|-------------|------------|
+| Data Classification | 4 ระดับ: สาธารณะ / ภายใน / ลับ / ลับมาก | ตรงกับ PDPA + มาตรฐานหน่วยงานรัฐ | "4 ระดับพอไหม? หรือต้องมีระดับ 5?" |
+| PII Masking | 9 รูปแบบ (บัตร ปชช., เบอร์, อีเมล, ที่อยู่, ชื่อ, บัญชีธนาคาร, passport, LINE, ชื่อ-สกุล) | mask ก่อนส่ง LLM ทุกครั้ง ตามคำแนะนำศาลฎีกา 2568 | "Recall 99.2% เพียงพอไหม?" |
+| Role-based Access | 4 roles: citizen / lawyer / government / judge | แต่ละ role เห็นข้อมูลต่างกัน | "ต้องมี role เพิ่มไหม?" |
+| Audit Log | CAL-130 SHA-256 Hash Chain — tamper-proof | ตรวจสอบย้อนหลังได้ 100% | "Hash chain เพียงพอไหม? ต้อง blockchain?" |
+| Risk Tier R0-R5 | R0 (FAQ) → R5 (ห้าม AI ตัดสินคดี) | กำหนดขอบเขต AI ชัดเจน | "เส้นแบ่ง R3/R4/R5 เหมาะสมไหม?" |
+| Honesty Score | 6 มิติ: citation, calibration, debate, disclaimer, pii_clean, data_completeness | วัดความน่าเชื่อถือเชิงปริมาณ | "6 มิตินี้ครบไหม?" |
+| Circuit Breaker | Block เมื่อ: honesty < 0.50, PII leak, hallucination > 5% | เบรกฉุกเฉินอัตโนมัติ | "threshold เหมาะสมไหม?" |
+| GLUE-RAAIA Score | Governance = GLUE × RAAIA_compliance × H-Score | สูตรรวมวัดคุณภาพ AI | "align กับ KPMG framework ไหม?" |
+| Legal Risk Score | σ(HCI + CVI + DCI - Trust) | ประเมินความเสี่ยงต่อ response | "สมการนี้สมเหตุสมผลไหม?" |
+| Ethical Feedback Loop | เรียนรู้จาก user override → ปรับ confidence | วงจรปรับปรุงต่อเนื่อง | "ใช้ได้จริงใน production ไหม?" |
+| AI Disclosure | ทุก response มี disclaimer + Confidence Badge | ตามคำแนะนำศาลฎีกา 2568 | "ต้องมี stamp ใน XML export ด้วยไหม?" |
+| CFS Fairness | ตรวจ bias 5 มิติ: ภูมิศาสตร์, ศาล, คดี, เวลา, บทบาท | เป้า CFS ≥ 93.5% | "5 มิติพอไหม?" |
+| Missing Data Penalty | ปรับลดเพดานความมั่นใจเมื่อข้อมูลขาด | โปร่งใสว่าข้อมูลไม่ครบ | "approach นี้ดีไหม?" |
+
+สรุป: ระบบเรามี governance layer 13 ตัว — ถามท่านว่าครบไหม ขาดอะไร
+
+---
+
+### 🟢 คุณสถาพน พัฒนะคูหา (Guardian AI Lab) — Enterprise AI + หน่วยงานรัฐ
+
+ท่านจะสนใจ: สถาปัตยกรรม AI ใช้ได้จริงไหม scale ได้ไหม deploy ในหน่วยงานรัฐได้ไหม
+
+| ส่วนของระบบ | สิ่งที่สร้างแล้ว | สอดคล้องยังไง | จุดที่ควรถาม |
+|------------|----------------|-------------|------------|
+| LangGraph Multi-Agent | 5 agents: Manager/Researcher/Reviewer/Compliance/Drafter | Orchestrate AI pipeline ทั้งหมด | "practical สำหรับ production ไหม?" |
+| Anti-Collusion Debate | Commit-Reveal SHA-256 + Knowledge Partition | ป้องกัน AI ฮั้วกัน | "เคยเห็น approach นี้ใน enterprise ไหม?" |
+| Hybrid RAG | FAISS 70% + BM25 30% + LeJEPA Reranking | Hit@3 = 93.7% | "ดีพอสำหรับ legal domain ไหม?" |
+| Anti-Hallucination 7 ชั้น | RAG → Citation → Guardrails → Debate → CBB → Flag → "ไม่รู้" | ป้องกัน AI หลอนหลายชั้น | "7 ชั้นมากไปไหม? overhead?" |
+| LLM Fallback Chain | Bedrock → Typhoon → SeaLLM → Ollama | ไม่ล่มแม้ cloud ล่ม | "ใช้ในหน่วยงานรัฐจริงไหม?" |
+| Pathumma Integration | เพิ่มเป็น LLM provider ได้ทันที | สอดคล้องกับเนคเทค | "Guardian AI Lab ทำงานกับ Pathumma ไหม?" |
+| Data Ingestion | PDF → OCR → Thai Chunk → Embed → Vector DB | 176K คำพิพากษา + 315 เอกสาร | "scale ถึง 1M+ ได้ไหม?" |
+| Phase 3 LatentMAS | เปลี่ยน agent communication → latent space | ลด token cost 80% | "realistic สำหรับ legal domain ไหม?" |
+| 458 Tests | Unit tests ครอบคลุม 31 services | พร้อม production | "test coverage เพียงพอไหม?" |
+| Stakeholder Strategy | Power-Interest Matrix 4 กลุ่ม | กลยุทธ์ adoption | "hackathon → pilot ต้องเตรียมอะไร?" |
+
+สรุป: ถามท่านว่า production-ready ไหม blocker อะไรในหน่วยงานรัฐ
+
+---
+
+### 🟠 คุณศาศวัต / Net (AWS Thailand) — AI Infrastructure + Cloud
+
+ท่านจะสนใจ: ใช้ AWS services ถูกต้องไหม optimize ได้ไหม มี technical blocker อะไร
+
+| ส่วนของระบบ | สิ่งที่สร้าง/ออกแบบ | AWS Service | จุดที่ควรถาม |
+|------------|-------------------|-------------|------------|
+| LLM หลัก | Bedrock Claude ทำงานแล้ว (Bearer Token) | Bedrock | "Bearer Token vs IAM Role?" |
+| Guardrails | ยังไม่ได้ config | Bedrock Guardrails | "block คำศัพท์กฎหมายไหม?" |
+| Embeddings | ใช้ OpenAI | ควรเปลี่ยน Titan? | "Titan รองรับ Thai ดีแค่ไหน?" |
+| Vector DB | FAISS + Qdrant | Aurora pgvector? | "อันไหนเหมาะสำหรับ legal?" |
+| Compute | ออกแบบ EKS 2-8 pods | EKS | "Sandbox สร้าง EKS ได้ไหม?" |
+| Database | ออกแบบ RDS Multi-AZ | Aurora PostgreSQL | "Sandbox รองรับ Multi-AZ?" |
+| Cache | ออกแบบ ElastiCache | ElastiCache Redis | "Sandbox มี ElastiCache?" |
+| Storage | S3 สร้างแล้ว | S3 | "KMS CMK setup ยังไง?" |
+| Auth | ออกแบบ Cognito + ThaID | Cognito | "รองรับ ThaID OIDC?" |
+| Firewall | ออกแบบ WAF | WAF | "block คำศัพท์กฎหมาย?" |
+| OCR | PyMuPDF + EasyOCR | ควรใช้ Textract? | "Textract รองรับเอกสารศาลไทย?" |
+| Cost | $690/เดือน (Reserved) | — | "มี hackathon credits?" |
+| Region | ap-southeast-1 | — | "พอสำหรับ data sovereignty?" |
+| Fallback | Ollama local | — | "AWS แนะนำ approach นี้ไหม?" |
+
+สรุป: ถามท่านเรื่อง sandbox limits, Guardrails config, Titan Thai, deploy strategy
+
+### 🟠 เตรียมขอ Support จากคุณศาศวัต (Net) — ไม่ใช่แค่ถาม แต่ขอจริง
+
+ท่าน Net สามารถให้ได้ทั้ง "คำแนะนำเชิงกลยุทธ์" และ "สนับสนุนทรัพยากร cloud"
+ต้องเตรียม ask ให้ชัดเจน:
+
+**ขอคำแนะนำเชิงกลยุทธ์ (Strategic Advice):**
+
+| หัวข้อ | สิ่งที่เราทำแล้ว | สิ่งที่ต้องการคำแนะนำ |
+|--------|----------------|---------------------|
+| Architecture Review | ออกแบบ EKS + RDS + ElastiCache + S3 + KMS + WAF | "Architecture นี้เหมาะสำหรับ Legal-Tech ไหม? ควรปรับอะไร?" |
+| Bedrock Strategy | ใช้ Claude via Bearer Token | "ควรใช้ Bedrock KB เสริม custom RAG ไหม? หรือ custom อย่างเดียวพอ?" |
+| Thai AI on AWS | ออกแบบ LLM chain: Bedrock → Typhoon → SeaLLM → Ollama | "AWS มี Thai-optimized model อะไรบ้างนอกจาก Titan?" |
+| Legal-Tech on AWS | ระบบแรกๆ ที่ทำ Legal AI บน AWS ในไทย | "มี reference architecture สำหรับ Legal-Tech ไหม?" |
+| Go-to-Market | hackathon → pilot → production | "AWS มี program สำหรับ GovTech/Legal-Tech startups ไหม?" |
+
+**ขอสนับสนุนทรัพยากร (Resource Ask):**
+
+| สิ่งที่ต้องการ | เหตุผล | Priority |
+|--------------|--------|----------|
+| AWS Credits สำหรับ hackathon | ทดสอบ Bedrock + EKS + RDS จริง ไม่ใช่แค่ local | สูงมาก |
+| Bedrock Guardrails setup support | ต้อง config ให้ไม่ block คำศัพท์กฎหมายไทย | สูงมาก |
+| Sandbox limit increase | สร้าง EKS cluster + RDS Multi-AZ สำหรับ demo | สูง |
+| Titan Embeddings benchmark | ทดสอบ Thai legal text เทียบ OpenAI | สูง |
+| SA (Solutions Architect) session | Review architecture 1 ชั่วโมง | กลาง |
+| AWS Activate / Startup program | ถ้าจะต่อยอดหลัง hackathon | กลาง |
+
+**ประโยคเปิดสำหรับท่าน Net:**
+
+> "ระบบเราออกแบบบน AWS ทั้งหมด — Bedrock Claude ทำงานแล้ว, S3 + ECR สร้างแล้ว
+> แต่ยังมี 3 จุดที่ต้องการ support จาก AWS:
+>
+> 1. Bedrock Guardrails — ต้อง config ให้ไม่ block คำศัพท์กฎหมาย (ฆ่า, ข่มขืน, ฉ้อโกง)
+> 2. Sandbox limits — ต้องสร้าง EKS + RDS สำหรับ demo วัน pitch
+> 3. Titan Embeddings — ต้องทดสอบว่ารองรับ Thai legal text ดีแค่ไหน
+>
+> ถ้าได้ credits หรือ SA session จะช่วยให้ demo วัน pitch สมบูรณ์มาก"
+
+**สิ่งที่ต้องเตรียมให้ท่าน Net ดู:**
+
+1. Architecture Diagram (มีใน design.md — Mermaid diagram)
+2. AWS Services ที่ใช้ทั้งหมด (ตารางใน design.md — 20+ services)
+3. Cost Estimation ($690/เดือน Reserved)
+4. Bedrock usage — model ID, region, token usage
+5. Demo สด — แสดงว่า Bedrock Claude ทำงานจริงแล้ว
+
+---
+
+## 💼 Business Strategy — ใช้ Framework ที่มีเป็นจุดขายเชิงธุรกิจ
+
+### ทำไมต้องมองมุมธุรกิจ?
+
+เมนเทอร์ทุกท่านไม่ได้ดูแค่ "ระบบทำงานได้ไหม" แต่ดูว่า "ระบบนี้จะอยู่รอดหลัง hackathon ไหม"
+Framework ที่เราสร้างแล้วคือ IP (Intellectual Property) ที่มีมูลค่าทางธุรกิจ — ต้อง pitch ให้เมนเทอร์เห็น
+
+### 🏗️ Framework ที่เรามี = สินทรัพย์ทางธุรกิจ (IP Assets)
+
+| Framework / IP | มูลค่าทางธุรกิจ | ใครซื้อ/ใช้ | Revenue Model |
+|---------------|-----------------|------------|---------------|
+| RAAIA 3.1 (Responsible AI Framework) | เป็น "มาตรฐาน" ที่หน่วยงานรัฐต้องมี — ขายเป็น compliance package ได้ | ศาล, กระทรวงยุติธรรม, หน่วยงานรัฐที่ใช้ AI | Licensing / Consulting |
+| Anti-Hallucination 7 ชั้น | ไม่มีใครในไทยมี — ขายเป็น "AI Safety Layer" ให้ Legal-Tech อื่นได้ | Legal-Tech startups, สำนักงานกฎหมาย, FinTech | SaaS / API-as-a-Service |
+| Honesty Score (6 มิติ) | วัดความน่าเชื่อถือ AI เชิงปริมาณ — ขายเป็น "AI Trust Certification" | องค์กรที่ต้อง audit AI, regulators | Certification Fee |
+| CFS Fairness Score (5 มิติ) | ตรวจ bias ใน AI — ขายเป็น "Fairness Audit Service" | ศาล, ธนาคาร, ประกันภัย, HR Tech | Audit Service Fee |
+| CAL-130 Audit Log (SHA-256) | Tamper-proof logging — ขายเป็น "AI Compliance Infrastructure" | ทุกองค์กรที่ใช้ AI ใน regulated industry | Infrastructure License |
+| PII Masking 9 รูปแบบ (Thai) | Thai-specific PII detection — ขายเป็น "Thai PDPA Compliance Tool" | ทุกบริษัทที่ต้อง comply กับ PDPA | SaaS Subscription |
+| Risk Tier R0-R5 | Framework กำหนดขอบเขต AI — ขายเป็น "AI Governance Template" | หน่วยงานรัฐ, enterprise ที่ deploy AI | Consulting / Template License |
+| Multi-Agent Debate Protocol | Anti-Collusion mechanism — ขายเป็น "Trusted AI Reasoning Engine" | FinTech, InsurTech, HealthTech ที่ต้องการ AI ที่ตรวจสอบได้ | API / Engine License |
+| Thai Legal Knowledge Base (176K+) | ฐานข้อมูลกฎหมายไทยที่ indexed + searchable — ขายเป็น "Legal Data API" | สำนักงานกฎหมาย, LegalTech, นักวิจัย | Data API Subscription |
+
+### 📊 Business Model Canvas — LegalGuard AI
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    LEGALGUARD AI — BUSINESS MODEL                   │
+├──────────────────┬──────────────────┬───────────────────────────────┤
+│  Key Partners    │  Key Activities  │  Value Propositions           │
+│                  │                  │                               │
+│  • ศาลยุติธรรม    │  • พัฒนา RAG +   │  สำหรับศาล/รัฐ (Phase 1):     │
+│  • ETDA          │    Multi-Agent   │  • ลดเวลาค้นคว้า 90%         │
+│  • เนคเทค        │  • Data Ingestion│  • ลดคำฟ้องตีกลับ 60%→10%    │
+│  • AWS Thailand  │  • Compliance    │  • Audit 100% tamper-proof   │
+│  • สภาทนายความ   │    Consulting    │                               │
+│                  │  • AI Safety     │  สำหรับ Private (Phase 2):    │
+│                  │    Monitoring    │  • Legal Research 10x เร็วขึ้น │
+│                  │                  │  • AI Trust Score ทุก response│
+│                  │                  │  • PDPA compliance built-in  │
+├──────────────────┼──────────────────┼───────────────────────────────┤
+│  Key Resources   │                  │  Customer Segments            │
+│                  │  Channels        │                               │
+│  • RAAIA 3.1     │                  │  B2G (Phase 1):              │
+│  • 176K judgments│  • ETDA Hackathon│  • ศาล 262 แห่ง               │
+│  • 9 IP assets   │  • Pilot program │  • กระทรวงยุติธรรม            │
+│  • AWS infra     │  • สภาทนายความ   │  • สำนักงานอัยการ             │
+│  • 458 tests     │  • AWS GovTech   │                               │
+│                  │  • Academic conf │  B2B (Phase 2):              │
+│                  │                  │  • สำนักงานกฎหมาย 5,000+     │
+│                  │                  │  • FinTech / InsurTech        │
+│                  │                  │  • Corporate legal teams     │
+├──────────────────┴──────────────────┼───────────────────────────────┤
+│  Cost Structure                     │  Revenue Streams              │
+│                                     │                               │
+│  • AWS: $690/เดือน (Reserved)        │  Phase 1 — Open Source + Gov: │
+│  • Team: [ระบุ]                     │  • Government grants/funding  │
+│  • Data: ฟรี (public domain)        │  • ETDA/สวทช. project funding │
+│  • LLM: Bedrock pay-per-use        │  • Pilot contracts กับศาล     │
+│                                     │                               │
+│  Break-even: ~50 users/เดือน        │  Phase 2 — Commercial:        │
+│  ที่ $15/user = $750 > $690 cost    │  • SaaS subscription $15-50/  │
+│                                     │    user/เดือน                  │
+│                                     │  • API access (pay-per-query) │
+│                                     │  • AI Safety consulting       │
+│                                     │  • RAAIA certification fee    │
+└─────────────────────────────────────┴───────────────────────────────┘
+```
+
+### 💰 Revenue Projection (Conservative)
+
+| ปี | Phase | ลูกค้า | Revenue Model | ประมาณการรายได้ |
+|----|-------|--------|---------------|----------------|
+| ปี 1 | Pilot | ศาล 2-3 แห่ง + ทนาย 50 คน | Grant + Pilot fee | ฿500K - ฿1M |
+| ปี 2 | Scale B2G | ศาล 20 แห่ง + ทนาย 500 คน | SaaS + Gov contract | ฿3M - ฿5M |
+| ปี 3 | B2B Launch | + สำนักงานกฎหมาย 100 แห่ง | SaaS + API + Consulting | ฿10M - ฿20M |
+
+### 🎯 คำถามเชิงธุรกิจสำหรับแต่ละ Mentor
+
+#### คุณสุราสินี (KPMG) — มุมธุรกิจ Governance & Compliance
+
+1. **RAAIA 3.1 เป็น Sellable Framework ได้ไหม?**
+   "เราสร้าง RAAIA 3.1 ที่มี Risk Tier, Honesty Score, CFS Fairness, Circuit Breaker — ถ้าจะ package เป็น 'AI Governance Framework for Legal Domain' ขายให้หน่วยงานรัฐอื่น KPMG มองว่า market มีไหม? ราคาเท่าไหร่?"
+
+2. **AI Governance Consulting เป็น Revenue Stream ได้ไหม?**
+   "KPMG ขาย AI Governance consulting ให้สถาบันการเงิน — ถ้าเราทำแบบเดียวกันสำหรับ Legal domain (ศาล, สำนักงานกฎหมาย, อัยการ) ท่านเห็น demand ไหม? ควรเริ่มจากอะไร?"
+
+3. **Certification Business**
+   "Honesty Score + CFS Fairness Score ของเรา — ถ้าจะพัฒนาเป็น 'AI Trust Certification' สำหรับ Legal-Tech อื่นๆ ในไทย KPMG สนใจร่วมมือเป็น certifying body ไหม?"
+
+4. **PDPA Compliance Tool เป็น Standalone Product ได้ไหม?**
+   "PII Masking 9 รูปแบบสำหรับภาษาไทย (Recall 99.2%) — ถ้าแยกขายเป็น 'Thai PDPA Compliance API' ให้บริษัทอื่นใช้ ท่านเห็นว่า market size เป็นยังไง?"
+
+#### คุณสถาพน (Guardian AI Lab) — มุมธุรกิจ Enterprise & Scaling
+
+1. **Pricing Strategy สำหรับหน่วยงานรัฐ**
+   "Guardian AI Lab ขาย AI solution ให้รัฐ — pricing model ที่ใช้ได้จริงคืออะไร? Per-user, per-query, annual license, หรือ project-based? ศาลมี budget cycle ยังไง?"
+
+2. **Hackathon → Pilot → Contract — Timeline จริง**
+   "จากประสบการณ์ OICxPRESS — จาก prototype ถึง production contract กับหน่วยงานรัฐใช้เวลาจริงเท่าไหร่? มี procurement process อะไรที่ต้องเตรียม?"
+
+3. **Partnership vs Competition กับ Pathumma/เนคเทค**
+   "เราออกแบบให้ Pathumma เสียบเข้า LLM chain ได้ — ในเชิงธุรกิจ ควร position เป็น partner กับเนคเทค หรือ independent? Guardian AI Lab จัดการเรื่องนี้ยังไง?"
+
+4. **IP Protection สำหรับ Open Source + Commercial**
+   "Phase 1 เราจะ open source สำหรับศาล, Phase 2 ขาย commercial — ท่านแนะนำ licensing model อะไร? (AGPL, dual license, open core?) Guardian AI Lab ใช้ model ไหน?"
+
+5. **Multi-Agent Debate เป็น Competitive Moat ได้ไหม?**
+   "Anti-Collusion Debate Protocol (Commit-Reveal SHA-256) ของเรา — ท่านเห็นว่านี่เป็น defensible IP ที่คู่แข่ง replicate ยากไหม? หรือเป็นแค่ nice-to-have?"
+
+#### คุณศาศวัต / Net (AWS) — มุมธุรกิจ Cloud & Go-to-Market
+
+1. **AWS Activate / ISV Program สำหรับ Legal-Tech**
+   "หลัง hackathon เราอยากต่อยอดเป็น startup จริง — AWS มี program อะไรที่ช่วย Legal-Tech startup? credits, SA support, co-sell program? ต้องมี traction แค่ไหนถึงจะ qualify?"
+
+2. **AWS Marketplace สำหรับ GovTech**
+   "ถ้าเราจะขาย LegalGuard AI ผ่าน AWS Marketplace ให้หน่วยงานรัฐ — process เป็นยังไง? มี GovTech category ไหม? หน่วยงานรัฐไทยซื้อผ่าน Marketplace ได้ไหม?"
+
+3. **Cost Model ที่ Scale ได้**
+   "ตอนนี้ $690/เดือน สำหรับ pilot — ถ้า scale ไป 262 ศาล + ทนาย 5,000 คน cost จะเป็นยังไง? มี volume discount สำหรับ Bedrock ไหม? Savings Plans ช่วยได้แค่ไหน?"
+
+4. **Reference Architecture เป็น Case Study**
+   "ถ้า LegalGuard AI เป็น Legal-Tech แรกบน AWS ในไทย — AWS Thailand สนใจทำ case study ร่วมกันไหม? จะช่วยทั้ง credibility ของเราและ AWS ในตลาด GovTech"
+
+5. **Data Sovereignty เป็น Selling Point**
+   "เราใช้ ap-southeast-1 + KMS CMK + Ollama fallback — ถ้าจะ pitch ให้ศาลว่า 'ข้อมูลไม่ออกนอกประเทศ' AWS มี certification หรือ compliance document อะไรที่ช่วย back claim นี้ได้?"
+
+#### ดร.ระดาภัทร (ศาลปกครอง) — มุมธุรกิจ Domain & Adoption
+
+1. **ศาลปกครองมี Budget สำหรับ AI ไหม?**
+   "ศาลปกครองมีแผนจัดซื้อ AI solution ไหม? ถ้ามี — procurement process เป็นยังไง? ต้องผ่าน สำนักงานศาลปกครอง หรือ สำนักงานศาลยุติธรรม?"
+
+2. **Pilot ที่ศาลปกครอง — เป็นไปได้ไหม?**
+   "ถ้าเราอยากทำ pilot ที่ศาลปกครอง 1 แห่ง — ท่านช่วย introduce ให้ได้ไหม? ต้องเตรียมอะไร? MOU ต้องผ่านใคร?"
+
+3. **Pain Point ที่ศาลยอมจ่ายเงิน**
+   "จากประสบการณ์ท่าน — ปัญหาอะไรของศาลปกครองที่ 'เจ็บ' มากพอที่จะยอมจ่ายเงินซื้อ AI solution? ค้นคำพิพากษา? ร่างคำวินิจฉัย? คัดกรองคำฟ้อง?"
+
+#### ดร.ศักดิ์ (ETDA) — มุมธุรกิจ Policy & Ecosystem
+
+1. **ETDA มี Funding สำหรับ AI Startup ไหม?**
+   "หลัง hackathon — ETDA มี incubator, accelerator, หรือ funding program สำหรับ Responsible AI startup ไหม? ต้อง apply ยังไง?"
+
+2. **Responsible AI Certification เป็น Business ได้ไหม?**
+   "ถ้า ETDA จะออก 'Responsible AI Certification' สำหรับ Legal domain — RAAIA 3.1 ของเราสามารถเป็น basis ได้ไหม? ETDA สนใจร่วมพัฒนา standard นี้ไหม?"
+
+3. **แนวปฏิบัติ 12 ประการ → Compliance Requirement**
+   "ถ้าแนวปฏิบัติ 12 ประการกลายเป็น mandatory requirement — ระบบที่ comply ได้จะมี competitive advantage มาก เราควรเตรียมตัวยังไง?"
+
+### 🗣️ ประโยคเปิดเชิงธุรกิจสำหรับแต่ละ Mentor
+
+**คุณสุราสินี (KPMG):**
+> "ระบบเรามี governance framework 9 ตัวที่สร้างเสร็จแล้ว — RAAIA 3.1, Honesty Score, CFS Fairness, PII Masking, Audit Log ฯลฯ
+> นอกจากใช้ในศาลแล้ว เรามองว่า framework เหล่านี้เป็น IP ที่ขายได้
+> อยากขอมุมมองจากท่านว่า market สำหรับ AI Governance ใน Legal domain เป็นยังไง?"
+
+**คุณสถาพน (Guardian AI Lab):**
+> "เราไม่ได้มองแค่ hackathon — เรามอง LegalGuard AI เป็น Legal-Tech startup
+> Phase 1 open source สำหรับศาล สร้าง trust + user base
+> Phase 2 ขาย Legal Professional Suite เป็น commercial
+> อยากขอคำแนะนำจากท่านว่า จาก prototype ถึง government contract จริง ต้องเตรียมอะไร?"
+
+**คุณศาศวัต / Net (AWS):**
+> "ระบบเราออกแบบบน AWS ทั้งหมด — ต้นทุน $690/เดือน
+> หลัง hackathon เราอยากต่อยอดเป็น startup จริง
+> อยากทราบว่า AWS มี program อะไรสำหรับ GovTech/Legal-Tech startup?
+> และถ้าเราเป็น Legal-Tech แรกบน AWS ในไทย — สนใจทำ case study ร่วมกันไหม?"
+
+**ดร.ระดาภัทร (ศาลปกครอง):**
+> "ระบบเรารองรับศาลปกครองครบ — ปค.1, มาตรา 56, เขตอำนาจ
+> อยากทราบว่า ศาลปกครองมีแผนใช้ AI ไหม? และถ้าเราอยากทำ pilot ต้องเตรียมอะไร?"
+
+**ดร.ศักดิ์ (ETDA):**
+> "RAAIA 3.1 ของเราสอดคล้องกับแนวปฏิบัติ 12 ประการของท่าน
+> เรามองว่า framework นี้สามารถเป็น national standard สำหรับ Legal AI ได้
+> ETDA สนใจร่วมพัฒนา Responsible AI Certification สำหรับ Legal domain ไหม?"
+
+### 📋 สรุป: Framework → Business Value (1-page cheat sheet)
+
+```
+Framework ที่มี          →  Business Value           →  Revenue Stream
+─────────────────────────────────────────────────────────────────────
+RAAIA 3.1               →  AI Governance Standard   →  Licensing + Consulting
+Anti-Hallucination 7L   →  AI Safety Layer          →  SaaS API
+Honesty Score 6D        →  AI Trust Certification   →  Certification Fee
+CFS Fairness 5D         →  Fairness Audit Service   →  Audit Fee
+CAL-130 Audit Log       →  Compliance Infrastructure→  Infra License
+PII Masking 9 Thai      →  PDPA Compliance Tool     →  SaaS Subscription
+Risk Tier R0-R5         →  AI Governance Template   →  Template License
+Multi-Agent Debate      →  Trusted Reasoning Engine →  Engine License
+176K Legal KB           →  Legal Data API           →  Data API Sub
+─────────────────────────────────────────────────────────────────────
+Total addressable:      ศาล 262 + ทนาย 80,000+ + สำนักงานกฎหมาย 5,000+
+                        + FinTech/InsurTech/HealthTech ที่ต้อง comply
+```
+
+---
+
+## 🎯 Priority: ถ้าเจอ Mentor แค่ 1 คน ถามอะไร
+
+| Mentor | คำถาม Technical ที่สำคัญที่สุด | คำถาม Business ที่สำคัญที่สุด |
+|--------|-------------------------------|-------------------------------|
+| ดร.ระดาภัทร (ศาลปกครอง) | "ขั้นตอนรับ ปค.1 จุดไหน AI ช่วยได้มากสุด?" | "ศาลปกครองมี budget/แผนใช้ AI ไหม? pilot ได้ไหม?" |
+| ดร.ศักดิ์ (ETDA) | "แนวปฏิบัติ 12 ประการ — ระบบเราครบไหม?" | "ETDA สนใจร่วมพัฒนา Responsible AI Certification ไหม?" |
+| คุณสุราสินี (KPMG) | "Governance 13 ตัวครบไหม? ขาดอะไร?" | "RAAIA 3.1 เป็น sellable framework ได้ไหม? market เป็นยังไง?" |
+| คุณสถาพน (Guardian AI Lab) | "hackathon → production blocker ใหญ่สุดคืออะไร?" | "จาก prototype ถึง government contract ใช้เวลาเท่าไหร่?" |
+| คุณศาศวัต / Net (AWS) | "Bedrock Guardrails block คำศัพท์กฎหมายไหม?" | "AWS มี program สำหรับ GovTech startup ไหม? ทำ case study ด้วยกันได้ไหม?" |
+
+| เวลา | หัวข้อ | ใครพูด |
+|-------|--------|--------|
+| 0:00–5:00 | นำเสนอภาพรวม + Demo สั้น | Lead |
+| 5:00–8:00 | ความท้าทาย 3 ข้อที่ต้องการคำปรึกษา | Lead |
+| 8:00–20:00 | ถาม-ตอบ / Mentor ให้ feedback | ทุกคน (คนจด + คนถาม) |
+| 20:00–23:00 | สรุป Next Action | Lead |
+
+แบ่งหน้าที่: คน A = นำเสนอ+ถาม, คน B = จด feedback ทุกข้อ
+
+---
+
+## สไลด์ 1 — ทีมคือใคร ทำอะไร (30 วินาที)
+
+ทีม Honest Predictor — Smart LegalGuard AI
+- แก้ปัญหา: ประชาชนเข้าไม่ถึงกระบวนการยุติธรรม + ศาลมีคดีค้าง + ค้นคว้าช้า
+- โซลูชัน: AI infrastructure เสริม CIOS/e-Filing v4 ด้วย RAG + Multi-Agent + Responsible AI
+- กลุ่มเป้าหมาย: ประชาชน, ทนาย, เจ้าหน้าที่ศาล, ผู้พิพากษา
+
+---
+
+## สไลด์ 2 — ความคืบหน้า (1 นาที)
+
+สิ่งที่ทำเสร็จแล้ว:
+- Backend: Python FastAPI, 31 services, 14 routers, 458 tests ผ่าน
+- Frontend: React 18, 15+ pages, role-based UI (ประชาชน/ทนาย/ธุรการ/ผู้พิพากษา/IT)
+- AI Pipeline: Hybrid RAG (FAISS 70% + BM25 30%), Hit@3 = 93.7%
+- Responsible AI: RAAIA 3.1, Anti-Hallucination 7 ชั้น, Risk Tier R0-R5, Honesty Score
+- Data: 176,543 คำพิพากษา + 315 เอกสารศาล + 6 HuggingFace datasets
+- AWS: Bedrock Claude ทำงานแล้ว, S3 + ECR สร้างแล้ว
+- สอดคล้อง: คำแนะนำประธานศาลฎีกา 2568 ทุกข้อ
+
+สิ่งที่ยังไม่เสร็จ:
+- Bedrock Guardrails ยังไม่ได้ config (ขาด Guardrail ID)
+- Typhoon API Key ยังไม่ได้สมัคร
+- ฟีเจอร์ใหม่ 6 ตัวสำหรับผู้พิพากษา (Precedent Comparison, Statute Check, Case Brief ฯลฯ)
+- Deploy จริงบน EKS ยังไม่ได้ทำ (รัน local อยู่)
+
+---
+
+## สไลด์ 3 — Demo สั้น (2 นาที)
+
+เลือก 1-2 flow ที่ impress ที่สุด:
+1. Semantic Search — ค้น "ฉ้อโกงสินเชื่อรถยนต์" → ผลลัพธ์พร้อม Confidence Badge + Citation
+2. น้องซื่อสัตย์ Chatbot — ถาม "ถูกโกงออนไลน์ต้องทำยังไง" → ตอบภาษาง่าย + อ้างมาตรา
+
+---
+
+## สไลด์ 4 — ความท้าทาย / สิ่งที่ต้องการคำปรึกษา ⭐
+
+### ความท้าทายที่ 1: ทำยังไงให้ผู้พิพากษา (อำนาจสูง + สนใจต่ำ) ยอมรับ AI
+
+สิ่งที่เราทำแล้ว:
+- Risk Tier R5 = AI ห้ามตัดสินคดี
+- เริ่มจาก Low-Risk (ค้นฎีกา, สรุปสำนวน, ถอดความ)
+- Disclaimer + Confidence Badge ทุก response
+- สอดคล้องคำแนะนำประธานศาลฎีกา 2568
+
+คำถามสำหรับ Mentor:
+- กลยุทธ์อะไรที่ทำให้กลุ่ม "อำนาจสูง + สนใจต่ำ" เปลี่ยนใจได้เร็วที่สุด?
+- ควร demo อะไรให้กรรมการเห็นเพื่อพิสูจน์ว่า AI ไม่ล้ำเส้นดุลยพินิจ?
+- มีตัวอย่างจากอุตสาหกรรมอื่น (เช่น แพทย์, การเงิน) ที่ทำสำเร็จไหม?
+
+### ความท้าทายที่ 2: Position ตัวเองยังไงเมื่อศาลมี CIOS + e-Filing v4 + เนคเทค/Pathumma แล้ว
+
+สิ่งที่เราทำแล้ว:
+- Position เป็น "AI layer เสริม" ไม่ใช่ "แทน"
+- e-Filing = ไปรษณีย์, CIOS = ตู้แฟ้ม, LegalGuard = ผู้ช่วยวิจัย
+- ออกแบบให้ Pathumma เสียบเข้า LLM chain ได้ทันที
+- API-first เชื่อม CIOS/e-Filing ผ่าน REST API
+
+คำถามสำหรับ Mentor:
+- วิธี pitch ที่ดีที่สุดเมื่อกรรมการถาม "ศาลมีระบบแล้ว ทำไมต้องมีอีก?"
+- ควรเน้น "เสริม" หรือ "ทดแทนบางส่วน" ดีกว่า?
+- ถ้ากรรมการมาจากเนคเทค/สวทช. ควรพูดยังไงไม่ให้ดูเหมือนแข่ง?
+
+### ความท้าทายที่ 3: Technical — AWS Architecture สำหรับ Legal Domain
+
+สิ่งที่เราทำแล้ว:
+- Bedrock Claude ทำงานแล้ว (Bearer Token)
+- Design ครบ: EKS + RDS Multi-AZ + ElastiCache + S3 + KMS + WAF
+- PII Masking 9 รูปแบบ + Ollama Fallback
+
+คำถามสำหรับ Mentor (ถ้า Mentor เป็นสาย tech/AWS):
+- Bedrock Guardrails block คำศัพท์กฎหมาย (ฆ่า, ข่มขืน) ไหม? config ยังไง?
+- Titan Embeddings รองรับ Thai ดีแค่ไหน เทียบ OpenAI?
+- Sandbox account มี limit อะไร? EKS สร้างได้ไหม?
+- Data sovereignty — ap-southeast-1 พอไหม หรือต้องรอ Bangkok region?
+
+---
+
+## สไลด์ 5 — สิ่งที่คาดหวังจาก Mentor
+
+1. คำแนะนำเรื่อง adoption strategy สำหรับกลุ่มผู้พิพากษา
+2. Feedback เรื่อง positioning กับระบบที่ศาลมีอยู่แล้ว
+3. Connection กับคนในวงการศาล/กระทรวงยุติธรรม (ถ้ามี)
+4. มุมมองเรื่อง Responsible AI ที่กรรมการจะให้น้ำหนัก
+
+---
+
+## ข้อมูลเตรียมไว้ตอบ Mentor (ถ้าถูกถาม)
+
+| คำถามที่อาจถูกถาม | คำตอบสั้น |
+|-------------------|----------|
+| ทีมมีกี่คน? | [ระบุจำนวน] |
+| ใช้เวลาทำมานานแค่ไหน? | [ระบุ] |
+| มี user จริงทดสอบไหม? | User Research 17 คน (ทนาย 3, ประชาชน 8, เจ้าหน้าที่ 4, อื่น 2) |
+| Revenue model? | Phase 1: Open source สำหรับศาล / Phase 2: Legal Professional Suite เป็น commercial |
+| ทำไมไม่ใช้ Bedrock KB สำเร็จรูป? | ต้องการ Thai chunking + BM25 + LeJEPA + Multi-Agent Debate ที่ KB ไม่รองรับ |
+| Hallucination rate? | เป้า < 1% ด้วย Anti-Hallucination 7 ชั้น |
+| ข้อมูลจากศาลมาครบไหม? | 176K คำพิพากษา + 315 เอกสาร มีแล้ว / ข้อมูลเพิ่มเติม (A3-A6, B4-B5) รอจากศาล |
+| Deploy แล้วหรือยัง? | รัน local ได้ / AWS infra สร้างแล้ว (S3, ECR, Bedrock) / EKS deploy ยังไม่ได้ |
+
+---
+
+## Next Action Template (กรอกหลังพบ Mentor)
+
+| # | Feedback จาก Mentor | Action Item | ใครทำ | เสร็จเมื่อไหร่ |
+|---|---------------------|-------------|-------|---------------|
+| 1 | | | | |
+| 2 | | | | |
+| 3 | | | | |
+| 4 | | | | |
+| 5 | | | | |

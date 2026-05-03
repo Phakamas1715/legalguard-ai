@@ -1,40 +1,51 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Scale, Users, FileText, Shield } from "lucide-react";
-
-import { API_BASE } from "@/lib/runtimeConfig";
-
-interface SystemStats {
-  actual: {
-    pdf_files: number;
-    mock_cases: number;
-    hf_datasets: number;
-    langgraph_agents: number;
-    pii_patterns: number;
-  };
-  targets: { total_cases: number };
-  phase: string;
-}
+import { apiClient, type DashboardSystemStatsResponse } from "@/lib/apiClient";
 
 const StatsBar = () => {
-  const [stats, setStats] = useState<SystemStats | null>(null);
+  const [stats, setStats] = useState<DashboardSystemStatsResponse | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/dashboard/system-stats`)
-      .then(r => r.ok ? r.json() : null)
+    apiClient.getDashboardSystemStats()
       .then(setStats)
       .catch(() => setStats(null));
   }, []);
 
-  const pdfCount = stats?.actual.pdf_files ?? 188;
-  const mockCases = stats?.actual.mock_cases ?? 25;
-  const hfDatasets = stats?.actual.hf_datasets ?? 10;
+  const targetCases = stats?.targets?.total_cases ? `${stats.targets.total_cases.toLocaleString()}+` : "—";
+  const pdfFiles = typeof stats?.actual.pdf_files === "number" ? `${stats.actual.pdf_files}` : "—";
+  const hfDatasets = typeof stats?.actual.hf_datasets === "number" ? `${stats.actual.hf_datasets}` : "—";
+  const auditEntries = typeof stats?.actual.audit_entries === "number" ? `${stats.actual.audit_entries}` : "—";
 
   const items = [
-    { icon: Scale, value: "160,000+", label: "ฐานข้อมูลคำพิพากษาเป้าหมาย", color: "text-navy-deep", sub: "OpenLaw Thailand Dataset" },
-    { icon: FileText, value: "25+", label: "AI Prompt Templates", color: "text-gold", sub: "ผ่านการ Audit โดยผู้เชี่ยวชาญ" },
-    { icon: Users, value: "3 Tracks", label: "ประชาชน · ศาล · ตุลาการ", color: "text-teal", sub: "พร้อมแตก private bundle เพิ่มได้" },
-    { icon: Shield, value: "Audit 100%", label: "ตรวจสอบย้อนหลังและปกปิด PII", color: "text-blue-600", sub: "มาตรฐาน RAAIA Verified" },
+    {
+      icon: Scale,
+      value: targetCases,
+      label: "เป้าหมายฐานข้อมูลคำพิพากษา",
+      color: "text-navy-deep",
+      sub: stats?.targets?.total_cases_note ?? "รอข้อมูลเป้าหมายจาก backend",
+    },
+    {
+      icon: FileText,
+      value: pdfFiles,
+      label: "PDF ที่มีในระบบตอนนี้",
+      color: "text-gold",
+      sub: stats?.actual.pdf_description ?? "actual count จาก backend system stats",
+    },
+    {
+      icon: Users,
+      value: hfDatasets,
+      label: "ชุดข้อมูล Hugging Face",
+      color: "text-teal",
+      sub: stats?.actual.hf_datasets_description ?? "actual count จาก backend system stats",
+    },
+    {
+      icon: Shield,
+      value: auditEntries,
+      label: "Audit entries ที่บันทึกแล้ว",
+      color: "text-blue-600",
+      sub: stats?.phase ?? "รอ backend system stats",
+    },
   ];
 
   return (
@@ -45,14 +56,26 @@ const StatsBar = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 + i * 0.1 }}
-          className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] p-8 text-center shadow-2xl hover:shadow-gold/10 hover:-translate-y-2 transition-all group"
+          className="float-card bg-white/90 backdrop-blur-xl border border-white/60 rounded-[2rem] p-8 text-center shadow-xl group relative overflow-hidden"
         >
-          <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-muted flex items-center justify-center group-hover:bg-gold/10 transition-colors">
-            <s.icon className={`w-6 h-6 ${s.color}`} />
+          {/* Subtle gradient accent at top */}
+          <div className={`absolute top-0 left-0 right-0 h-1 ${
+            s.color === 'text-gold' ? 'bg-gradient-to-r from-gold/80 to-gold/20' :
+            s.color === 'text-teal' ? 'bg-gradient-to-r from-teal/80 to-teal/20' :
+            s.color === 'text-blue-600' ? 'bg-gradient-to-r from-blue-600/80 to-blue-600/20' :
+            'bg-gradient-to-r from-navy-deep/80 to-navy-deep/20'
+          } rounded-t-[2rem]`} />
+          <div className={`w-14 h-14 mx-auto mb-5 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${
+            s.color === 'text-gold' ? 'bg-gradient-to-br from-gold/20 to-gold/5 shadow-gold/10' :
+            s.color === 'text-teal' ? 'bg-gradient-to-br from-teal/20 to-teal/5 shadow-teal/10' :
+            s.color === 'text-blue-600' ? 'bg-gradient-to-br from-blue-600/20 to-blue-600/5' :
+            'bg-gradient-to-br from-navy-deep/15 to-navy-deep/5'
+          } shadow-lg`}>
+            <s.icon className={`w-7 h-7 ${s.color}`} />
           </div>
-          <div className={`font-heading text-3xl font-black mb-1 p-0.5 tracking-tighter ${s.color}`}>{s.value}</div>
-          <div className="text-sm font-bold text-foreground mb-1">{s.label}</div>
-          <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground opacity-60">{s.sub}</div>
+          <div className={`font-heading text-3xl font-black mb-1.5 tracking-tighter ${s.color}`}>{s.value}</div>
+          <div className="text-sm font-bold text-foreground mb-1.5">{s.label}</div>
+          <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/50">{s.sub}</div>
         </motion.div>
       ))}
     </div>

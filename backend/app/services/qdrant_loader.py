@@ -1,10 +1,9 @@
 """Qdrant vector database helper service for LegalGuard AI."""
 from __future__ import annotations
 
-from __future__ import annotations
-
 import logging
 from uuid import uuid4
+from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from qdrant_client import QdrantClient
@@ -23,7 +22,6 @@ from qdrant_client.models import (
 logger = logging.getLogger(__name__)
 
 COLLECTION_NAME = "legalguard_chunks"
-VECTOR_SIZE = 1536  # OpenAI text-embedding-3-small
 
 
 class QdrantSettings(BaseSettings):
@@ -33,6 +31,7 @@ class QdrantSettings(BaseSettings):
 
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: str = ""
+    embedding_dimensions: int = 1536
 
 
 class QdrantService:
@@ -60,7 +59,7 @@ class QdrantService:
         self._client.create_collection(
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(
-                size=VECTOR_SIZE,
+                size=self._settings.embedding_dimensions,
                 distance=Distance.COSINE,
             ),
         )
@@ -86,7 +85,7 @@ class QdrantService:
         """Upsert a batch of vectors with payload into the collection.
 
         Each item in *chunks* must contain:
-          - ``vector``: list[float] of length VECTOR_SIZE
+          - ``vector``: list[float] of length ``embedding_dimensions``
           - ``payload``: dict with fields matching the Qdrant payload schema
           - ``id`` (optional): str UUID — generated if absent
         """
@@ -120,13 +119,23 @@ class QdrantService:
         """
         qdrant_filter = self._build_filter(filters) if filters else None
 
-        results = self._client.search(
-            collection_name=COLLECTION_NAME,
-            query_vector=query_vector,
-            query_filter=qdrant_filter,
-            limit=top_k,
-            with_payload=True,
-        )
+        if hasattr(self._client, "search"):
+            results = self._client.search(
+                collection_name=COLLECTION_NAME,
+                query_vector=query_vector,
+                query_filter=qdrant_filter,
+                limit=top_k,
+                with_payload=True,
+            )
+        else:
+            query_response = self._client.query_points(
+                collection_name=COLLECTION_NAME,
+                query=query_vector,
+                query_filter=qdrant_filter,
+                limit=top_k,
+                with_payload=True,
+            )
+            results = query_response.points
 
         return [
             {

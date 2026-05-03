@@ -47,59 +47,59 @@ const SystemDemoPage = () => {
     
     // Step 1: Ingestion
     setCurrentPhase("ingestion");
-    addLog("Initializing Data Ingestion Pipeline...");
+    addLog("เริ่มต้นกระบวนการนำเข้าข้อมูล...");
     for (let i = 0; i <= 100; i += 5) {
       setProgress(i);
-      if (i === 20) addLog("Loading Thai Judicial Dataset (OpenLaw)...");
-      if (i === 50) addLog("Executing Advanced OCR & NLP Segmentation...");
-      if (i === 80) addLog("Applying Automated PII/PDPA Masking...");
+      if (i === 20) addLog("โหลดชุดข้อมูลคำพิพากษาและเอกสารอ้างอิง...");
+      if (i === 50) addLog("แยกโครงสร้างเอกสารและจัดเตรียมข้อความสำหรับค้นหา...");
+      if (i === 80) addLog("ปกปิดข้อมูลส่วนบุคคลอัตโนมัติตาม PDPA...");
       await new Promise(r => setTimeout(r, 100));
     }
-    addLog("✔ Ingestion Complete: 160K+ vectors indexed.");
+    addLog("✔ นำเข้าข้อมูลเสร็จสมบูรณ์ พร้อมใช้งานใน knowledge layer");
     await new Promise(r => setTimeout(r, 500));
 
     // Step 2: Search
     setCurrentPhase("search");
-    addLog("User Query: 'ถูกหลอกลงทุนออนไลน์ ฟ้องอย่างไร?'");
+    addLog("รับโจทย์ตัวอย่าง: 'ถูกหลอกลงทุนออนไลน์ ฟ้องอย่างไร?'");
     for (let i = 0; i <= 100; i += 10) {
       setProgress(i);
-      if (i === 30) addLog("Neural Semantic Search active...");
-      if (i === 60) addLog("Hybrid Reranking (FAISS + BM25) in progress...");
+      if (i === 30) addLog("เริ่มค้นหาความหมายและบริบทข้อกฎหมาย...");
+      if (i === 60) addLog("รวมผลค้นหาจาก semantic + keyword retrieval...");
       await new Promise(r => setTimeout(r, 150));
     }
-    addLog("✔ Top 3 candidates retrieved with 94.2% confidence.");
+    addLog("✔ ได้ผลลัพธ์ที่เกี่ยวข้องพร้อมจัดอันดับแหล่งอ้างอิง");
     await new Promise(r => setTimeout(r, 500));
 
     // Step 3: Agents
     setCurrentPhase("agents");
-    addLog("Orchestrating Multi-Agent Network...");
+    addLog("เริ่มประสานงาน Feynman Multi-Agent Engine...");
     for (let i = 0; i <= 100; i += 10) {
       setProgress(i);
-      if (i === 20) addLog("Researcher Agent identifying Penal Code Sec. 341...");
-      if (i === 50) addLog("Reviewer Agent validating case precedents...");
-      if (i === 80) addLog("Compliance Agent scanning for potential bias...");
+      if (i === 20) addLog("Researcher Agent วิเคราะห์ประเด็นและมาตราที่เกี่ยวข้อง...");
+      if (i === 50) addLog("Reviewer Agent ตรวจทานคำพิพากษาและแหล่งอ้างอิง...");
+      if (i === 80) addLog("Compliance Agent ตรวจความเสี่ยงและข้อกำกับดูแล...");
       await new Promise(r => setTimeout(r, 200));
     }
-    addLog("✔ Multi-Agent reasoning verified (CAL-130 Protected).");
+    addLog("✔ การประมวลผลหลายเอเจนต์เสร็จ พร้อมบันทึก audit trace");
     await new Promise(r => setTimeout(r, 500));
 
     // Step 4: Safety
     setCurrentPhase("safety");
-    addLog("Activating Legal Guardrails...");
+    addLog("เริ่มตรวจ guardrails และความพร้อมใช้งาน...");
     for (let i = 0; i <= 100; i += 10) {
       setProgress(i);
-      if (i === 40) addLog("Running Hallucination-Check (Grounding)...");
-      if (i === 80) addLog("Verifying AWS Bedrock Security Policies...");
+      if (i === 40) addLog("ตรวจ grounding และความสอดคล้องของคำตอบ...");
+      if (i === 80) addLog("ยืนยัน policy ด้านความปลอดภัยและสิทธิ์การเข้าถึง...");
       await new Promise(r => setTimeout(r, 150));
     }
-    addLog("✔ Safety validated: Zero Hallucination detected.");
+    addLog("✔ ผ่านการตรวจด้านความปลอดภัยและการอ้างอิง");
     await new Promise(r => setTimeout(r, 500));
 
     // Step 5: Output
     setCurrentPhase("output");
-    addLog("Generating final response for Citizen Role...");
+    addLog("จัดเตรียมผลลัพธ์สำหรับการใช้งานตามบทบาท...");
     setProgress(100);
-    addLog("✔ Operation Success: LegalGuard AI is ready.");
+    addLog("✔ เดโมเสร็จสมบูรณ์ พร้อมไปยังโมดูลใช้งานจริง");
     setIsSimulating(false);
   };
 
@@ -107,7 +107,7 @@ const SystemDemoPage = () => {
     <div className="min-h-screen flex flex-col bg-[#050b18] text-white">
       <Navbar />
 
-      {/* Hero Simulator Header */}
+      {/* Hero Demo Header */}
       <div className="relative pt-24 pb-12 overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 z-0">
           <img src={demoBg} className="w-full h-full object-cover opacity-10" alt="" />
@@ -117,13 +117,13 @@ const SystemDemoPage = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 text-gold rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-gold/20">
-              <Activity className="w-3 h-3" /> Real-time System Simulator
+              <Activity className="w-3 h-3" /> Interactive Product Demo
             </motion.div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-              LegalGuard AI <span className="text-gold">Simulator</span>
+              การทำงานของ <span className="text-gold">LegalGuard AI</span>
             </h1>
             <p className="text-white/60 text-lg md:text-xl font-medium max-w-2xl mx-auto mb-10">
-              สัมผัสประสบการณ์การทำงานของสถาปัตยกรรมระดับชาติ <br />แบบ Step-by-Step ผ่านเครื่องจำลองระบบอัจฉริยะ
+              ดูเส้นทางการทำงานของระบบตั้งแต่รับข้อมูล ค้นอ้างอิง <br />ประมวลผลหลายเอเจนต์ ไปจนถึงการตรวจสอบความพร้อมใช้งาน
             </p>
             
             {!isSimulating && currentPhase === "idle" && (
@@ -134,21 +134,21 @@ const SystemDemoPage = () => {
                 className="group relative px-8 py-4 bg-gold text-navy-deep font-bold rounded-2xl shadow-2xl flex items-center gap-3 mx-auto overflow-hidden transition-all"
               >
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
-                <Play className="w-5 h-5 fill-current" /> เริ่มต้นการจำลองระบบ
+                <Play className="w-5 h-5 fill-current" /> เริ่มดูการทำงานของระบบ
               </motion.button>
             )}
             
             {isSimulating && (
               <div className="flex items-center justify-center gap-4 text-gold font-bold">
                 <RefreshCw className="w-5 h-5 animate-spin" /> 
-                <span className="animate-pulse">ระบบกำลังประมวลผลจำลอง...</span>
+                <span className="animate-pulse">ระบบกำลังสาธิตการทำงาน...</span>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Simulator Interface */}
+      {/* Demo Interface */}
       <div className="container mx-auto px-4 py-12 flex-1">
         <div className="grid lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
           
@@ -157,12 +157,12 @@ const SystemDemoPage = () => {
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden">
               <div className="flex items-center justify-between mb-10">
                 <h3 className="text-xl font-bold flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-gold" /> System Flow Visualizer
+                  <Layers className="w-5 h-5 text-gold" /> ภาพรวมการทำงานของระบบ
                 </h3>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
-                    <span className="text-[10px] font-bold text-gold uppercase tracking-widest">Active State</span>
+                    <span className="text-[10px] font-bold text-gold uppercase tracking-widest">Active Step</span>
                   </div>
                 </div>
               </div>
@@ -193,7 +193,7 @@ const SystemDemoPage = () => {
                         </h4>
                         {currentPhase === phase.id && (
                           <div className="text-[10px] font-bold bg-gold/20 text-gold px-2 py-0.5 rounded-lg border border-gold/20 mr-2 uppercase">
-                            Processing {progress}%
+                            In Progress {progress}%
                           </div>
                         )}
                       </div>
@@ -223,7 +223,7 @@ const SystemDemoPage = () => {
               <div className="bg-white/5 px-6 py-4 border-b border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Terminal className="w-4 h-4 text-gold" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-white/60">System Core Logs</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-white/60">Demo Activity Log</span>
                 </div>
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
@@ -236,7 +236,7 @@ const SystemDemoPage = () => {
                 className="flex-1 p-6 font-mono text-[11px] leading-relaxed overflow-y-auto space-y-2 scrollbar-hide"
               >
                 {logs.length === 0 && (
-                  <p className="text-white/20 italic">Waiting for system trigger...</p>
+                  <p className="text-white/20 italic">พร้อมเริ่มสาธิตการทำงานของระบบ...</p>
                 )}
                 {logs.map((log, i) => (
                   <motion.div 
@@ -254,7 +254,7 @@ const SystemDemoPage = () => {
             {/* Live Metrics */}
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8">
               <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-gold" /> Security & Performance
+                <Activity className="w-4 h-4 text-gold" /> Demo Highlights
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 {[
@@ -281,13 +281,13 @@ const SystemDemoPage = () => {
                   className="bg-gradient-to-br from-gold to-accent p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group"
                 >
                   <div className="relative z-10">
-                    <h3 className="text-navy-deep text-2xl font-bold mb-2">Simulated Success!</h3>
-                    <p className="text-navy-deep/80 text-sm font-medium mb-6">ระบบจำลองยืนยันความพร้อมของสถาปัตยกรรม 100% กุญแจสู่ความยุติธรรมดิจิทัลพร้อมใช้งานแล้ว</p>
+                    <h3 className="text-navy-deep text-2xl font-bold mb-2">พร้อมดูโมดูลใช้งานจริงต่อ</h3>
+                    <p className="text-navy-deep/80 text-sm font-medium mb-6">เดโมนี้แสดง flow หลักของระบบครบแล้ว คุณสามารถไปต่อที่ Back Office Hub เพื่อดู Clerk Copilot, Judge Workbench และ AI Control Tower ได้ทันที</p>
                     <button 
-                      onClick={() => navigate("/search?role=citizen")}
+                      onClick={() => navigate("/back-office")}
                       className="w-full py-4 bg-navy-deep text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:gap-4 transition-all"
                     >
-                      ลองใช้งานจริงบนระบบ Sandbox <ArrowRight className="w-5 h-5" />
+                      เปิด Back Office Hub <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="absolute top-[-50%] right-[-20%] w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />

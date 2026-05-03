@@ -18,6 +18,7 @@ import json
 import logging
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
@@ -299,7 +300,7 @@ class LegalGraphDB:
     - Subgraph retrieval for LangGraph agent context
     """
 
-    def __init__(self, embedding_fn=None):
+    def __init__(self, embedding_fn=None, persist_path: Optional[str | Path] = None):
         """Initialize graph store.
 
         Args:
@@ -309,6 +310,9 @@ class LegalGraphDB:
         self._nodes: Dict[str, GraphNode] = {}
         self._edges: List[GraphEdge] = []
         self._embedding_fn = embedding_fn
+        self._persist_path = Path(persist_path) if persist_path else None
+        self._last_persisted_at: Optional[str] = None
+        self._load_from_disk()
 
     def _embed(self, text: str) -> List[float]:
         """Generate embedding for text."""
@@ -328,6 +332,7 @@ class LegalGraphDB:
         if embed and not node.embedding:
             node.embedding = self._embed(node.label)
         self._nodes[node.id] = node
+        self._persist()
         return node
 
     def get_node(self, node_id: str) -> Optional[GraphNode]:
@@ -336,6 +341,7 @@ class LegalGraphDB:
     def remove_node(self, node_id: str) -> None:
         self._nodes.pop(node_id, None)
         self._edges = [e for e in self._edges if e.source_id != node_id and e.target_id != node_id]
+        self._persist()
 
     def all_nodes(self) -> List[GraphNode]:
         return list(self._nodes.values())
@@ -346,6 +352,7 @@ class LegalGraphDB:
         """Add an edge between two existing nodes."""
         if edge.source_id in self._nodes and edge.target_id in self._nodes:
             self._edges.append(edge)
+            self._persist()
         return edge
 
     def get_edges(self, node_id: str) -> List[GraphEdge]:
@@ -375,6 +382,7 @@ class LegalGraphDB:
             self.add_node(node, embed=embed)
         for edge in kg.edges:
             self.add_edge(edge)
+        self._persist()
 
     # -- Similarity search ----------------------------------------------------
 
@@ -491,6 +499,7 @@ class LegalGraphDB:
                 seen.add(key)
                 unique_edges.append(e)
         self._edges = unique_edges
+        self._persist()
 
         return merged_count
 
@@ -521,6 +530,8 @@ class LegalGraphDB:
 
     def from_networkx(self, G: nx.DiGraph) -> None:
         """Import graph from NetworkX DiGraph."""
+        self._nodes = {}
+        self._edges = []
         for node_id, data in G.nodes(data=True):
             label = data.pop("label", str(node_id))
             node_type = data.pop("node_type", "")
@@ -541,6 +552,7 @@ class LegalGraphDB:
                 weight=weight,
                 attributes=data,
             ))
+        self._persist()
 
     # -- Stats ----------------------------------------------------------------
 
@@ -559,6 +571,9 @@ class LegalGraphDB:
             "total_edges": len(self._edges),
             "node_types": type_counts,
             "edge_types": edge_types,
+            "storage_mode": "persistent_json" if self._persist_path else "memory",
+            "persist_path": str(self._persist_path) if self._persist_path else None,
+            "persisted_at": self._last_persisted_at,
         }
 
     def to_context_string(self, kg: Optional[KnowledgeGraph] = None) -> str:
@@ -585,3 +600,37 @@ class LegalGraphDB:
                 parts.append(f"  - {src_label} --[{edge.label}]--> {tgt_label}")
 
         return "\n".join(parts)
+
+    def _load_from_disk(self) -> None:
+        if not self._persist_path or not self._persist_path.exists():
+            return
+
+        try:
+            payload = json.loads(self._persist_path.read_text(encoding="utf-8"))
+            nodes = payload.get("nodes", [])
+            edges = payload.get("edges", [])
+            self._nodes = {node_data["id"]: GraphNode(**node_data) for node_data in nodes}
+            self._edges = [GraphEdge(**edge_data) for edge_data in edges]
+            self._last_persisted_at = payload.get("persisted_at")
+        except Exception as exc:
+            logger.warning("Failed to load persisted knowledge graph: %s", exc)
+
+    def _persist(self) -> None:
+        if not self._persist_path:
+            return
+
+        try:
+            self._persist_path.parent.mkdir(parents=True, exist_ok=True)
+            persisted_at = datetime.now(timezone.utc).isoformat()
+            payload = {
+                "persisted_at": persisted_at,
+                "nodes": [node.model_dump() for node in self._nodes.values()],
+                "edges": [edge.model_dump() for edge in self._edges],
+            }
+            self._persist_path.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            self._last_persisted_at = persisted_at
+        except Exception as exc:
+            logger.warning("Failed to persist knowledge graph: %s", exc)

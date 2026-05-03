@@ -1,33 +1,43 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import SearchPage from "./pages/SearchPage.tsx";
-import BookmarksPage from "./pages/BookmarksPage.tsx";
-import HistoryPage from "./pages/HistoryPage.tsx";
-import JudgmentDetailPage from "./pages/JudgmentDetailPage.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import GovernmentDashboard from "./pages/GovernmentDashboard.tsx";
-import ComplaintFormPage from "./pages/ComplaintFormPage.tsx";
-import CitizenDashboard from "./pages/CitizenDashboard.tsx";
-import JudgeDashboard from "./pages/JudgeDashboard.tsx";
-import SystemDemoPage from "./pages/SystemDemoPage.tsx";
-import ITDashboard from "./pages/ITDashboard.tsx";
-import NitiBenchPage from "./pages/NitiBenchPage.tsx";
-import PredictPage from "./pages/PredictPage.tsx";
-import GlossaryPage from "./pages/GlossaryPage.tsx";
-import PromptsPage from "./pages/PromptsPage.tsx";
-import GraphPage from "./pages/GraphPage.tsx";
-import CourtsPage from "./pages/CourtsPage.tsx";
-import ResponsibleAIPage from "./pages/ResponsibleAIPage.tsx";
-import AnalyzeCasePage from "./pages/AnalyzeCasePage.tsx";
-import TrustCenterPage from "./pages/TrustCenterPage.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
-import LegalChatbot from "./components/LegalChatbot.tsx";
 import { memory } from "@/lib/layeredMemory";
+
+const Index = lazy(() => import("./pages/Index.tsx"));
+const SearchPage = lazy(() => import("./pages/SearchPage.tsx"));
+const BookmarksPage = lazy(() => import("./pages/BookmarksPage.tsx"));
+const HistoryPage = lazy(() => import("./pages/HistoryPage.tsx"));
+const JudgmentDetailPage = lazy(() => import("./pages/JudgmentDetailPage.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const GovernmentDashboardLegacy = lazy(() => import("./pages/GovernmentDashboard.tsx"));
+const ComplaintFormPage = lazy(() => import("./pages/ComplaintFormPage.tsx"));
+const CitizenDashboard = lazy(() => import("./pages/CitizenDashboard.tsx"));
+const JudgeDashboardLegacy = lazy(() => import("./pages/JudgeDashboard.tsx"));
+const SystemDemoPage = lazy(() => import("./pages/SystemDemoPage.tsx"));
+const RoleSimulatorPage = lazy(() => import("./pages/RoleSimulatorPage.tsx"));
+const ITDashboardLegacy = lazy(() => import("./pages/ITDashboard.tsx"));
+const NitiBenchPage = lazy(() => import("./pages/NitiBenchPage.tsx"));
+const PredictPage = lazy(() => import("./pages/PredictPage.tsx"));
+const GlossaryPage = lazy(() => import("./pages/GlossaryPage.tsx"));
+const PromptsPage = lazy(() => import("./pages/PromptsPage.tsx"));
+const GraphPage = lazy(() => import("./pages/GraphPage.tsx"));
+const CourtsPage = lazy(() => import("./pages/CourtsPage.tsx"));
+const ResponsibleAIPage = lazy(() => import("./pages/ResponsibleAIPage.tsx"));
+const AnalyzeCasePage = lazy(() => import("./pages/AnalyzeCasePage.tsx"));
+const TrustCenterPage = lazy(() => import("./pages/TrustCenterPage.tsx"));
+const PrivateOfferingPage = lazy(() => import("./pages/PrivateOfferingPage.tsx"));
+const BackOfficeHubPage = lazy(() => import("./pages/BackOfficeHubPage.tsx"));
+const ClerkCopilotPage = lazy(() => import("./pages/ClerkCopilotPage.tsx"));
+const JudgeWorkbenchPage = lazy(() => import("./pages/JudgeWorkbenchPage.tsx"));
+const AIControlTowerPage = lazy(() => import("./pages/AIControlTowerPage.tsx"));
+const TraceConsolePage = lazy(() => import("./pages/TraceConsolePage.tsx"));
+const LegalChatbot = lazy(() => import("./components/LegalChatbot.tsx"));
+const AuthPage = lazy(() => import("./pages/AuthPage.tsx"));
+const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -42,6 +52,14 @@ const MemoryRetentionBootstrap = () => {
   return null;
 };
 
+const RouteLoadingFallback = () => (
+  <div className="flex min-h-[40vh] items-center justify-center px-4">
+    <div className="rounded-2xl border border-border bg-card px-6 py-4 text-sm font-medium text-muted-foreground shadow-card">
+      กำลังโหลดหน้าระบบ...
+    </div>
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -50,30 +68,46 @@ const App = () => (
       <ErrorBoundary>
         <MemoryRetentionBootstrap />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/bookmarks" element={<BookmarksPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/judgment/:id" element={<JudgmentDetailPage />} />
-            <Route path="/government" element={<GovernmentDashboard />} />
-            <Route path="/judge" element={<JudgeDashboard />} />
-            <Route path="/citizen" element={<CitizenDashboard />} />
-            <Route path="/complaint-form" element={<ComplaintFormPage />} />
-            <Route path="/demo" element={<SystemDemoPage />} />
-            <Route path="/it" element={<ITDashboard />} />
-            <Route path="/benchmark" element={<NitiBenchPage />} />
-            <Route path="/predict" element={<PredictPage />} />
-            <Route path="/glossary" element={<GlossaryPage />} />
-            <Route path="/prompts" element={<PromptsPage />} />
-            <Route path="/graph" element={<GraphPage />} />
-            <Route path="/courts" element={<CourtsPage />} />
-            <Route path="/responsible-ai" element={<ResponsibleAIPage />} />
-            <Route path="/trust-center" element={<TrustCenterPage />} />
-            <Route path="/analyze" element={<AnalyzeCasePage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <LegalChatbot />
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/bookmarks" element={<BookmarksPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/judgment/:id" element={<JudgmentDetailPage />} />
+              <Route path="/government" element={<Navigate to="/clerk-copilot" replace />} />
+              <Route path="/government-legacy" element={<GovernmentDashboardLegacy />} />
+              <Route path="/judge" element={<Navigate to="/judge-workbench" replace />} />
+              <Route path="/judge-legacy" element={<JudgeDashboardLegacy />} />
+              <Route path="/citizen" element={<CitizenDashboard />} />
+              <Route path="/back-office" element={<BackOfficeHubPage />} />
+              <Route path="/clerk-copilot" element={<ClerkCopilotPage />} />
+              <Route path="/judge-workbench" element={<JudgeWorkbenchPage />} />
+              <Route path="/ai-control-tower" element={<AIControlTowerPage />} />
+              <Route path="/trace-console" element={<TraceConsolePage />} />
+              <Route path="/complaint-form" element={<ComplaintFormPage />} />
+              <Route path="/demo" element={<SystemDemoPage />} />
+              <Route path="/simulator" element={<RoleSimulatorPage />} />
+              <Route path="/it" element={<Navigate to="/ai-control-tower" replace />} />
+              <Route path="/it-legacy" element={<ITDashboardLegacy />} />
+              <Route path="/benchmark" element={<NitiBenchPage />} />
+              <Route path="/predict" element={<PredictPage />} />
+              <Route path="/glossary" element={<GlossaryPage />} />
+              <Route path="/prompts" element={<PromptsPage />} />
+              <Route path="/graph" element={<GraphPage />} />
+              <Route path="/courts" element={<CourtsPage />} />
+              <Route path="/responsible-ai" element={<ResponsibleAIPage />} />
+              <Route path="/trust-center" element={<TrustCenterPage />} />
+              <Route path="/analyze" element={<AnalyzeCasePage />} />
+              <Route path="/private-offering" element={<PrivateOfferingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+          <Suspense fallback={null}>
+            <LegalChatbot />
+          </Suspense>
         </BrowserRouter>
       </ErrorBoundary>
     </TooltipProvider>

@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PartnerBar from "@/components/PartnerBar";
+import BackOfficeBridgeBanner from "@/components/BackOfficeBridgeBanner";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
-  Shield, Database, BarChart3, Hash, ShieldCheck, AlertTriangle,
+  Shield, Database, BarChart3, Hash, ShieldCheck, AlertTriangle, Search, Users, Sparkles,
   CheckCircle2, Cpu, Server, Activity, Terminal, Network, Layers, Lock, RefreshCw, Pin, Trash2, Pencil
 } from "lucide-react";
 import { maskPII, type PIISpan } from "@/lib/piiMasking";
@@ -38,6 +39,95 @@ interface LiveMetrics {
   error_rate_1h: number;
   system_health: Record<string, string>;
   ai_metrics: { avg_honesty_score: number; hallucination_rate: number; pii_leak_count: number };
+}
+
+interface SystemStatsResponse {
+  actual: {
+    pdf_files: number;
+    hf_datasets: number;
+    audit_entries: number;
+    pii_patterns: number;
+    total_tests: number;
+  };
+  phase: string;
+}
+
+interface EvaluationMetricsResponse {
+  privacy: {
+    pii_precision: number;
+    pii_precision_pct: string;
+    pii_recall: number;
+    pii_recall_pct: string;
+    pii_f1: number;
+    pii_leakage_rate: number;
+    pii_leakage_pct: string;
+    total_pii_masked: number;
+    pdpa_compliant: boolean;
+  };
+  rag: {
+    source_attribution_accuracy: number;
+    source_attribution_pct: string;
+    hallucination_rate: number;
+    hallucination_pct: string;
+    avg_confidence: number;
+    high_confidence_rate: number;
+  };
+  governance: {
+    ethics_compliance_rate: number;
+    ethics_compliance_pct: string;
+    expert_review_rate: number;
+    expert_review_pct: string;
+    circuit_breaker_triggers: number;
+    audit_chain_valid: boolean;
+  };
+}
+
+interface ReleaseGuardResponse {
+  passed: boolean;
+  checks: Array<{ name: string; passed: boolean; detail: string }>;
+}
+
+interface GraphStatsResponse {
+  total_nodes: number;
+  total_edges: number;
+  node_types: Record<string, number>;
+  edge_types: Record<string, number>;
+  storage_mode?: string;
+  persist_path?: string | null;
+  persisted_at?: string | null;
+}
+
+interface AccessMatrixResponse {
+  source: string;
+  role_order: string[];
+  role_labels: Record<string, string>;
+  classifications: Array<{
+    classification: string;
+    label: string;
+    detail: string;
+    roles: Array<{
+      role: string;
+      label: string;
+      allowed: boolean;
+      quality: number;
+    }>;
+  }>;
+  quality_by_role: Array<{
+    role: string;
+    label: string;
+    quality: number;
+  }>;
+}
+
+interface BenchmarkQuickReport {
+  total_cases: number;
+  hit_at_1: number;
+  hit_at_3: number;
+  hit_at_5: number;
+  mrr: number;
+  avg_citation_accuracy: number;
+  hallucination_rate: number;
+  avg_latency_ms: number;
 }
 
 interface AuditRow {
@@ -164,6 +254,49 @@ interface SavedAuditSet {
   rows: AuditRow[];
 }
 
+interface SafetyLayerDetail {
+  step: string;
+  layer_code?: string;
+  title: string;
+  desc: string;
+  icon: typeof Shield;
+  color: string;
+  bg: string;
+  architectureLabel: string;
+  purpose: string;
+  inputs: string[];
+  controls: string[];
+  outputs: string[];
+  services: string[];
+  runtimeStatus?: string;
+  runtimeEvidence?: Record<string, unknown>;
+}
+
+interface SafetyPipelineResponse {
+  title: string;
+  subtitle: string;
+  badge: string;
+  architecture_version: string;
+  integrity: {
+    audit_chain_valid: boolean;
+    generated_at: string;
+  };
+  layers: Array<{
+    step: string;
+    layer_code?: string;
+    title: string;
+    description: string;
+    architecture_label: string;
+    purpose: string;
+    inputs: string[];
+    controls: string[];
+    outputs: string[];
+    services: string[];
+    runtime_status?: string;
+    runtime_evidence?: Record<string, unknown>;
+  }>;
+}
+
 const toAuditRowMap = (rows: AuditRow[]) => (
   rows.reduce<Record<string, AuditRow>>((accumulator, row) => {
     accumulator[row.id] = row;
@@ -200,6 +333,246 @@ const sanitizeFilenameBase = (value: string) => {
   return trimmed.replace(/\s+/g, "-").replace(/[^a-z0-9-_]/g, "");
 };
 
+const strategicDimensions = [
+  {
+    icon: Cpu,
+    title: "Efficiency & Speed",
+    summary: "ลดเวลายกร่าง ตรวจร่าง และคัดกรองคำฟ้อง เพื่อลดคอขวดในกระบวนพิจารณา",
+    systems: ["Drafting Assistant", "Complaint Verification", "Workflow Automation"],
+    target: "ลดเวลายกร่าง 30-50%",
+  },
+  {
+    icon: Search,
+    title: "Consistency & Accuracy",
+    summary: "ยกระดับการค้นคืนคำพิพากษาและข้อกฎหมายให้สม่ำเสมอ เข้าใจบริบท และอ้างอิงได้จริง",
+    systems: ["Semantic Search", "Precedent Recommendation", "Predictive Model"],
+    target: "Citation Accuracy >= 95%",
+  },
+  {
+    icon: BarChart3,
+    title: "Data-Driven Management",
+    summary: "มองเห็นสถานการณ์คดีแบบใกล้ real-time ระบุ bottleneck และช่วยจัดสรรสำนวนตามภาระงาน",
+    systems: ["Executive Dashboard", "Bottleneck Analytics", "Workload Allocation"],
+    target: "ลดคดีค้าง 10-25%",
+  },
+  {
+    icon: Users,
+    title: "Public Service & Accessibility",
+    summary: "ให้ประชาชนเข้าถึงบริการศาลได้จากที่บ้าน พร้อม AI ช่วยอธิบายสิทธิ ขั้นตอน และศาลที่เกี่ยวข้อง",
+    systems: ["e-Filing", "Citizen Chatbot", "Court Lookup"],
+    target: "เข้าถึงบริการภายในวันเดียว",
+  },
+  {
+    icon: Shield,
+    title: "Transparency & Trust",
+    summary: "ทำให้ทุกการตัดสินใจของระบบตรวจสอบย้อนหลังได้ พร้อมปกปิดข้อมูลส่วนบุคคลอย่างเป็นระบบ",
+    systems: ["Audit Log", "PII Masking", "Explainability", "Access Control"],
+    target: "Audit Coverage 100%",
+  },
+];
+
+const coverageGroups = [
+  {
+    title: "มีอยู่แล้วใน /it",
+    items: [
+      "Live system monitor + simulated ops logs",
+      "CAL-130 audit explorer พร้อม filter, export, saved sets",
+      "Ingestion job explorer + retry chain + compare view",
+      "PII masking sandbox สำหรับทดสอบ PDPA patterns",
+    ],
+  },
+  {
+    title: "เพิ่มให้รอบนี้",
+    items: [
+      "NitiBench quick benchmark ในหน้า IT",
+      "Responsible AI / Release Guard snapshot",
+      "System assets + Knowledge Graph stats",
+      "Data classification matrix + role access visibility",
+    ],
+  },
+];
+
+const safetyLayerDetails: SafetyLayerDetail[] = [
+  {
+    step: "01",
+    title: "PII Sanitization",
+    desc: "ดักจับและปกปิดข้อมูลส่วนตัว (PDPA) ทันที",
+    icon: Shield,
+    color: "text-blue-400",
+    bg: "bg-blue-400/20",
+    architectureLabel: "Ingress Privacy Layer",
+    purpose: "กันข้อมูลส่วนบุคคลไม่ให้ไหลเข้า agent และ retrieval แบบดิบตั้งแต่ต้นทาง",
+    inputs: [
+      "คำถามผู้ใช้, ข้อเท็จจริงคดี, เอกสารคำร้อง, transcript",
+      "ข้อมูลอ่อนไหว เช่น ชื่อ, เลขบัตร, เบอร์โทร, ที่อยู่",
+    ],
+    controls: [
+      "Regex + pattern detection สำหรับ PII ไทย",
+      "maskPII runtime ก่อนเข้า search, chat และ reasoning",
+      "บันทึก audit เมื่อมีการ mask เพื่อรองรับ PDPA",
+    ],
+    outputs: [
+      "ข้อความที่ถูก mask แล้ว",
+      "จำนวน PII spans และ metadata สำหรับ compliance",
+    ],
+    services: ["PII Masking", "PDPA Guard", "Audit Event"],
+  },
+  {
+    step: "02",
+    title: "Intent Routing",
+    desc: "วิเคราะห์เจตนาและส่งไปยัง AI Legal Agent",
+    icon: Terminal,
+    color: "text-blue-300",
+    bg: "bg-blue-300/20",
+    architectureLabel: "Routing & Planning Layer",
+    purpose: "แยกว่าคำขอนี้เป็นงานค้นคดี, เทียบมาตรา, สถิติ, หรือ drafting เพื่อพาไป pipeline ที่ถูกต้อง",
+    inputs: [
+      "query ที่ผ่านการ mask แล้ว",
+      "memory context และ prompt context ของผู้ใช้",
+    ],
+    controls: [
+      "intent classification",
+      "LegalQueryPlanner เลือก strategy ระหว่าง SQL / GRAPH / HYBRID",
+      "บันทึก plan และ intent ลง audit trail",
+    ],
+    outputs: [
+      "intent label",
+      "retrieval strategy และ entity hints",
+    ],
+    services: ["Query Router", "LegalQueryPlanner", "Role Context"],
+  },
+  {
+    step: "03",
+    title: "Hybrid Retrieval",
+    desc: "สืบค้นกฎหมาย 160k+ ฉบับด้วย Vector & BM25",
+    icon: Database,
+    color: "text-gold",
+    bg: "bg-gold/20",
+    architectureLabel: "Knowledge Access Layer",
+    purpose: "ดึงคำพิพากษา มาตรา และเอกสารที่เกี่ยวข้องจากหลายแหล่งให้ครบทั้ง semantic และ keyword",
+    inputs: [
+      "retrieval strategy จาก router",
+      "query, statute refs, entity hints, memory context",
+    ],
+    controls: [
+      "Hybrid search: vector + BM25",
+      "semantic cache และ retrieval target memory",
+      "รองรับ knowledge graph และ ingestion data layer",
+    ],
+    outputs: [
+      "candidate documents และ citations",
+      "retrieval targets สำหรับชั้น reranking",
+    ],
+    services: ["Vector Search", "BM25", "Knowledge Graph", "Semantic Cache"],
+  },
+  {
+    step: "04",
+    title: "Context Filter",
+    desc: "คัดกรองเฉพาะเนื้อหาที่เกี่ยวข้องและถูกต้องแม่นยำ",
+    icon: Layers,
+    color: "text-orange-400",
+    bg: "bg-orange-400/20",
+    architectureLabel: "Relevance & Context Layer",
+    purpose: "ลด noise ก่อนเข้า reasoning เพื่อให้ model เห็นเฉพาะบริบทที่เกี่ยวกับประเด็นคดีจริง",
+    inputs: [
+      "candidate documents จาก retrieval",
+      "intent, statutes, relevance hints",
+    ],
+    controls: [
+      "context pruning และ reranking",
+      "fairness baseline ก่อนผ่านไป governance",
+      "LeJEPA / hybrid scoring ช่วยคัดความเกี่ยวข้อง",
+    ],
+    outputs: [
+      "curated context bundle",
+      "fairness baseline และ relevance score",
+    ],
+    services: ["Hybrid Reranking", "Context Window Control", "Fairness Baseline"],
+  },
+  {
+    step: "05",
+    title: "AI Guardrails",
+    desc: "AWS Bedrock ตรวจระเบียบวินัยและความลำเอียง",
+    icon: ShieldCheck,
+    color: "text-teal",
+    bg: "bg-teal/20",
+    architectureLabel: "Governance Gate Layer",
+    purpose: "วางรั้ว Responsible AI ก่อนและหลัง model reasoning เพื่อคุมความเสี่ยงระดับองค์กรรัฐ",
+    inputs: [
+      "curated context bundle",
+      "reasoning outputs, honesty score, audit state",
+    ],
+    controls: [
+      "governanceService ประเมิน risk, violations, xi, URAACF",
+      "release guard, policy enforcement และ access control",
+      "เช็ก audit integrity ก่อนปิดงาน",
+    ],
+    outputs: [
+      "risk level และ governance vector",
+      "decision ว่าควรปล่อยผลหรือหยุดที่ safety gate",
+    ],
+    services: ["RAAIA Safety Gate", "Responsible AI", "Release Guard"],
+  },
+  {
+    step: "06",
+    title: "Halluc. Audit",
+    desc: "ตรวจสอบการมโน และระบุมาตราอ้างอิงจริง 100%",
+    icon: CheckCircle2,
+    color: "text-purple-400",
+    bg: "bg-purple-400/20",
+    architectureLabel: "Verification & Consensus Layer",
+    purpose: "ให้หลาย agent ตรวจทาน reasoning กันเอง ลด overconfidence และช่วยให้ผลลัพธ์อ้างอิงได้",
+    inputs: [
+      "reasoning trace",
+      "retrieval context, compliance feedback, reviewer feedback",
+    ],
+    controls: [
+      "Feynman Multi-Agent Engine ที่ L6",
+      "RESEARCHER / COMPLIANCE / REVIEWER / SKEPTIC / CONSENSUS",
+      "honesty score และ reflection cycles",
+    ],
+    outputs: [
+      "คำตอบที่ผ่าน consensus",
+      "confidence, honesty score, agent timeline",
+    ],
+    services: ["Strategic Reasoning", "Feynman Multi-Agent Engine", "Citation Review"],
+  },
+  {
+    step: "07",
+    title: "Crypto Log",
+    desc: "ประทับตรา Hash ลง Audit Log ป้องกันการแก้ไข",
+    icon: Hash,
+    color: "text-red-400",
+    bg: "bg-red-400/20",
+    architectureLabel: "Immutable Audit Layer",
+    purpose: "ทำให้ทุก action ตรวจสอบย้อนหลังได้ และบอกได้ว่าใครทำอะไร เมื่อไร ผ่านระบบไหน",
+    inputs: [
+      "final answer, governance state, audit metadata",
+      "user id, action, confidence, result count",
+    ],
+    controls: [
+      "CAL-130 hash chain logging",
+      "audit explorer, saved sets, export และ integrity validation",
+      "เชื่อมกับ IT Dashboard และ Responsible AI view",
+    ],
+    outputs: [
+      "immutable audit record",
+      "chain validation status และ incident evidence",
+    ],
+    services: ["CAL-130 Audit Log", "Hash Chain", "IT Observability"],
+  },
+];
+
+const safetyVisualMap: Record<string, { icon: typeof Shield; color: string; bg: string }> = {
+  "01": { icon: Shield, color: "text-blue-400", bg: "bg-blue-400/20" },
+  "02": { icon: Terminal, color: "text-blue-300", bg: "bg-blue-300/20" },
+  "03": { icon: Database, color: "text-gold", bg: "bg-gold/20" },
+  "04": { icon: Layers, color: "text-orange-400", bg: "bg-orange-400/20" },
+  "05": { icon: ShieldCheck, color: "text-teal", bg: "bg-teal/20" },
+  "06": { icon: CheckCircle2, color: "text-purple-400", bg: "bg-purple-400/20" },
+  "07": { icon: Hash, color: "text-red-400", bg: "bg-red-400/20" },
+};
+
 const ITDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [chainValid, setChainValid] = useState<boolean | null>(null);
@@ -223,7 +596,16 @@ const ITDashboard = () => {
   const [piiInput, setPiiInput] = useState("");
   const [piiResult, setPiiResult] = useState<{ masked: string; spans: PIISpan[]; piiCount: number } | null>(null);
   const [liveMetrics, setLiveMetrics] = useState<LiveMetrics | null>(null);
+  const [systemStats, setSystemStats] = useState<SystemStatsResponse | null>(null);
+  const [evaluationMetrics, setEvaluationMetrics] = useState<EvaluationMetricsResponse | null>(null);
+  const [releaseGuard, setReleaseGuard] = useState<ReleaseGuardResponse | null>(null);
+  const [graphStats, setGraphStats] = useState<GraphStatsResponse | null>(null);
+  const [accessMatrix, setAccessMatrix] = useState<AccessMatrixResponse | null>(null);
+  const [benchmarkReport, setBenchmarkReport] = useState<BenchmarkQuickReport | null>(null);
+  const [benchmarkLoading, setBenchmarkLoading] = useState(false);
+  const [benchmarkError, setBenchmarkError] = useState("");
   const [liveError, setLiveError] = useState("");
+  const [observabilityError, setObservabilityError] = useState("");
   const [adminError, setAdminError] = useState("");
   const [jobs, setJobs] = useState<IngestionJob[]>([]);
   const [selectedJobId, setSelectedJobId] = useState("");
@@ -236,6 +618,8 @@ const ITDashboard = () => {
   const [retryLoading, setRetryLoading] = useState(false);
   const [retryFailedLoading, setRetryFailedLoading] = useState(false);
   const [confirmRetryFailedOpen, setConfirmRetryFailedOpen] = useState(false);
+  const [safetyPipeline, setSafetyPipeline] = useState<SafetyPipelineResponse | null>(null);
+  const [selectedSafetyLayer, setSelectedSafetyLayer] = useState<SafetyLayerDetail | null>(null);
   const [auditExportScope, setAuditExportScope] = useState<"current_page" | "all_filtered">("all_filtered");
   const [jobFilterSource, setJobFilterSource] = useState("all");
   const [jobFilterStatus, setJobFilterStatus] = useState("all");
@@ -437,6 +821,93 @@ const ITDashboard = () => {
   }, [adminRefreshTick, auditFilterAction, auditFilterAgentRole, auditFilterCaseType, auditPage, auditPageSize, auditSearch]);
 
   useEffect(() => {
+    const loadObservability = async () => {
+      try {
+        const [statsResp, metricsResp, releaseResp, graphResp, accessResp, safetyResp] = await Promise.all([
+          fetch(`${API_BASE}/dashboard/system-stats`).catch(() => null),
+          fetch(`${API_BASE}/dashboard/metrics`).catch(() => null),
+          fetch(`${API_BASE}/responsible-ai/release-guard`).catch(() => null),
+          fetch(`${API_BASE}/graph/stats`).catch(() => null),
+          fetch(`${API_BASE}/responsible-ai/access-matrix`).catch(() => null),
+          fetch(`${API_BASE}/dashboard/safety-pipeline`).catch(() => null),
+        ]);
+
+        let successCount = 0;
+
+        if (statsResp?.ok) {
+          const data = (await statsResp.json()) as SystemStatsResponse;
+          setSystemStats(data);
+          successCount += 1;
+        }
+
+        if (metricsResp?.ok) {
+          const data = (await metricsResp.json()) as EvaluationMetricsResponse;
+          setEvaluationMetrics(data);
+          successCount += 1;
+        }
+
+        if (releaseResp?.ok) {
+          const data = (await releaseResp.json()) as ReleaseGuardResponse;
+          setReleaseGuard(data);
+          successCount += 1;
+        }
+
+        if (graphResp?.ok) {
+          const data = (await graphResp.json()) as GraphStatsResponse;
+          setGraphStats(data);
+          successCount += 1;
+        }
+
+        if (accessResp?.ok) {
+          const data = (await accessResp.json()) as AccessMatrixResponse;
+          setAccessMatrix(data);
+          successCount += 1;
+        }
+
+        if (safetyResp?.ok) {
+          const data = (await safetyResp.json()) as SafetyPipelineResponse;
+          setSafetyPipeline(data);
+          successCount += 1;
+        }
+
+        setObservabilityError(successCount === 0 ? "ไม่สามารถดึง observability snapshot เพิ่มเติมจาก backend ได้" : "");
+      } catch (error) {
+        console.error("IT observability error:", error);
+        setObservabilityError("ไม่สามารถดึง observability snapshot เพิ่มเติมจาก backend ได้");
+      }
+    };
+
+    void loadObservability();
+    const interval = setInterval(() => void loadObservability(), 60000);
+    return () => clearInterval(interval);
+  }, [adminRefreshTick]);
+
+  const renderedSafetyLayers = useMemo(() => {
+    const sourceLayers = safetyPipeline?.layers?.length
+      ? safetyPipeline.layers.map((layer) => {
+          const visuals = safetyVisualMap[layer.step] ?? safetyVisualMap["01"];
+          return {
+            step: layer.step,
+            layer_code: layer.layer_code,
+            title: layer.title,
+            desc: layer.description,
+            architectureLabel: layer.architecture_label,
+            purpose: layer.purpose,
+            inputs: layer.inputs,
+            controls: layer.controls,
+            outputs: layer.outputs,
+            services: layer.services,
+            runtimeStatus: layer.runtime_status,
+            runtimeEvidence: layer.runtime_evidence,
+            ...visuals,
+          } satisfies SafetyLayerDetail;
+        })
+      : safetyLayerDetails;
+
+    return sourceLayers;
+  }, [safetyPipeline]);
+
+  useEffect(() => {
     setAuditPage(1);
   }, [auditFilterAction, auditFilterAgentRole, auditFilterCaseType, auditSearch]);
 
@@ -519,6 +990,23 @@ const ITDashboard = () => {
     () => Array.from(new Set(jobs.map((job) => job.source_code))).sort(),
     [jobs],
   );
+
+  const classificationMatrix = useMemo(() => accessMatrix?.classifications ?? [], [accessMatrix]);
+
+  const roleQualityLevels = useMemo(() => accessMatrix?.quality_by_role ?? [], [accessMatrix]);
+
+  const topNodeTypes = useMemo(() => (
+    Object.entries(graphStats?.node_types ?? {})
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 3)
+  ), [graphStats]);
+
+  const releaseGuardSummary = useMemo(() => {
+    if (!releaseGuard) return null;
+    const totalChecks = releaseGuard.checks.length;
+    const passedChecks = releaseGuard.checks.filter((check) => check.passed).length;
+    return { totalChecks, passedChecks, failedChecks: totalChecks - passedChecks };
+  }, [releaseGuard]);
 
   const failedFilePaths = useMemo(() => {
     if (!selectedJob) return [];
@@ -850,6 +1338,28 @@ const ITDashboard = () => {
     setAdminRefreshTick((value) => value + 1);
   };
 
+  const runBenchmarkSnapshot = async () => {
+    setBenchmarkLoading(true);
+    setBenchmarkError("");
+    try {
+      const response = await fetch(`${API_BASE}/benchmark/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ include_survey: true, include_hf: false }),
+      });
+      if (!response.ok) {
+        throw new Error(`benchmark ${response.status}`);
+      }
+      const data = (await response.json()) as BenchmarkQuickReport;
+      setBenchmarkReport(data);
+    } catch (error) {
+      console.error("benchmark snapshot error:", error);
+      setBenchmarkError("ไม่สามารถรัน NitiBench snapshot จากหน้า IT ได้");
+    } finally {
+      setBenchmarkLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -872,15 +1382,15 @@ const ITDashboard = () => {
             </div>
             <div className="text-center md:text-left">
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-3 py-1 bg-gold text-white border border-gold rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 shadow-gold"
+                className="inline-flex items-center gap-2 rounded-full border border-gold/70 bg-gold/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(255,183,0,0.24)] mb-4"
               >
-                System Administrator Console
+                มุมมองเดิม (Legacy View)
               </motion.div>
               <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="font-heading text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
-                ระบบ IT / <span className="text-gold">ผู้ดูแลระบบ</span>
+                ระบบ IT / <span className="text-gold">ผู้ดูแลระบบในมุมมองเดิม</span>
               </motion.h1>
               <motion.p initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="text-white font-medium text-base md:text-lg max-w-2xl leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-                ศูนย์ควบคุมโครงสร้างพื้นฐานเทคโนโลยีระดับชาติ ประสิทธิภาพ และความปลอดภัยระดับสูงสุด
+                มุมมองอ้างอิงของแดชบอร์ดเดิม สำหรับตรวจเชิงลึกด้านโครงสร้างพื้นฐาน ประสิทธิภาพ และความปลอดภัยของระบบ
               </motion.p>
             </div>
           </div>
@@ -888,6 +1398,16 @@ const ITDashboard = () => {
       </div>
 
       <div className="container mx-auto px-4 pb-8 flex-1">
+        <div className="mb-8 max-w-5xl">
+          <BackOfficeBridgeBanner
+            eyebrow="มุมมองเดิม (Legacy View)"
+            title="ศูนย์ควบคุม AI คือหน้าหลักใหม่สำหรับการติดตามระบบและการกำกับดูแล"
+            description="หน้านี้เป็นมุมมองเดิมสำหรับการตรวจเชิงลึกและการเปรียบเทียบ ส่วนการใช้งานหลักควรเริ่มที่ศูนย์ควบคุม AI เพื่อดูการมองเห็นระบบ ความพร้อมก่อนปล่อยใช้งาน และความเสี่ยงเชิงปฏิบัติการในภาพเดียว"
+            primaryAction={{ label: "เปิดศูนย์ควบคุม AI", path: "/ai-control-tower", icon: Server }}
+            secondaryAction={{ label: "เปิดศูนย์รวมแดชบอร์ดหลังบ้าน", path: "/back-office" }}
+            tone="teal"
+          />
+        </div>
 
         <div className="space-y-6 max-w-5xl">
           {/* Live Command Center */}
@@ -896,11 +1416,11 @@ const ITDashboard = () => {
             <div className="md:col-span-2 bg-[#0B1120] text-white border border-[#1E293B] rounded-2xl p-6 shadow-card relative overflow-hidden">
               <div className="absolute -top-4 -right-4 p-4 opacity-5"><Terminal className="w-32 h-32" /></div>
               <div className="flex items-center justify-between mb-5 relative z-10">
-                <h3 className="font-heading font-bold text-lg flex items-center gap-2"><Terminal className="w-5 h-5 text-gold" /> Live System Monitor</h3>
+                <h3 className="font-heading font-bold text-lg flex items-center gap-2"><Terminal className="w-5 h-5 text-gold" /> ตัวติดตามระบบในมุมมองเดิม</h3>
                 <div className="flex items-center gap-2 text-xs bg-[#00ff00]/10 border border-[#00ff00]/20 px-3 py-1 rounded-full">
                   <span className="w-2 h-2 rounded-full bg-[#00ff00] animate-pulse"></span>
                   <span className="text-[#00ff00] font-mono tracking-widest">
-                    {liveError ? "SIMULATION MODE" : "SYSTEMS NOMINAL"}
+                    {liveError ? "โหมดจำลองสถานการณ์" : "ระบบอยู่ในเกณฑ์ปกติ"}
                   </span>
                 </div>
               </div>
@@ -913,19 +1433,19 @@ const ITDashboard = () => {
               {/* Metrics Mini-cards */}
               <div className="grid grid-cols-3 gap-4 mb-5 relative z-10">
                 <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-colors">
-                  <div className="text-xs text-white/50 mb-1 flex items-center gap-1"><Cpu className="w-3 h-3" /> CPU Load</div>
+                  <div className="text-xs text-white/50 mb-1 flex items-center gap-1"><Cpu className="w-3 h-3" /> ภาระประมวลผล CPU</div>
                   <div className="text-2xl font-mono text-white flex items-end gap-1">
                     {liveMetrics ? liveMetrics.requests_1h * 0.05 : Math.floor(Math.random() * 5 + 35)}<span className="text-sm text-white/50 mb-1">%</span>
                   </div>
                 </div>
                 <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-colors">
-                  <div className="text-xs text-white/50 mb-1 flex items-center gap-1"><Database className="w-3 h-3" /> Memory Usage</div>
+                  <div className="text-xs text-white/50 mb-1 flex items-center gap-1"><Database className="w-3 h-3" /> การใช้หน่วยความจำ</div>
                   <div className="text-2xl font-mono text-white flex items-end gap-1">
                     4.2<span className="text-sm text-white/50 mb-1">GB / 16GB</span>
                   </div>
                 </div>
                 <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-colors">
-                  <div className="text-xs text-white/50 mb-1 flex items-center gap-1"><Activity className="w-3 h-3" /> Cache Hit Rate</div>
+                  <div className="text-xs text-white/50 mb-1 flex items-center gap-1"><Activity className="w-3 h-3" /> อัตราแคชที่ใช้ได้ผล</div>
                   <div className="text-2xl font-mono text-teal flex items-end gap-1">
                     {liveMetrics ? (liveMetrics.cache_hit_rate_1h * 100).toFixed(1) : "94.2"}<span className="text-sm text-teal/50 mb-1">%</span>
                   </div>
@@ -934,7 +1454,7 @@ const ITDashboard = () => {
 
               {/* Terminal Output */}
               <div className="bg-black/80 rounded-xl p-4 font-mono text-xs text-[#00ff22] h-[140px] overflow-hidden border border-white/20 shadow-inner">
-                {simLogs.length === 0 && <span className="text-white/40 italic">Waiting for secure connection...</span>}
+                {simLogs.length === 0 && <span className="text-white/40 italic">กำลังรอการเชื่อมต่อที่ปลอดภัย...</span>}
                 {simLogs.map((log, i) => (
                   <motion.div key={log + i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-2 truncate flex items-center gap-2">
                     <span className="text-gold/60 font-bold">»</span> <span className="text-white font-medium">{log}</span>
@@ -945,7 +1465,7 @@ const ITDashboard = () => {
 
             {/* Node Status */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-card flex flex-col">
-              <h3 className="font-heading font-bold mb-5 flex items-center gap-2"><Network className="w-5 h-5 text-primary" /> Cloud Infrastructure (AWS EKS Cluster)</h3>
+              <h3 className="font-heading font-bold mb-5 flex items-center gap-2"><Network className="w-5 h-5 text-primary" /> โครงสร้างพื้นฐานคลาวด์ (AWS EKS Cluster)</h3>
               <div className="flex-1 flex flex-col justify-between gap-3">
                 {[
                   { name: "AWS EKS Cluster (ap-southeast-1)", status: "Active", ping: "8ms", load: "bg-teal" },
@@ -970,124 +1490,209 @@ const ITDashboard = () => {
             </div>
           </div>
 
-          {/* 7-Layer Legal Safety Pipeline — High-Impact Professional Version */}
-          <div className="relative border border-[#1E293B] rounded-[3rem] p-10 shadow-2xl overflow-hidden group min-h-[500px]">
-            {/* National Professional IT Background */}
-            <div className="absolute inset-0 z-0">
-              <img
-                src={itBg}
-                alt="High-Tech Pipeline Background"
-                className="w-full h-full object-cover opacity-70 contrast-125 saturate-150"
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-navy-deep/95 via-navy-deep/80 to-[#0B1120]/90 backdrop-blur-[1px]"></div>
+          {/* Trust Center & Governance Section — The National Standard */}
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading font-black text-4xl text-navy-deep tracking-tighter flex items-center gap-4">
+                <ShieldCheck className="w-10 h-10 text-gold" /> ศูนย์ความเชื่อมั่นและการกำกับดูแล
+              </h2>
+              <div className="flex items-center gap-3 px-4 py-2 bg-teal-light border border-teal/20 rounded-full">
+                <div className="w-2.5 h-2.5 rounded-full bg-teal animate-pulse" />
+                <span className="text-[11px] font-black text-teal tracking-[0.1em] uppercase">สอดคล้องข้อกำกับ ETDA</span>
+              </div>
             </div>
 
-            <div className="relative z-10">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-                <div>
-                  <h3 className="font-heading font-black text-3xl text-white flex items-center gap-3 drop-shadow-xl">
-                    <Shield className="w-8 h-8 text-gold" /> ระบบคัดกรองความปลอดภัย 7 ชั้น (7-Layer Safety Pipeline)
-                  </h3>
-                  <p className="text-white font-bold text-sm mt-2 opacity-90 drop-shadow-md">สถาปัตยกรรมป้องกันข้อมูลระดับชาติ ออกแบบโดย Honest Predictor Enterprise</p>
-                </div>
-                <div className="flex items-center gap-3 px-6 py-3 bg-gold/20 border-2 border-gold/40 rounded-2xl backdrop-blur-xl shadow-2xl">
-                  <Lock className="w-5 h-5 text-gold" />
-                  <span className="text-xs font-black text-gold tracking-[0.2em] uppercase">Certified Security Layer</span>
-                </div>
-              </div>
-
-              {/* Dynamic Connector Path for 7 steps */}
-              <div className="hidden lg:block absolute top-[55px] left-[5%] right-[5%] h-[2px] bg-gradient-to-r from-blue-500 via-gold to-teal opacity-40">
-                <motion.div
-                  animate={{ x: ["0%", "100%"] }}
-                  transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
-                  className="w-60 h-full bg-white shadow-[0_0_30px_#fff] blur-[1px]"
+            {/* 7-Layer Legal Safety Pipeline — High-Impact Professional Version */}
+            <div className="relative border border-[#1E293B] rounded-[3rem] p-10 shadow-2xl overflow-hidden group min-h-[500px]">
+              {/* National Professional IT Background */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src={itBg}
+                  alt="High-Tech Pipeline Background"
+                  className="w-full h-full object-cover opacity-70 contrast-125 saturate-150"
                 />
+                <div className="absolute inset-0 bg-gradient-to-br from-navy-deep/95 via-navy-deep/80 to-[#0B1120]/90 backdrop-blur-[1px]"></div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
-                {[
-                  { step: "STEP 01", title: "PII Sanitization", desc: "ดักจับและปกปิดข้อมูลส่วนตัว (PDPA) ทันทีที่รับข้อมูล", icon: Shield, color: "text-blue-400", bg: "bg-blue-400/20" },
-                  { step: "STEP 02", title: "Intent Routing", desc: "วิเคราะห์เจตนาและส่งไปยัง AI Agent เฉพาะทางกฎหมาย", icon: Terminal, color: "text-blue-300", bg: "bg-blue-300/20" },
-                  { step: "STEP 03", title: "Hybrid Retrieval", desc: "สืบค้นกฎหมาย 160k+ ฉบับด้วย Semantic & Keyword", icon: Database, color: "text-gold", bg: "bg-gold/20" },
-                  { step: "STEP 04", title: "Context Filter", desc: "คัดกรองเฉพาะเนื้อหาที่เกี่ยวข้องและถูกต้องแม่นยำที่สุด", icon: Layers, color: "text-orange-400", bg: "bg-orange-400/20" },
-                  { step: "STEP 05", title: "AI Guardrails", desc: "AWS Bedrock ตรวจสอบระเบียบวินัย ความลำเอียง และพิษของคำ", icon: ShieldCheck, color: "text-teal", bg: "bg-teal/20" },
-                  { step: "STEP 06", title: "Halluc. Audit", desc: "ตรวจสอบการมโน และระบุมาตราอ้างอิงจริง 100%", icon: CheckCircle2, color: "text-purple-400", bg: "bg-purple-400/20" },
-                  { step: "STEP 07", title: "Crypto Log", desc: "ประทับตรา Hash ลง Audit Log ป้องกันการแก้ไขย้อนหลัง", icon: Hash, color: "text-red-400", bg: "bg-red-400/20" }
-                ].map((step, i) => (
-                  <motion.div key={step.title} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                    className="flex flex-col items-center text-center relative p-2">
-                    <div className={`w-16 h-16 rounded-[1.5rem] ${step.bg} border-2 border-white/20 flex items-center justify-center mb-4 shadow-2xl backdrop-blur-xl hover:scale-110 transition-transform`}>
-                      <step.icon className={`w-8 h-8 ${step.color} drop-shadow-[0_0_10px_currentColor]`} />
-                      <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-lg bg-black/60 border border-white/20 text-[9px] font-black tracking-widest ${step.color}`}>{step.step}</div>
-                    </div>
-                    <h4 className="text-white font-black text-[11px] mb-2 tracking-tighter uppercase drop-shadow-md">{step.title}</h4>
-                    <p className="text-white font-bold text-[10px] leading-relaxed drop-shadow-lg">{step.desc}</p>
-                  </motion.div>
-                ))}
+              <div className="relative z-10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+                  <div>
+                    <h3 className="font-heading font-black text-3xl text-white flex items-center gap-3 drop-shadow-xl">
+                      <Shield className="w-8 h-8 text-gold" /> {safetyPipeline?.title ?? "ระบบคัดกรองความปลอดภัย 7 ชั้น (7-Layer Safety Pipeline)"}
+                    </h3>
+                    <p className="text-white font-bold text-sm mt-2 opacity-90 drop-shadow-md">
+                      {safetyPipeline?.subtitle ?? "สถาปัตยกรรมป้องกันข้อมูลระดับชาติ ออกแบบโดย Honest Predictor Enterprise"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 px-6 py-3 bg-gold/20 border-2 border-gold/40 rounded-2xl backdrop-blur-xl shadow-2xl">
+                    <Lock className="w-5 h-5 text-gold" />
+                    <span className="text-xs font-black text-gold tracking-[0.2em] uppercase">{safetyPipeline?.badge ?? "ชั้นความปลอดภัยที่ผ่านการรับรอง"}</span>
+                  </div>
+                </div>
+
+                {/* Dynamic Connector Path for 7 steps — Slimmer and subtler for trust */}
+                <div className="hidden lg:block absolute top-[52px] left-[8%] right-[8%] h-[1px] bg-gradient-to-r from-blue-500/20 via-gold/40 to-teal/20 opacity-30">
+                  <motion.div
+                    animate={{ x: ["0%", "100%"] }}
+                    transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                    className="w-40 h-full bg-white shadow-[0_0_20px_#fff] blur-[1px]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6 lg:gap-2">
+                  {renderedSafetyLayers.map((step, i) => (
+                    <motion.button
+                      key={step.title}
+                      type="button"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => setSelectedSafetyLayer(step)}
+                      className="flex flex-col items-center text-center relative p-1 group/item rounded-2xl focus:outline-none focus:ring-2 focus:ring-gold/50"
+                    >
+                      <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-2xl ${step.bg} border border-white/20 flex items-center justify-center mb-4 shadow-2xl backdrop-blur-xl group-hover/item:scale-110 transition-transform relative`}>
+                        <step.icon className={`w-7 h-7 lg:w-8 lg:h-8 ${step.color} drop-shadow-[0_0_10px_currentColor]`} />
+                        <div className={`absolute -top-2 -right-2 px-1.5 py-0.5 rounded-md bg-navy-deep border border-white/30 text-[8px] font-black tracking-widest ${step.color} shadow-lg`}>STEP {step.step}</div>
+                      </div>
+                      <h4 className="text-white font-bold text-[10px] lg:text-[11px] mb-1.5 tracking-tighter uppercase drop-shadow-md">{step.title}</h4>
+                      <p className="text-white/80 font-medium text-[9px] lg:text-[10px] leading-snug px-1 max-w-[120px] mx-auto">{step.desc}</p>
+                      {step.runtimeStatus && (
+                        <span className={`mt-2 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] ${
+                          step.runtimeStatus === "healthy"
+                            ? "bg-teal/20 text-teal"
+                            : step.runtimeStatus === "warning"
+                              ? "bg-gold/20 text-gold"
+                              : "bg-white/10 text-white/80"
+                        }`}>
+                          {step.runtimeStatus}
+                        </span>
+                      )}
+                      <span className="mt-3 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white/90">
+                        ดูองค์ประกอบ
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex justify-center">
+                  <p className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-bold text-white/80 backdrop-blur-xl">
+                    คลิกแต่ละชั้นเพื่อดู input, control, service และ output ของสถาปัตยกรรมจริง
+                  </p>
+                </div>
+              </div>
+
+              {/* Pipeline Status Indicator with High Contrast */}
+              <div className="mt-12 flex items-center justify-center gap-8 py-5 bg-black/40 backdrop-blur-3xl rounded-[2rem] border border-white/10 shadow-2xl relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-[#00ff22] animate-pulse shadow-[0_0_15px_#00ff22]"></div>
+                    <span className="text-xs text-[#00ff22] font-black tracking-[0.2em] uppercase">การเข้ารหัสครบทุกช่วงทาง</span>
+                </div>
+                <div className="w-px h-6 bg-white/20"></div>
+                <div className="flex items-center gap-3">
+                  <Activity className="w-4 h-4 text-gold" />
+                  <span className="text-xs text-white font-black tracking-[0.2em] uppercase">ความสมบูรณ์ของระบบ: 99.99%</span>
+                </div>
               </div>
             </div>
 
-            {/* Pipeline Status Indicator with High Contrast */}
-            <div className="mt-12 flex items-center justify-center gap-8 py-5 bg-black/40 backdrop-blur-3xl rounded-[2rem] border border-white/10 shadow-2xl relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-[#00ff22] animate-pulse shadow-[0_0_15px_#00ff22]"></div>
-                <span className="text-xs text-[#00ff22] font-black tracking-[0.2em] uppercase">E2E Encryption Active</span>
+            {/* Technical Stats & Fairness */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> ตัวชี้วัดประสิทธิภาพ (เป้าหมาย)</h3>
+                <p className="text-xs text-muted-foreground mb-3">ค่าด้านล่างเป็นเป้าหมายจาก design doc — ค่าจริงจะวัดเมื่อ ingest ข้อมูลครบ</p>
+                <div className="space-y-3">
+                  {[
+                    { label: "Hit@3 Accuracy", value: "93.7%" },
+                    { label: "P95 Latency", value: "689ms" },
+                    { label: "อัตราคำตอบคลาดเคลื่อน", value: "< 1%" },
+                    { label: "การตรวจจับ PII ครบถ้วน", value: "99.2%" },
+                    { label: "คะแนนความเป็นธรรม CFS", value: "93.5%" },
+                    { label: "ดัชนีความซื่อสัตย์", value: "≥ 0.85" },
+                    { label: "สัดส่วนการค้นแบบผสม", value: "เน้นความหมายร่วมกับคำค้น" },
+                    { label: "กลไกจัดอันดับซ้ำ", value: "แบบจำลองความปลอดภัยขั้นสูง" },
+                  ].map(m => (
+                    <div key={m.label} className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">{m.label}</span>
+                      <span className="font-medium font-mono">{m.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="w-px h-6 bg-white/20"></div>
-              <div className="flex items-center gap-3">
-                <Activity className="w-4 h-4 text-gold" />
-                <span className="text-xs text-white font-black tracking-[0.2em] uppercase">System Integrity: 99.99%</span>
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+                <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-teal" /> การติดตามความเป็นธรรม CFS (เป้าหมาย)</h3>
+                <p className="text-xs text-muted-foreground mb-3">ค่าจริงจะคำนวณจาก search results — ใช้ POST /dashboard/fairness</p>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="p-3 bg-teal-light rounded-xl text-center"><div className="text-lg font-bold text-teal">93.5%</div><div className="text-[11px] text-muted-foreground">CFS</div></div>
+                  <div className="p-3 bg-gold-light rounded-xl text-center"><div className="text-lg font-bold text-accent-foreground">0.85</div><div className="text-[11px] text-muted-foreground">H-Score</div></div>
+                  <div className="p-3 bg-secondary rounded-xl text-center"><div className="text-lg font-bold text-primary">&lt;1%</div><div className="text-[11px] text-muted-foreground">คำตอบคลาดเคลื่อน</div></div>
+                </div>
+                <div className="space-y-2">
+                  {[{ label: "F_geo (ภูมิศาสตร์)", value: 92, color: "bg-teal" }, { label: "F_court (ประเภทศาล)", value: 88, color: "bg-primary" }, { label: "F_time (ช่วงเวลา)", value: 95, color: "bg-accent" }].map(b => (
+                    <div key={b.label} className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground w-36">{b.label}</span>
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden"><div className={`h-full ${b.color} rounded-full`} style={{ width: `${b.value}%` }} /></div>
+                      <span className="text-xs font-bold w-10 text-right">{b.value}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
+            </div>
+            
+            <div className="p-4 bg-teal/5 border border-teal/10 rounded-2xl">
+              <p className="text-xs text-muted-foreground flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-teal flex-shrink-0" />
+                ส่วนนี้แสดงข้อมูลจาก <strong>ศูนย์ความเชื่อมั่น</strong> เพื่อยืนยันความโปร่งใสและความรับผิดชอบของระบบตามมาตรฐาน ETDA RAAIA 3.1
+              </p>
             </div>
           </div>
-
-          {/* Technical Stats */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-              <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> Performance Metrics (เป้าหมาย)</h3>
-              <p className="text-xs text-muted-foreground mb-3">ค่าด้านล่างเป็นเป้าหมายจาก design doc — ค่าจริงจะวัดเมื่อ ingest ข้อมูลครบ</p>
-              <div className="space-y-3">
-                {[
-                  { label: "Hit@3 Accuracy", value: "93.7%" },
-                  { label: "P95 Latency", value: "689ms" },
-                  { label: "Hallucination Rate", value: "< 1%" },
-                  { label: "PII Recall", value: "99.2%" },
-                  { label: "CFS Fairness", value: "93.5%" },
-                  { label: "Honesty Score", value: "≥ 0.85" },
-                  { label: "Hybrid Search Ratio", value: "Semantic + Keyword Focus" },
-                  { label: "Reranking Engine", value: "Advanced Safety Models" },
-                ].map(m => (
-                  <div key={m.label} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">{m.label}</span>
-                    <span className="font-medium font-mono">{m.value}</span>
-                  </div>
-                ))}
+          <div className="space-y-6">
+            <div className="mb-6 max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold-light px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent-foreground">
+                <Sparkles className="h-4 w-4 text-gold" /> มิติประสิทธิภาพเชิงยุทธศาสตร์
               </div>
+              <h2 className="mt-4 font-heading text-4xl font-bold text-foreground">
+                5 มิติที่ระบบนี้ถูกออกแบบมาเพื่อเปลี่ยนเกม
+              </h2>
+              <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+                วิสัยทัศน์เบื้องหลังสถาปัตยกรรม: การนำ AI มาใช้ในกระบวนการยุติธรรมต้องวัดผลได้จริงในทุกมิติ
+              </p>
             </div>
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-              <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-teal" /> CFS Fairness Monitoring (เป้าหมาย)</h3>
-              <p className="text-xs text-muted-foreground mb-3">ค่าจริงจะคำนวณจาก search results — ใช้ POST /dashboard/fairness</p>
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="p-3 bg-teal-light rounded-xl text-center"><div className="text-lg font-bold text-teal">93.5%</div><div className="text-[11px] text-muted-foreground">CFS</div></div>
-                <div className="p-3 bg-gold-light rounded-xl text-center"><div className="text-lg font-bold text-accent-foreground">0.85</div><div className="text-[11px] text-muted-foreground">H-Score</div></div>
-                <div className="p-3 bg-secondary rounded-xl text-center"><div className="text-lg font-bold text-primary">&lt;1%</div><div className="text-[11px] text-muted-foreground">Halluc.</div></div>
-              </div>
-              <div className="space-y-2">
-                {[{ label: "F_geo (ภูมิศาสตร์)", value: 92, color: "bg-teal" }, { label: "F_court (ประเภทศาล)", value: 88, color: "bg-primary" }, { label: "F_time (ช่วงเวลา)", value: 95, color: "bg-accent" }].map(b => (
-                  <div key={b.label} className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-36">{b.label}</span>
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden"><div className={`h-full ${b.color} rounded-full`} style={{ width: `${b.value}%` }} /></div>
-                    <span className="text-xs font-bold w-10 text-right">{b.value}%</span>
+
+            <div className="grid gap-6 lg:grid-cols-5">
+              {strategicDimensions.map((dimension, index) => (
+                <motion.div
+                  key={dimension.title}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.08 }}
+                  className="flex h-full flex-col rounded-[2rem] border border-border bg-card p-6 shadow-card hover:-translate-y-1 hover:shadow-card-hover"
+                >
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <dimension.icon className="h-7 w-7" />
                   </div>
-                ))}
-              </div>
+                  <h3 className="font-heading text-xl font-bold text-foreground leading-tight">{dimension.title}</h3>
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{dimension.summary}</p>
+                  <div className="mt-5 space-y-2 flex-grow">
+                    {dimension.systems.map((system) => (
+                      <div key={system} className="rounded-xl bg-muted/60 px-3 py-2 text-[10px] font-bold text-foreground uppercase tracking-widest">
+                        {system}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-5 rounded-2xl border border-gold/20 bg-gold-light px-4 py-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-foreground/70">Impact KPI</p>
+                    <p className="mt-1 text-sm font-black text-accent-foreground">{dimension.target}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
 
           {/* LLM Providers */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-            <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><Cpu className="w-5 h-5 text-primary" /> Infrastructure Persistence & AWS Cloud Management</h3>
+            <h3 className="font-heading font-bold mb-4 flex items-center gap-2"><Cpu className="w-5 h-5 text-primary" /> การจัดการโครงสร้างพื้นฐานและคลาวด์ AWS</h3>
             <div className="flex flex-wrap gap-3">
               {["AWS EKS (Kubernetes)", "Amazon RDS (PostgreSQL)", "Amazon S3 (Data Lake)", "Amazon Bedrock (LLM)", "AWS Lambda (Async PII)"].map((p, i) => (
                 <div key={p} className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-sm">
@@ -1105,15 +1710,298 @@ const ITDashboard = () => {
             </div>
           </div>
 
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h3 className="font-heading font-bold flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-primary" /> แผนที่ความครอบคลุมของฝ่ายไอที
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  สรุปว่าหน้า /it มีอะไรอยู่แล้ว และส่วนที่เติมเพื่อปิด gap ด้าน observability, compliance, และ data management
+                </p>
+              </div>
+              {observabilityError && (
+                <div className="rounded-xl border border-gold/20 bg-gold/10 px-3 py-2 text-xs text-gold">
+                  {observabilityError}
+                </div>
+              )}
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {coverageGroups.map((group) => (
+                <div key={group.title} className="rounded-2xl border border-border bg-muted/15 p-4">
+                  <h4 className="text-sm font-semibold text-foreground">{group.title}</h4>
+                  <div className="mt-3 space-y-2">
+                    {group.items.map((item) => (
+                      <p key={item} className="text-sm text-muted-foreground">
+                        • {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-heading font-bold flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-primary" /> การประเมินย่อ NitiBench
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    ให้ IT กดรัน benchmark ย่อจากหน้าเดียวเพื่อดู Hit@K, MRR, citation accuracy และ latency
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void runBenchmarkSnapshot()}
+                    disabled={benchmarkLoading}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-navy-deep disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${benchmarkLoading ? "animate-spin" : ""}`} />
+                    {benchmarkReport ? "รันใหม่" : "รัน snapshot"}
+                  </button>
+                  <a
+                    href="/benchmark"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
+                  >
+                    เปิดหน้าเต็ม
+                  </a>
+                </div>
+              </div>
+              {benchmarkError && (
+                <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive">
+                  {benchmarkError}
+                </div>
+              )}
+              {!benchmarkReport ? (
+                <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted/10 p-5 text-sm text-muted-foreground">
+                  ยังไม่มี benchmark snapshot ในหน้านี้ กดรันเพื่อดึงผลลัพธ์ล่าสุดจาก backend
+                </div>
+              ) : (
+                <>
+                  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <Stat icon={BarChart3} value={`${(benchmarkReport.hit_at_3 * 100).toFixed(1)}%`} label="Hit@3" color="text-primary" />
+                    <Stat icon={Activity} value={benchmarkReport.mrr.toFixed(3)} label="MRR" color="text-teal" />
+                    <Stat icon={CheckCircle2} value={`${(benchmarkReport.avg_citation_accuracy * 100).toFixed(0)}%`} label="Citation" color="text-accent-foreground" />
+                    <Stat icon={Cpu} value={`${benchmarkReport.avg_latency_ms.toFixed(0)}ms`} label="Latency" color="text-gold" />
+                  </div>
+                  <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-4">
+                    <div className="grid gap-3 md:grid-cols-3">
+                      <MiniMetric label="Hit@1" value={`${(benchmarkReport.hit_at_1 * 100).toFixed(1)}%`} />
+                      <MiniMetric label="Hit@5" value={`${(benchmarkReport.hit_at_5 * 100).toFixed(1)}%`} />
+                      <MiniMetric label="Hallucination" value={`${(benchmarkReport.hallucination_rate * 100).toFixed(1)}%`} />
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                    ครอบคลุม {benchmarkReport.total_cases} กรณี จากชุดทดสอบตามการสำรวจผู้ใช้
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-heading font-bold flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-teal" /> ภาพรวมการกำกับการใช้ AI
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    รวม release guard, governance และ RAG quality ที่ IT ต้องใช้เวลาตรวจ production readiness
+                  </p>
+                </div>
+                <a
+                  href="/responsible-ai"
+                  className="rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
+                >
+                  เปิดหน้าการกำกับการใช้ AI
+                </a>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <MiniMetric
+                  label="Release Guard"
+                  value={releaseGuardSummary ? `${releaseGuardSummary.passedChecks}/${releaseGuardSummary.totalChecks}` : "—"}
+                  note={releaseGuard?.passed ? "passed" : "waiting"}
+                />
+                <MiniMetric
+                  label="Ethics Compliance"
+                  value={evaluationMetrics?.governance.ethics_compliance_pct ?? "—"}
+                  note={evaluationMetrics?.governance.audit_chain_valid ? "audit chain valid" : "audit chain unknown"}
+                />
+                <MiniMetric
+                  label="Source Attribution"
+                  value={evaluationMetrics?.rag.source_attribution_pct ?? "—"}
+                  note={`avg confidence ${evaluationMetrics ? Math.round(evaluationMetrics.rag.avg_confidence * 100) : "—"}%`}
+                />
+                <MiniMetric
+                  label="Expert Review"
+                  value={evaluationMetrics?.governance.expert_review_pct ?? "—"}
+                  note={`circuit breaker ${evaluationMetrics?.governance.circuit_breaker_triggers ?? "—"} ครั้ง`}
+                />
+              </div>
+              <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-4">
+                  <p className="text-xs font-medium text-foreground">รายการตรวจปล่อยใช้งานล่าสุด</p>
+                <div className="mt-3 space-y-2">
+                  {(releaseGuard?.checks ?? []).slice(0, 4).map((check) => (
+                    <div key={check.name} className="flex items-start justify-between gap-3 rounded-xl bg-card px-3 py-2">
+                      <div>
+                        <p className="text-sm text-foreground">{check.name}</p>
+                        <p className="text-xs text-muted-foreground">{check.detail}</p>
+                      </div>
+                      <span className={`rounded-full px-2 py-1 text-[11px] font-medium ${check.passed ? "bg-teal/10 text-teal" : "bg-destructive/10 text-destructive"}`}>
+                        {check.passed ? "ผ่าน" : "ไม่ผ่าน"}
+                      </span>
+                    </div>
+                  ))}
+                  {(releaseGuard?.checks ?? []).length === 0 && (
+                    <p className="text-sm text-muted-foreground">ยังไม่มี release guard snapshot จาก backend</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+              <h3 className="font-heading font-bold flex items-center gap-2">
+                <Database className="w-5 h-5 text-primary" /> ภาพรวมชั้นข้อมูล
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                สิ่งที่ IT ต้องเห็นเพื่อจัดการ data ingestion, corpus growth และความพร้อมของ asset ทั้งระบบ
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                <MiniMetric label="PDF Corpus" value={systemStats ? String(systemStats.actual.pdf_files) : "—"} />
+                <MiniMetric label="HF Datasets" value={systemStats ? String(systemStats.actual.hf_datasets) : "—"} />
+                <MiniMetric label="Audit Rows" value={systemStats ? String(systemStats.actual.audit_entries) : "—"} />
+                <MiniMetric label="Tests" value={systemStats ? String(systemStats.actual.total_tests) : "—"} />
+              </div>
+              <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-4">
+                <p className="text-xs font-medium text-foreground">สถิติกราฟความรู้</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <MiniMetric label="Nodes" value={graphStats ? String(graphStats.total_nodes) : "—"} />
+                  <MiniMetric label="Edges" value={graphStats ? String(graphStats.total_edges) : "—"} />
+                </div>
+                <div className="mt-3 space-y-2">
+                  {topNodeTypes.length > 0 ? topNodeTypes.map(([nodeType, count]) => (
+                    <div key={nodeType} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{nodeType}</span>
+                      <span className="font-medium text-foreground">{count}</span>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground">ยังไม่มี node ใน knowledge graph ตอนนี้</p>
+                  )}
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {graphStats?.storage_mode ? `การจัดเก็บ ${graphStats.storage_mode}` : (systemStats?.phase ?? "รอข้อมูลสถิติจากระบบหลังบ้าน")}
+                  {graphStats?.persisted_at ? ` • บันทึกล่าสุด ${new Date(graphStats.persisted_at).toLocaleString("th-TH")}` : ""}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
+              <h3 className="font-heading font-bold flex items-center gap-2">
+                <Shield className="w-5 h-5 text-teal" /> ตัวติดตามการปกปิด PII
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                เปลี่ยนจาก sandbox ทดลอง เป็น runtime monitor สำหรับดู recall, leakage และจำนวน PII ที่ระบบปกปิดต่อเนื่อง
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                <MiniMetric label="Precision" value={evaluationMetrics?.privacy.pii_precision_pct ?? "—"} />
+                <MiniMetric label="Recall" value={evaluationMetrics?.privacy.pii_recall_pct ?? "—"} />
+                <MiniMetric label="Leakage" value={evaluationMetrics?.privacy.pii_leakage_pct ?? "—"} />
+                <MiniMetric label="Masked Total" value={evaluationMetrics ? String(evaluationMetrics.privacy.total_pii_masked) : "—"} />
+              </div>
+              <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-4">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <MiniMetric
+                    label="การรั่วไหล PII ล่าสุด"
+                    value={liveMetrics ? String(liveMetrics.ai_metrics.pii_leak_count) : "—"}
+                    note={evaluationMetrics?.privacy.pdpa_compliant ? "PDPA compliant" : "ต้องตรวจสอบเพิ่ม"}
+                  />
+                  <MiniMetric
+                    label="รูปแบบ PII"
+                    value={systemStats ? String(systemStats.actual.pii_patterns) : "—"}
+                    note="กฎการปกปิดข้อมูลสำหรับงานกฎหมายไทย"
+                  />
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  ค่า precision/recall มาจาก evaluation pipeline ส่วน live leak count มาจาก runtime metrics ช่วงล่าสุด
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-card overflow-hidden">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="font-heading font-bold flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-primary" /> ระดับชั้นข้อมูลและตารางสิทธิ์เข้าถึง
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  มุมมองที่ IT ยังขาด: ข้อมูลแต่ละชั้นเป็นอะไร ใครเข้าถึงได้ และคุณภาพข้อมูลที่แต่ละ role มองเห็นตาม Lake Formation RBAC
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  source: {accessMatrix?.source ?? "backend unavailable"}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium">Classification</th>
+                    <th className="px-4 py-3 text-left font-medium">Detail</th>
+                    {(accessMatrix?.role_order ?? []).map((role) => (
+                      <th key={role} className="px-4 py-3 text-center font-medium">{accessMatrix?.role_labels?.[role] ?? role}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {classificationMatrix.map((entry) => (
+                    <tr key={entry.classification} className="hover:bg-muted/40">
+                      <td className="px-4 py-3 align-top">
+                        <div className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary inline-block">
+                          {entry.label}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{entry.detail}</td>
+                      {entry.roles.map((roleInfo) => (
+                        <td key={`${entry.classification}-${roleInfo.role}`} className="px-4 py-3 text-center">
+                          <span className={`inline-flex rounded-full px-2 py-1 text-[11px] font-medium ${roleInfo.allowed ? "bg-teal/10 text-teal" : "bg-destructive/10 text-destructive"}`}>
+                            {roleInfo.allowed ? "อนุญาต" : "ไม่อนุญาต"}
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-5">
+              {roleQualityLevels.map((role) => (
+                <div key={role.role} className="rounded-xl border border-border bg-muted/10 p-3">
+                  <p className="text-xs text-muted-foreground">{role.label}</p>
+                  <p className="mt-2 text-xl font-bold text-foreground">{role.quality}</p>
+                  <div className="mt-2 h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${role.quality}%` }} />
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">ระดับคุณภาพข้อมูล</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Audit Log */}
           <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
             <div className="p-5 border-b border-border flex items-center justify-between">
               <div>
-                <h3 className="font-heading font-bold flex items-center gap-2"><Hash className="w-5 h-5 text-primary" /> Secure Auditing Log</h3>
+                <h3 className="font-heading font-bold flex items-center gap-2"><Hash className="w-5 h-5 text-primary" /> บันทึกการตรวจสอบย้อนหลังแบบปลอดภัย</h3>
                 <p className="mt-1 text-xs text-muted-foreground">filter/search ตาม action, agent role, case type และคำค้นจาก query preview</p>
               </div>
               <div className="text-right">
-                <span className="block text-xs text-muted-foreground font-mono">Cryptographic Verification | {chainValid === null ? "..." : chainValid ? "✅ Valid" : "❌ Broken"}</span>
+                <span className="block text-xs text-muted-foreground font-mono">การยืนยันเชิงเข้ารหัส | {chainValid === null ? "..." : chainValid ? "✅ สมบูรณ์" : "❌ ผิดปกติ"}</span>
                 <span className="mt-1 block text-xs text-muted-foreground">ทั้งหมด {auditTotal} รายการ</span>
               </div>
             </div>
@@ -2079,6 +2967,99 @@ const ITDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+      <Dialog open={Boolean(selectedSafetyLayer)} onOpenChange={(open) => {
+        if (!open) {
+          setSelectedSafetyLayer(null);
+        }
+      }}>
+        <DialogContent className="max-w-5xl border border-border bg-card">
+          {selectedSafetyLayer && (
+            <>
+              <DialogHeader>
+                <div className="mb-4 flex items-center gap-3">
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${selectedSafetyLayer.bg} border border-border`}>
+                    <selectedSafetyLayer.icon className={`h-7 w-7 ${selectedSafetyLayer.color}`} />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                      Step {selectedSafetyLayer.step} · {selectedSafetyLayer.architectureLabel}
+                    </div>
+                    <DialogTitle className="mt-1 text-2xl">
+                      {selectedSafetyLayer.title}
+                    </DialogTitle>
+                    <DialogDescription className="mt-2 max-w-3xl text-sm leading-relaxed">
+                      {selectedSafetyLayer.desc} จุดประสงค์ของชั้นนี้คือ {selectedSafetyLayer.purpose}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-2xl border border-border bg-muted/20 p-5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">Input ที่รับเข้ามา</p>
+                  <div className="mt-3 space-y-2">
+                    {selectedSafetyLayer.inputs.map((item) => (
+                      <p key={item} className="text-sm leading-relaxed text-foreground">
+                        • {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-border bg-muted/20 p-5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">Control Logic</p>
+                  <div className="mt-3 space-y-2">
+                    {selectedSafetyLayer.controls.map((item) => (
+                      <p key={item} className="text-sm leading-relaxed text-foreground">
+                        • {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-border bg-muted/20 p-5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">Output ที่ส่งต่อ</p>
+                  <div className="mt-3 space-y-2">
+                    {selectedSafetyLayer.outputs.map((item) => (
+                      <p key={item} className="text-sm leading-relaxed text-foreground">
+                        • {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-border bg-muted/20 p-5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">Runtime Services</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {selectedSafetyLayer.services.map((service) => (
+                      <span key={service} className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-bold text-primary">
+                        {service}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-gold/20 bg-gold/5 p-4">
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  มุมมองนี้ออกแบบเพื่อให้ฝ่าย IT และ Mentor เห็นว่าแต่ละชั้นไม่ได้เป็นแค่ชื่อบน diagram แต่มี
+                  input, control, service และ output ที่ตรวจสอบย้อนหลังได้จริงในสถาปัตยกรรมหลังบ้าน
+                </p>
+                {selectedSafetyLayer.runtimeEvidence && (
+                  <div className="mt-4 grid gap-2 md:grid-cols-2">
+                    {Object.entries(selectedSafetyLayer.runtimeEvidence).map(([key, value]) => (
+                      <div key={key} className="rounded-xl border border-border bg-background px-3 py-2">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{key}</p>
+                        <p className="mt-1 text-sm font-medium text-foreground break-all">{String(value)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
       <Dialog open={confirmRetryFailedOpen} onOpenChange={setConfirmRetryFailedOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -2148,6 +3129,14 @@ const Stat = ({ icon: Icon, value, label, color }: { icon: typeof Database; valu
     <div className={`font-heading text-2xl font-bold ${color}`}>{value}</div>
     <div className="text-xs text-muted-foreground mt-1">{label}</div>
   </motion.div>
+);
+
+const MiniMetric = ({ label, value, note }: { label: string; value: string; note?: string }) => (
+  <div className="rounded-xl border border-border bg-card p-3">
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="mt-2 text-lg font-bold text-foreground">{value}</p>
+    {note ? <p className="mt-1 text-[11px] text-muted-foreground">{note}</p> : null}
+  </div>
 );
 
 export default ITDashboard;

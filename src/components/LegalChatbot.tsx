@@ -174,13 +174,13 @@ const LegalChatbot = () => {
       <AnimatePresence>
         {!open && (
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-            className="fixed bottom-4 right-4 z-50 flex flex-col items-center gap-1 cursor-pointer group" onClick={() => setOpen(true)}>
-            <motion.div initial={{ opacity: 0, y: 10 }} className="bg-card border border-border rounded-2xl px-4 py-3 shadow-lg mb-1 max-w-[200px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <p className="text-sm font-medium">สวัสดีครับ! 🙏</p>
-              <p className="text-xs text-muted-foreground mt-0.5">มีคำถามกฎหมายไหม? กดคุยได้เลย</p>
+            className="fixed bottom-3 right-3 z-40 flex flex-col items-center gap-0 cursor-pointer group" onClick={() => setOpen(true)}>
+            <motion.div initial={{ opacity: 0, y: 10 }} className="bg-card border border-border rounded-xl px-3 py-2 shadow-lg mb-1 max-w-[160px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <p className="text-[10px] font-medium">สวัสดีครับ! 🙏</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">กดคุยกับน้องซื่อสัตย์ได้เลย</p>
             </motion.div>
-            <BotAvatar size="w-40 h-40" />
-            <span className="bg-navy-deep text-white text-[10px] font-black tracking-widest uppercase px-5 py-2 rounded-full shadow-2xl -mt-2 relative z-10 border border-white/10">น้องซื่อสัตย์ AI</span>
+            <BotAvatar size="w-16 h-16" />
+            <span className="bg-navy-deep text-white text-[8px] font-black tracking-wider uppercase px-3 py-1 rounded-full shadow-xl -mt-1 relative z-10 border border-white/10">น้องซื่อสัตย์ AI</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -189,45 +189,46 @@ const LegalChatbot = () => {
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-6rem)] bg-card border border-border rounded-2xl shadow-lg flex flex-col overflow-hidden">
-            {/* Header with Premium Institutional Style & Background Image */}
-            <div className="relative overflow-hidden shadow-lg">
+            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-6rem)] bg-card border border-border/60 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden">
+            {/* Header — Clean & Trustworthy */}
+            <div className="relative overflow-hidden">
               {/* Background Image with Overlay */}
               <div className="absolute inset-0 z-0">
                 <img 
                   src={chatbotHeaderBg} 
-                  alt="Legal Background" 
-                  className="w-full h-full object-cover opacity-60 contrast-110"
+                  alt="" 
+                  className="w-full h-full object-cover opacity-50"
                 />
-                <div className="absolute inset-0 bg-gradient-to-br from-navy-deep/90 via-navy-deep/70 to-primary/40" />
+                <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/95 via-navy-deep/85 to-primary/60" />
               </div>
               
-              <div className="relative p-5 flex items-center gap-4 z-10">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gold/20 rounded-full blur-md animate-pulse"></div>
-                  <BotAvatar size="w-14 h-14" />
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-navy-deep rounded-full shadow-lg z-20" />
+              <div className="relative p-4 flex items-center gap-3 z-10">
+                <div className="relative flex-shrink-0">
+                  <BotAvatar size="w-12 h-12" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 border-2 border-navy-deep rounded-full z-20" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-heading font-bold text-white text-lg tracking-tight drop-shadow-md">
-                    น้องซื่อสัตย์ <span className="text-[10px] bg-gold text-navy-deep font-bold px-1.5 py-0.5 rounded ml-1 uppercase">Official AI</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading font-bold text-white text-base tracking-tight">น้องซื่อสัตย์</span>
+                    <span className="text-[9px] bg-gold/90 text-navy-deep font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">AI</span>
                   </div>
-                  <p className="text-xs text-white/80 font-medium italic drop-shadow-sm">Judicial Assistant System</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] text-green-300 font-mono flex items-center gap-1 bg-black/20 px-2 py-0.5 rounded-full border border-white/10">
-                      <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${backendStatus.online ? "bg-green-400" : "bg-red-400"}`} /> {backendStatus.online ? "BACKEND ONLINE" : "OFFLINE MODE"}
+                  <p className="text-[11px] text-white/70 mt-0.5">ผู้ช่วยกฎหมายไทย • Smart LegalGuard</p>
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <span className={`text-[9px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full ${backendStatus.online ? "bg-green-500/20 text-green-300 border border-green-400/20" : "bg-red-500/20 text-red-300 border border-red-400/20"}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${backendStatus.online ? "bg-green-400 animate-pulse" : "bg-red-400"}`} />
+                      {backendStatus.online ? "RAG พร้อมใช้งาน" : "โหมดออฟไลน์"}
                     </span>
-                    <span className="text-[10px] text-white/80 font-mono flex items-center gap-1 bg-black/20 px-2 py-0.5 rounded-full border border-white/10">
-                      <Database className="w-3 h-3" /> L2 {memoryStats.l2Count} / L5 {memoryStats.l5Count}
+                    <span className="text-[9px] text-white/50 flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                      <ShieldCheck className="w-3 h-3" /> Anti-Hallucination 7 ชั้น
                     </span>
                   </div>
                 </div>
                 <button 
                   onClick={() => setOpen(false)} 
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 hover:text-gold transition-all text-white backdrop-blur-sm border border-white/10" 
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all text-white/80 hover:text-white" 
                   aria-label="ปิดแชท"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -249,13 +250,18 @@ const LegalChatbot = () => {
                   <div className="mb-5 flex flex-wrap items-center justify-center gap-2 text-[11px]">
                     <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 ${backendStatus.online ? "bg-teal/10 text-teal" : "bg-accent/10 text-accent-foreground"}`}>
                       <ShieldCheck className="h-3.5 w-3.5" />
-                      {backendStatus.online ? "Connected to backend" : "Fallback knowledge mode"}
+                      {backendStatus.online ? "Connected to backend" : "Local guidance mode"}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-500">
                       <Database className="h-3.5 w-3.5" />
-                      Layered memory active
+                      Workspace memory active
                     </span>
                   </div>
+                  {!backendStatus.online && (
+                    <p className="mt-2 text-[11px] text-slate-500">
+                      โหมดนี้ใช้คำตอบสำรองในเครื่องเพื่อสาธิตประสบการณ์ใช้งาน ไม่ใช่ผลจาก retrieval backend แบบเต็มรูป
+                    </p>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     {QUICK_ACTIONS.map((a, idx) => (
@@ -265,7 +271,7 @@ const LegalChatbot = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.05 }}
                         onClick={() => sendMessage(a.label)}
-                        className="bg-white hover:bg-gold/5 border border-slate-200 hover:border-gold/30 rounded-2xl p-4 text-left transition-all duration-300 group shadow-sm hover:shadow-md"
+                        className="bg-white hover:bg-gold/5 border border-slate-200 hover:border-gold/30 rounded-2xl p-4 text-left transition-all duration-300 group shadow-sm hover:shadow-md hover:-translate-y-0.5"
                       >
                         <span className="text-2xl block mb-2 group-hover:scale-110 transition-transform">{a.emoji}</span>
                         <p className="text-[11px] font-black leading-tight text-navy-deep group-hover:text-primary mb-1 uppercase tracking-tight">{a.label}</p>
@@ -333,12 +339,12 @@ const LegalChatbot = () => {
             )}
 
             {/* Input */}
-            <div className="p-3 border-t border-border">
+            <div className="p-3 border-t border-border/60 bg-gradient-to-t from-white to-transparent">
               <form onSubmit={e => { e.preventDefault(); sendMessage(); }} className="flex items-center gap-2">
                 <input type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="พิมพ์คำถามของคุณ..."
                   className="flex-1 bg-muted border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 <button type="submit" disabled={!input.trim() || isLoading}
-                  className="p-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-navy-deep transition-colors disabled:opacity-50"><Send className="w-4 h-4" /></button>
+                  className="p-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-navy-deep transition-all disabled:opacity-50 shadow-sm hover:shadow-md"><Send className="w-4 h-4" /></button>
               </form>
               <p className="text-xs text-muted-foreground mt-1.5 text-center">⚖️ ข้อมูลเบื้องต้น กรุณาปรึกษาทนายความสำหรับกรณีจริง</p>
             </div>

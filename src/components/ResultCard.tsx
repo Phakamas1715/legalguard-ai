@@ -120,7 +120,7 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
-      className="bg-card border border-border rounded-2xl shadow-card hover:shadow-card-hover transition-shadow overflow-hidden"
+      className="float-card bg-card border border-border/70 rounded-2xl shadow-card hover:shadow-xl transition-all overflow-hidden"
     >
       <div className="p-5 md:p-6">
         {/* Header row */}
@@ -211,10 +211,10 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 pt-2 border-t border-border">
+        <div className="flex items-center gap-3 pt-3 border-t border-border/60">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-navy-deep transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-navy-deep transition-colors group/expand"
           >
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             {expanded ? "ย่อ" : "อ่านเพิ่มเติม"}
@@ -256,14 +256,14 @@ const ResultCard = ({ result, index, role, query, isBookmarked, onToggleBookmark
       </div>
 
       {/* Confidence bar */}
-      <div className="h-1 bg-muted">
+      <div className="h-1.5 bg-muted">
         <div
-          className={`h-full transition-all ${
+          className={`h-full transition-all duration-500 ${
             result.confidence >= 0.7
-              ? "bg-confidence-high"
+              ? "bg-gradient-to-r from-confidence-high to-confidence-high/60"
               : result.confidence >= 0.4
-              ? "bg-confidence-medium"
-              : "bg-confidence-low"
+              ? "bg-gradient-to-r from-confidence-medium to-confidence-medium/60"
+              : "bg-gradient-to-r from-confidence-low to-confidence-low/60"
           }`}
           style={{ width: `${result.confidence * 100}%` }}
         />
@@ -281,7 +281,7 @@ const TraceabilityItem = ({
   value: string;
   icon: ReactNode;
 }) => (
-  <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+  <div className="rounded-xl border border-border/60 bg-gradient-to-br from-muted/40 to-muted/20 px-3 py-2.5 transition-all hover:shadow-sm">
     <div className="mb-1 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
       {icon}
       {label}

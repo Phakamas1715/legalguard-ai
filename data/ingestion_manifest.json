@@ -1,0 +1,2923 @@
+{
+  "generated_at": "2026-04-07T19:20:29.095216Z",
+  "root": "data",
+  "summary": {
+    "total_files": 321,
+    "actions": {
+      "ingest": 208,
+      "manual_review": 106,
+      "skip": 7
+    },
+    "pipelines": {
+      "none": 7,
+      "ocr_candidate": 3,
+      "office_conversion_required": 101,
+      "pdf_rag_pipeline": 208,
+      "structured_judgment_json": 2
+    },
+    "file_types": {
+      ".1": 1,
+      ".bak-20260407-demo": 1,
+      ".db": 1,
+      ".doc": 95,
+      ".docx": 3,
+      ".html": 1,
+      ".jpg": 3,
+      ".json": 5,
+      ".pdf": 208,
+      ".ts": 1,
+      ".xlsx": 2
+    }
+  },
+  "entries": [
+    {
+      "path": "data/LegalGuard_Competition_Blueprint.docx",
+      "file_type": ".docx",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/LegalGuard_Dev_Architecture.html",
+      "file_type": ".html",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "html_reference",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/case_2568_sample.json",
+      "file_type": ".json",
+      "pipeline": "structured_judgment_json",
+      "action": "ingest",
+      "source_code": "A4.9",
+      "document_type": "judgment",
+      "reason": "structured legal JSON พร้อมแปลงเป็น chunk และดัชนีค้นหาได้ทันที"
+    },
+    {
+      "path": "data/court_judgments_sample.json",
+      "file_type": ".json",
+      "pipeline": "structured_judgment_json",
+      "action": "ingest",
+      "source_code": "A4.1",
+      "document_type": "judgment",
+      "reason": "structured legal JSON พร้อมแปลงเป็น chunk และดัชนีค้นหาได้ทันที"
+    },
+    {
+      "path": "data/ingestion_manifest.json",
+      "file_type": ".json",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "LOCAL.misc",
+      "document_type": "json_reference",
+      "reason": "ไฟล์ระบบ, cache, vector snapshot หรือ artifact ภายใน ไม่ควร ingest เข้าคลังค้นหา"
+    },
+    {
+      "path": "data/jobs.db",
+      "file_type": ".db",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "LOCAL.misc",
+      "document_type": "unknown",
+      "reason": "ไฟล์ระบบ, cache, vector snapshot หรือ artifact ภายใน ไม่ควร ingest เข้าคลังค้นหา"
+    },
+    {
+      "path": "data/jobs.db.bak-20260407-demo",
+      "file_type": ".bak-20260407-demo",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "LOCAL.misc",
+      "document_type": "unknown",
+      "reason": "ไฟล์ระบบ, cache, vector snapshot หรือ artifact ภายใน ไม่ควร ingest เข้าคลังค้นหา"
+    },
+    {
+      "path": "data/mockResults.ts",
+      "file_type": ".ts",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "LOCAL.misc",
+      "document_type": "unknown",
+      "reason": "ไฟล์ระบบ, cache, vector snapshot หรือ artifact ภายใน ไม่ควร ingest เข้าคลังค้นหา"
+    },
+    {
+      "path": "data/openlaw_fetched.json",
+      "file_type": ".json",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "OPENLAW.cache",
+      "document_type": "json_reference",
+      "reason": "ไฟล์ระบบ, cache, vector snapshot หรือ artifact ภายใน ไม่ควร ingest เข้าคลังค้นหา"
+    },
+    {
+      "path": "data/openlaw_vectors.json",
+      "file_type": ".json",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "OPENLAW.vector-cache",
+      "document_type": "json_reference",
+      "reason": "ไฟล์ระบบ, cache, vector snapshot หรือ artifact ภายใน ไม่ควร ingest เข้าคลังค้นหา"
+    },
+    {
+      "path": "data/กลยุทธ์_AI_Dataset_และการทำ_Fine-tuning_บน_AWS_สำหรับ_LegalGuard_AI.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "reference",
+      "reason": "เป็น PDF แต่ยังไม่แมป source_code ชัดเจนสำหรับ ingest อัตโนมัติ ควรตรวจชุดข้อมูลก่อน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/00 สารบัญแบบพิมพ์ศาล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/01 แบบฟอร์มปกหน้าสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/02 แบบฟอร์มหน้าสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/03 แบบฟอร์มสารบาญ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/04 แบบพิมพ์คำฟ้อง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/05 แบบฟอร์มคำขอท้ายคำฟ้องแพ่ง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/06 แบบฟอร์มคำขอท้ายคำฟ้องอาญา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/07 แบบฟอร์มคำร้อง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/08 แบบฟอร์มบัญชีทรัพย์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/09 แบบฟอร์มใบแต่งทนายความ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/10 แบบฟอร์มใบมอบฉันทะ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/11 แบบฟอร์มคำให้การจำเลย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/12 แบบฟอร์มหมายเรียกคดีมโนสาเร่หรือคดีไม่มีข้อยุ่งยาก.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/13 แบบฟอร์มหมายเรียกคดีแพ่งสามัญ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/14 แบบฟอร์มหมายเรียกคดีอาญา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/15 ทวิ แบบฟอร์มบัญชีพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/15 แบบฟอร์มบัญชีพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/16 แบบฟอร์มหมายเรียกพยานบุคคล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/17 แบบฟอร์มหมายเรียกพยานเอกสารหรือพยานวัตถุ(คดีอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/18 แบบฟอร์มหมายเรียกพยานเอกสารหรือพยานวัตถุ(คดีแพ่ง).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/19 ตรีแบบฟอร์มหมายนัดไต่สวนมูลฟ้อง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/19 ทวิแบบฟอร์มคำสั่งเรียกตัวความ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/19 แบบฟอร์มหมายนัด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/20 ทวิ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/20 แบบฟอร์มบันทึกเจ้าหน้าที่เรื่องให้พยานทราบกำหนดนัด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/21 คำเบิกความพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/21 ทวิบันทึกถ้อยคำแทนการซักถามพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/21 บันทึกถ้อยคำพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/22 แบบฟอร์มรายงานกระบวนพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/23 แบบฟอร์มรายงานเจ้าหน้าที่.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/24 แบบฟอร์มหมายยึดทรัพย์ชั่วคราว.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/25 แบบฟอร์มหมายอายัดทรัพย์ชั่วคราว(ถึงลูกหนี้ของจำเลย).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/26 แบบฟอร์มหมายอายัดชั่วคราว(ถึงจำเลย).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/27 แบบฟอร์มหมายอายัดชั่วคราว(ถึงเจ้าพนักงานบังคับคดี).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/28 แบบฟอร์มห้ามชั่วคราว.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/29 แบบฟอร์มสัญญาประนีประนอมยอมความ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/30 แบบฟอร์มคำพิพากษาตามยอม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/31 แบบฟอร์มคำพิพากษา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/32 แบบฟอร์มอุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/33 แบบฟอร์มท้ายอุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/34 แบบฟอร์มคำแก้อุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/35 แบบฟอร์มท้ายคำแก้อุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/36 แบบฟอร์มฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/37 แบบฟอร์มท้ายฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/38 แบบฟอร์มคำแก้ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/39 แบบฟอร์มท้ายคำแก้ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/40 ก.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/40 พ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/40.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/40_40ก_40พ แบบฟอร์ม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/41 แบบฟอร์มคำบังคับ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/42 แบบฟอร์มหมายบังคับคดี พ18.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/42 แบบฟอร์มหมายบังคับคดี.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/44 แบบฟอร์มหนังสือขอแรงทนาย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/45 แบบฟอร์มหนังสือส่งสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/46 แบบฟอร์มหนังสือส่งสำนวนคืน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/47 ทวิ หมายจับ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/47 หมายจับระหว่างพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/48 ทวิ หมายค้น.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/48 แบบฟอร์มหมายค้นระหว่างพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/49 แบบฟอร์มหมายขังระหว่างสอบสวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/50 แบบฟอร์มหมายขังระหว่างไต่สวนมูลฟ้องหรือพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/51 ตรี แบบฟอร์มหมายจำคุกระหว่างอุธรณ์ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/51 ทวิ แบบฟอร์มหมายกักขังระหว่างอุธรณ์ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/51 แบบฟอร์มหมายจำคุกและกักขังระหว่างอุธรณ์ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/52 ทวิ แบบฟอร์มหมายกักขังเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/52 แบบฟอร์มหมายจำคุกและกักขังเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/52ตรี แบบฟอร์มหมายจำคุกเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/52ทวิ แบบฟอร์มหมายกักขังเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/53 แบบฟอร์มหมายปล่อย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/54 แบบฟอร์มหมายปล่อยหมายเรียกเจ้าพนักงานหรือบุคคล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/55 แบบฟอร์มหนังสือส่งตัวเด็กไปไว้โรงเรียนหรือสถานที่ฝึกและอบรม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/56 ทวิหมายแจ้งคำสั่งยกเลิกการเบิกตัวผู้ต้องขังมาศาล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/56 แบบฟอร์มคำสั่งเบิกตัวผู้ต้องขัง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/57 คำร้องขอปล่อยชั่วคราว.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/58 สัญญาประกัน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/59 แบบฟอร์มทัณฑ์บน(ตามมาตรา46แห่งประมวลกฎหมายอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/60 แบบฟอร์มสัญญาประกัน(ตามมาตรา46แห่งประมวลกฎหมายอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/61 แบบฟอร์มสัญญาวางข้อกำหนดให้ระวังเด็ก(ตามมาตรา74(2)แห่งประมวลกฎหมายอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/62 แบบฟอร์มใบรับหนังสือหรือหมาย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/63 แบบฟอร์มใบรับของกลาง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/65 แบบฟอร์มใบรับเอกสารและหลักฐาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/66 ใบรับสิ่งของ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/68 รายงานความประจำวัน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/72 แบบฟอร์มวันทำการและวันหยุดราชการศาล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/75 แบบฟอร์มบัญชีค่าฤชาธรรมเนียม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/76แบบฟอร์มปกหลังสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/ข1แบบฟอร์มบันทึกฟ้องด้วยวาจา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/ข2แบบฟอร์มบันทึกคำให้การจำเลยด้วยวาจา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/ข3แบบฟอร์มบันทึกคำเบิกความของพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/ข4แบบฟอร์มบันทึกคำฟ้อง คำสารภาพคำพิพากษาตาม พรบ จัดตั้งศาลแขวงมาตรา20.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/ข5แบบฟอร์มบันทึกคำสั่งให้คืนตัวผู้ต้องหาตาม พรบ จัดตั้งศาลแขวงมาตรา20_prom.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/คป1 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/คป2 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/คป3 แบบฟอร์มคำสั่งอนุญาตให้เข้าไปสถานที่ในเวลากลางคืน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/คป4 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/คป5 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ PDF/คป6 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/00 สารบัญแบบพิมพ์ศาล.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/01 แบบฟอร์มปกหน้าสำนวน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/02 แบบฟอร์มหน้าสำนวน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/03 แบบฟอร์มสารบาญ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/04 แบบพิมพ์คำฟ้อง.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/05 แบบฟอร์มคำขอท้ายคำฟ้องแพ่ง.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/06 แบบฟอร์มคำขอท้ายคำฟ้องอาญา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/07 แบบฟอร์มคำร้อง.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/08 แบบฟอร์มบัญชีทรัพย์.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/09 แบบฟอร์มใบแต่งทนายความ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/10 แบบฟอร์มใบมอบฉันทะ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/11 แบบฟอร์มคำให้การจำเลย.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/12 แบบฟอร์มหมายเรียกคดีมโนสาเร่หรือคดีไม่มีข้อยุ่งยาก.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/13 แบบฟอร์มหมายเรียกคดีแพ่งสามัญ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/14 แบบฟอร์มหมายเรียกคดีอาญา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/15 ทวิ แบบฟอร์มบัญชีพยาน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/15 แบบฟอร์มบัญชีพยาน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/16 แบบฟอร์มหมายเรียกพยานบุคคล.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/17 แบบฟอร์มหมายเรียกพยานเอกสารหรือพยานวัตถุ(คดีอาญา).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/18 แบบฟอร์มหมายเรียกพยานเอกสารหรือพยานวัตถุ(คดีแพ่ง).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/19 ตรีแบบฟอร์มหมายนัดไต่สวนมูลฟ้อง.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/19 ทวิแบบฟอร์มคำสั่งเรียกตัวความ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/19 แบบฟอร์มหมายนัด.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/20 ทวิ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/20 แบบฟอร์มบันทึกเจ้าหน้าที่เรื่องให้พยานทราบกำหนดนัด.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/21 คำเบิกความพยาน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/21 ทวิบันทึกถ้อยคำแทนการซักถามพยาน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/22 แบบฟอร์มรายงานกระบวนพิจารณา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/23 แบบฟอร์มรายงานเจ้าหน้าที่.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/24 แบบฟอร์มหมายยึดทรัพย์ชั่วคราว.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/25 แบบฟอร์มหมายอายัดทรัพย์ชั่วคราว(ถึงลูกหนี้ของจำเลย).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/26 แบบฟอร์มหมายอายัดชั่วคราว(ถึงจำเลย).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/27 แบบฟอร์มหมายอายัดชั่วคราว(ถึงเจ้าพนักงานบังคับคดี).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/28 แบบฟอร์มห้ามชั่วคราว.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/29 แบบฟอร์มสัญญาประนีประนอมยอมความ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/30 แบบฟอร์มคำพิพากษาตามยอม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/31 แบบฟอร์มคำพิพากษา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/32 แบบฟอร์มอุทธรณ์.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/33 แบบฟอร์มท้ายอุทธรณ์.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/34 แบบฟอร์มคำแก้อุทธรณ์.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/35 แบบฟอร์มท้ายคำแก้อุทธรณ์.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/36 แบบฟอร์มฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/37 แบบฟอร์มท้ายฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/38 แบบฟอร์มคำแก้ฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/39 แบบฟอร์มท้ายคำแก้ฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/40 ก.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/40 พ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/40.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/41 แบบฟอร์มคำบังคับ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/42 แบบฟอร์มหมายบังคับคดี พ18.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/42 แบบฟอร์มหมายบังคับคดี.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/44 แบบฟอร์มหนังสือขอแรงทนาย.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/45 แบบฟอร์มหนังสือส่งสำนวน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/46 แบบฟอร์มหนังสือส่งสำนวนคืน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/47 ทวิ หมายจับ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/47 หมายจับระหว่างพิจารณา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/48 ทวิ หมายค้น.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/48 แบบฟอร์มหมายค้นระหว่างพิจารณา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/49 แบบฟอร์มหมายขังระหว่างสอบสวน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/50 แบบฟอร์มหมายขังระหว่างไต่สวนมูลฟ้องหรือพิจารณา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/51 ตรี แบบฟอร์มหมายจำคุกระหว่างอุธรณ์ฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/51 ทวิ แบบฟอร์มหมายกักขังระหว่างอุธรณ์ฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/51 แบบฟอร์มหมายจำคุกและกักขังระหว่างอุธรณ์ฎีกา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/52 ทวิ แบบฟอร์มหมายกักขังเมื่อคดีถึงที่สุด.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/52 แบบฟอร์มหมายจำคุกและกักขังเมื่อคดีถึงที่สุด.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/52ตรี แบบฟอร์มหมายจำคุกเมื่อคดีถึงที่สุด.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/52ทวิ แบบฟอร์มหมายกักขังเมื่อคดีถึงที่สุด.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/53 แบบฟอร์มหมายปล่อย.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/54 แบบฟอร์มหมายปล่อยหมายเรียกเจ้าพนักงานหรือบุคคล.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/55 แบบฟอร์มหนังสือส่งตัวเด็กไปไว้โรงเรียนหรือสถานที่ฝึกและอบรม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/56 ทวิหมายแจ้งคำสั่งยกเลิกการเบิกตัวผู้ต้องขังมาศาล.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/56 แบบฟอร์มคำสั่งเบิกตัวผู้ต้องขัง.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/57 คำร้องขอปล่อยชั่วคราว68.docx",
+      "file_type": ".docx",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/58 สัญญาประกัน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/59 แบบฟอร์มทัณฑ์บน(ตามมาตรา46แห่งประมวลกฎหมายอาญา).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/60 แบบฟอร์มสัญญาประกัน(ตามมาตรา46แห่งประมวลกฎหมายอาญา).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/61 แบบฟอร์มสัญญาวางข้อกำหนดให้ระวังเด็ก(ตามมาตรา74(2)แห่งประมวลกฎหมายอาญา).doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/62 แบบฟอร์มใบรับหนังสือหรือหมาย.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/63 แบบฟอร์มใบรับของกลาง.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/65 แบบฟอร์มใบรับเอกสารและหลักฐาน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/66 ใบรับสิ่งของ.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/68 รายงานความประจำวัน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/72 แบบฟอร์มวันทำการและวันหยุดราชการศาล.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/75 แบบฟอร์มบัญชีค่าฤชาธรรมเนียม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/76แบบฟอร์มปกหลังสำนวน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/ข1แบบฟอร์มบันทึกฟ้องด้วยวาจา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/ข2แบบฟอร์มบันทึกคำให้การจำเลยด้วยวาจา.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/ข3แบบฟอร์มบันทึกคำเบิกความของพยาน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/ข4แบบฟอร์มบันทึกคำฟ้อง คำสารภาพคำพิพากษาตาม พรบ จัดตั้งศาลแขวงมาตรา20.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.1",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/ข5แบบฟอร์มบันทึกคำสั่งให้คืนตัวผู้ต้องหาตาม พรบ จัดตั้งศาลแขวงมาตรา20_prom.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/คป1 แบบให้ผู้อำนวยการลงนาม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/คป2 แบบให้ผู้อำนวยการลงนาม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/คป3 แบบฟอร์มคำสั่งอนุญาตให้เข้าไปสถานที่ในเวลากลางคืน.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/คป4 แบบให้ผู้อำนวยการลงนาม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/คป5 แบบให้ผู้อำนวยการลงนาม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A1 แบบฟอร์มและเอกสารทางคดี/แบบพิมพ์-แบบฟอร์มศาลทั้งหมด (A1.1 แบบฟอร์มคำฟ้อง e-Filing และ A1.6 แบบฟอร์มเอกสารประกอบ)/รูปแบบ Word/คป6 แบบให้ผู้อำนวยการลงนาม.doc",
+      "file_type": ".doc",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "A1.6",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A2 คู่มือและแนวทางปฏิบัติ/คู่มือ E-Filing  Version 3 - ประชาชน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A2.1",
+      "document_type": "guide",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A7 ข้อมูลอ้างอิงและช่องทางติดต่อ/ที่อยู่ เบอร์โทรศัพท์ติดต่อ และเขตอำนาจศาลของหน่วยงานศาลยุติธรรมทั่วประเทศ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A7.1",
+      "document_type": "reference",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A7 ข้อมูลอ้างอิงและช่องทางติดต่อ/ศาลที่เปิด e-Filing - คดีผู้บริโภค.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A7.2",
+      "document_type": "reference",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A7 ข้อมูลอ้างอิงและช่องทางติดต่อ/ศาลที่เปิด e-Filing - จัดการมรดก.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A7.2",
+      "document_type": "reference",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /A7 ข้อมูลอ้างอิงและช่องทางติดต่อ/ศาลยุติธรรมชุมชน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "A7.3",
+      "document_type": "reference",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/00 สารบัญแบบพิมพ์ศาล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/01 แบบฟอร์มปกหน้าสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/02 แบบฟอร์มหน้าสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/03 แบบฟอร์มสารบาญ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/04 แบบพิมพ์คำฟ้อง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/05 แบบฟอร์มคำขอท้ายคำฟ้องแพ่ง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/06 แบบฟอร์มคำขอท้ายคำฟ้องอาญา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/07 แบบฟอร์มคำร้อง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/08 แบบฟอร์มบัญชีทรัพย์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/09 แบบฟอร์มใบแต่งทนายความ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/10 แบบฟอร์มใบมอบฉันทะ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/11 แบบฟอร์มคำให้การจำเลย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/12 แบบฟอร์มหมายเรียกคดีมโนสาเร่หรือคดีไม่มีข้อยุ่งยาก.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/13 แบบฟอร์มหมายเรียกคดีแพ่งสามัญ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/14 แบบฟอร์มหมายเรียกคดีอาญา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/15 ทวิ แบบฟอร์มบัญชีพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/15 แบบฟอร์มบัญชีพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/16 แบบฟอร์มหมายเรียกพยานบุคคล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/17 แบบฟอร์มหมายเรียกพยานเอกสารหรือพยานวัตถุ(คดีอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/18 แบบฟอร์มหมายเรียกพยานเอกสารหรือพยานวัตถุ(คดีแพ่ง).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/19 ตรีแบบฟอร์มหมายนัดไต่สวนมูลฟ้อง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/19 ทวิแบบฟอร์มคำสั่งเรียกตัวความ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/19 แบบฟอร์มหมายนัด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/20 ทวิ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/20 แบบฟอร์มบันทึกเจ้าหน้าที่เรื่องให้พยานทราบกำหนดนัด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/21 คำเบิกความพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/21 ทวิบันทึกถ้อยคำแทนการซักถามพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/21 บันทึกถ้อยคำพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/22 แบบฟอร์มรายงานกระบวนพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/23 แบบฟอร์มรายงานเจ้าหน้าที่.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/24 แบบฟอร์มหมายยึดทรัพย์ชั่วคราว.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/25 แบบฟอร์มหมายอายัดทรัพย์ชั่วคราว(ถึงลูกหนี้ของจำเลย).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/26 แบบฟอร์มหมายอายัดชั่วคราว(ถึงจำเลย).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/27 แบบฟอร์มหมายอายัดชั่วคราว(ถึงเจ้าพนักงานบังคับคดี).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/28 แบบฟอร์มห้ามชั่วคราว.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/29 แบบฟอร์มสัญญาประนีประนอมยอมความ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/30 แบบฟอร์มคำพิพากษาตามยอม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/31 แบบฟอร์มคำพิพากษา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/32 แบบฟอร์มอุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/33 แบบฟอร์มท้ายอุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/34 แบบฟอร์มคำแก้อุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/35 แบบฟอร์มท้ายคำแก้อุทธรณ์.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/36 แบบฟอร์มฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/37 แบบฟอร์มท้ายฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/38 แบบฟอร์มคำแก้ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/39 แบบฟอร์มท้ายคำแก้ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/40 ก.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/40 พ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/40.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/40_40ก_40พ แบบฟอร์ม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/41 แบบฟอร์มคำบังคับ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/42 แบบฟอร์มหมายบังคับคดี พ18.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/42 แบบฟอร์มหมายบังคับคดี.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/44 แบบฟอร์มหนังสือขอแรงทนาย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/45 แบบฟอร์มหนังสือส่งสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/46 แบบฟอร์มหนังสือส่งสำนวนคืน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/47 ทวิ หมายจับ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/47 หมายจับระหว่างพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/48 ทวิ หมายค้น.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/48 แบบฟอร์มหมายค้นระหว่างพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/49 แบบฟอร์มหมายขังระหว่างสอบสวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/50 แบบฟอร์มหมายขังระหว่างไต่สวนมูลฟ้องหรือพิจารณา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/51 ตรี แบบฟอร์มหมายจำคุกระหว่างอุธรณ์ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/51 ทวิ แบบฟอร์มหมายกักขังระหว่างอุธรณ์ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/51 แบบฟอร์มหมายจำคุกและกักขังระหว่างอุธรณ์ฎีกา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/52 ทวิ แบบฟอร์มหมายกักขังเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/52 แบบฟอร์มหมายจำคุกและกักขังเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/52ตรี แบบฟอร์มหมายจำคุกเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/52ทวิ แบบฟอร์มหมายกักขังเมื่อคดีถึงที่สุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/53 แบบฟอร์มหมายปล่อย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/54 แบบฟอร์มหมายปล่อยหมายเรียกเจ้าพนักงานหรือบุคคล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/55 แบบฟอร์มหนังสือส่งตัวเด็กไปไว้โรงเรียนหรือสถานที่ฝึกและอบรม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/56 ทวิหมายแจ้งคำสั่งยกเลิกการเบิกตัวผู้ต้องขังมาศาล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/56 แบบฟอร์มคำสั่งเบิกตัวผู้ต้องขัง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/57 คำร้องขอปล่อยชั่วคราว.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/58 สัญญาประกัน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/59 แบบฟอร์มทัณฑ์บน(ตามมาตรา46แห่งประมวลกฎหมายอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/60 แบบฟอร์มสัญญาประกัน(ตามมาตรา46แห่งประมวลกฎหมายอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/61 แบบฟอร์มสัญญาวางข้อกำหนดให้ระวังเด็ก(ตามมาตรา74(2)แห่งประมวลกฎหมายอาญา).pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/62 แบบฟอร์มใบรับหนังสือหรือหมาย.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/63 แบบฟอร์มใบรับของกลาง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/65 แบบฟอร์มใบรับเอกสารและหลักฐาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/66 ใบรับสิ่งของ.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/68 รายงานความประจำวัน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/72 แบบฟอร์มวันทำการและวันหยุดราชการศาล.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/75 แบบฟอร์มบัญชีค่าฤชาธรรมเนียม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/76แบบฟอร์มปกหลังสำนวน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/ข1แบบฟอร์มบันทึกฟ้องด้วยวาจา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/ข2แบบฟอร์มบันทึกคำให้การจำเลยด้วยวาจา.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/ข3แบบฟอร์มบันทึกคำเบิกความของพยาน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/ข4แบบฟอร์มบันทึกคำฟ้อง คำสารภาพคำพิพากษาตาม พรบ จัดตั้งศาลแขวงมาตรา20.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.1",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/ข5แบบฟอร์มบันทึกคำสั่งให้คืนตัวผู้ต้องหาตาม พรบ จัดตั้งศาลแขวงมาตรา20_prom.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/คป1 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/คป2 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/คป3 แบบฟอร์มคำสั่งอนุญาตให้เข้าไปสถานที่ในเวลากลางคืน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/คป4 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/คป5 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/คป6 แบบให้ผู้อำนวยการลงนาม.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B1.6",
+      "document_type": "court_form",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B1 แบบฟอร์มและเอกสารทางคดีศาลปกครอง/แบบคำร้อง ปค.1",
+      "file_type": ".1",
+      "pipeline": "none",
+      "action": "skip",
+      "source_code": "B1.1",
+      "document_type": "unknown",
+      "reason": "ไม่อยู่ใน pipeline การ ingest ปัจจุบันของระบบ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B2 คู่มือและแนวทางปฏิบัติ/FAQ คดีปกครอง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B2.1",
+      "document_type": "guide",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B2 คู่มือและแนวทางปฏิบัติ/Flow Chart ขั้นตอนฟ้องคดี.jpg",
+      "file_type": ".jpg",
+      "pipeline": "ocr_candidate",
+      "action": "manual_review",
+      "source_code": "B2.2",
+      "document_type": "image_reference",
+      "reason": "ไฟล์ภาพต้องผ่าน OCR และตรวจคุณภาพก่อน ingest อัตโนมัติ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B2 คู่มือและแนวทางปฏิบัติ/คดีปกครอง vs แพ่ง vs อาญา.jpg",
+      "file_type": ".jpg",
+      "pipeline": "ocr_candidate",
+      "action": "manual_review",
+      "source_code": "B2.2",
+      "document_type": "image_reference",
+      "reason": "ไฟล์ภาพต้องผ่าน OCR และตรวจคุณภาพก่อน ingest อัตโนมัติ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B2 คู่มือและแนวทางปฏิบัติ/คู่มือสำหรับประชาชน.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B2.1",
+      "document_type": "guide",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B2 คู่มือและแนวทางปฏิบัติ/พ.ร.บ.จัดตั้งศาลปกครอง พ.ศ. 2542.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B2.3",
+      "document_type": "guide",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B3 กฎหมายและระเบียบ/Academic_140225_141554.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B3.1",
+      "document_type": "regulation",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B3 กฎหมายและระเบียบ/ระเบียบศาลปกครองสูงสุด.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "ingest",
+      "source_code": "B3.1",
+      "document_type": "regulation",
+      "reason": "PDF รองรับการสกัดข้อความ, chunk, mask PII, embed และทำดัชนีได้ใน pipeline ปัจจุบัน"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /B3 กฎหมายและระเบียบ/อัตราค่าธรรมเนียม.jpg",
+      "file_type": ".jpg",
+      "pipeline": "ocr_candidate",
+      "action": "manual_review",
+      "source_code": "B3.1",
+      "document_type": "image_reference",
+      "reason": "ไฟล์ภาพต้องผ่าน OCR และตรวจคุณภาพก่อน ingest อัตโนมัติ"
+    },
+    {
+      "path": "data/ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน /สารบัญ - ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน_.xlsx",
+      "file_type": ".xlsx",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "spreadsheet",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/รายงานวิจัย_Agentic_AI_Governance_ฉบับเต็ม.docx",
+      "file_type": ".docx",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "office_document",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    },
+    {
+      "path": "data/สรุปสถาปัตยกรรม_AWS_แบบบูรณาการสำหรับ_LegalGuard_AI_ศาลยุติธรรมและศาลปกครอง.pdf",
+      "file_type": ".pdf",
+      "pipeline": "pdf_rag_pipeline",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "reference",
+      "reason": "เป็น PDF แต่ยังไม่แมป source_code ชัดเจนสำหรับ ingest อัตโนมัติ ควรตรวจชุดข้อมูลก่อน"
+    },
+    {
+      "path": "data/สารบัญ - ข้อมูลเกี่ยวกับกระบวนการยุติธรรม เพื่อประกอบการแข่งขัน .xlsx",
+      "file_type": ".xlsx",
+      "pipeline": "office_conversion_required",
+      "action": "manual_review",
+      "source_code": "LOCAL.misc",
+      "document_type": "spreadsheet",
+      "reason": "ต้องแปลงเป็น PDF/JSON มาตรฐานหรือมี parser เพิ่มก่อนจึง ingest ได้อย่างน่าเชื่อถือ"
+    }
+  ]
+}

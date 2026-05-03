@@ -68,6 +68,43 @@ class TestLiveMetrics:
         assert metrics["requests_1h"] == 0
         assert metrics["requests_24h"] == 0
 
+    def test_safety_pipeline_returns_all_7_layers(self):
+        svc = self._make_service()
+        payload = svc.get_safety_pipeline()
+
+        assert payload["architecture_version"] == "backend_runtime_v1"
+        assert payload["integrity"]["audit_chain_valid"] is True
+        assert len(payload["layers"]) == 7
+        assert payload["layers"][0]["title"] == "PII Sanitization"
+        assert payload["layers"][5]["layer_code"] == "L6"
+
+    def test_safety_pipeline_includes_runtime_evidence(self):
+        svc = self._make_service()
+        payload = svc.get_safety_pipeline()
+
+        first = payload["layers"][0]
+        assert first["runtime_status"] == "healthy"
+        assert "runtime_evidence" in first
+        assert "avg_honesty_score" in first["runtime_evidence"]
+
+    def test_agentic_architecture_returns_all_components(self):
+        svc = self._make_service()
+        payload = svc.get_agentic_architecture()
+
+        assert payload["architecture_version"] == "backend_runtime_v1"
+        assert payload["integrity"]["audit_chain_valid"] is True
+        assert len(payload["components"]) == 6
+        assert payload["components"][0]["title"] == "Role-Aware Access Layer"
+        assert "relation_to_safety_pipeline" in payload
+
+    def test_agentic_architecture_includes_runtime_evidence(self):
+        svc = self._make_service()
+        payload = svc.get_agentic_architecture()
+
+        first = payload["components"][0]
+        assert "runtime_evidence" in first
+        assert "system_health" in first["runtime_evidence"]
+
     def test_recent_audit_entries_returns_rows(self):
         svc = self._make_service()
         payload = svc.get_recent_audit_entries(limit=2)

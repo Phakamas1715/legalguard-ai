@@ -193,6 +193,27 @@ class TestEmbedBatch:
         results = service.embed_batch([])
         assert results == []
 
+    def test_bedrock_cohere_batch_shape(self) -> None:
+        settings = _make_settings(
+            embedding_provider="bedrock",
+            bedrock_embedding_model="cohere.embed-multilingual-v3",
+            bedrock_cohere_dimensions=4,
+        )
+        svc = EmbeddingService(settings)
+
+        fake_body = MagicMock()
+        fake_body.read.return_value = json.dumps(
+            {"embeddings": [[0.1, 0.2, 0.3, 0.4], [0.5, 0.6, 0.7, 0.8]]}
+        ).encode()
+        fake_client = MagicMock()
+        fake_client.invoke_model.return_value = {"body": fake_body}
+        svc._client = fake_client
+
+        results = svc.embed_batch(["หนึ่ง", "สอง"], batch_size=2)
+
+        assert results == [[0.1, 0.2, 0.3, 0.4], [0.5, 0.6, 0.7, 0.8]]
+        fake_client.invoke_model.assert_called_once()
+
 
 # ---------------------------------------------------------------------------
 # Retry logic
@@ -332,7 +353,10 @@ class TestUnknownProvider:
 
 class TestBedrockProvider:
     def test_embed_bedrock_single(self) -> None:
-        settings = _make_settings(embedding_provider="bedrock")
+        settings = _make_settings(
+            embedding_provider="bedrock",
+            bedrock_embedding_model="amazon.titan-embed-text-v2:0",
+        )
         svc = EmbeddingService(settings)
 
         fake_body = MagicMock()

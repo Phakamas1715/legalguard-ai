@@ -1,10 +1,8 @@
 """Embedding service for LegalGuard AI.
 
-Supports OpenAI, Amazon Bedrock Titan, and Typhoon Embeddings.
+Supports OpenAI, Amazon Bedrock (Titan/Cohere), and Typhoon Embeddings.
 Provides single and batch embedding with retry logic (exponential backoff).
 """
-from __future__ import annotations
-
 from __future__ import annotations
 
 import json
@@ -28,6 +26,10 @@ class EmbeddingSettings(BaseSettings):
     embedding_model: str = "text-embedding-3-small"
     embedding_dimensions: int = 1536
     aws_region: str = "ap-southeast-1"
+    bedrock_embedding_model: str = "cohere.embed-multilingual-v3"
+    bedrock_cohere_dimensions: int = 1024
+    bedrock_cohere_input_type: str = "search_document"
+    bedrock_cohere_truncate: str = "END"
     typhoon_api_key: str = ""
     typhoon_embed_url: str = "https://api.opentyphoon.ai/v1"
     typhoon_embed_model: str = "typhoon-v2-embed-multilingual"
@@ -37,7 +39,7 @@ class EmbeddingSettings(BaseSettings):
 
 
 class EmbeddingService:
-    """Generate text embeddings via OpenAI or Amazon Bedrock Titan."""
+    """Generate text embeddings via OpenAI or Amazon Bedrock models."""
 
     MAX_RETRIES = 3
     BASE_DELAY = 1.0  # seconds
@@ -100,7 +102,7 @@ class EmbeddingService:
             last_exc,
             len(texts),
         )
-        dims = self._settings.embedding_dimensions
+        dims = self._expected_dimensions()
         return [[0.0] * dims for _ in texts]
 
     def _backoff_delay(self, attempt: int, exc: Exception) -> float:
@@ -146,7 +148,7 @@ class EmbeddingService:
         except Exception as exc:
             raise _classify_openai_error(exc) from exc
 
-    # -- Amazon Bedrock Titan -------------------------------------------------
+    # -- Amazon Bedrock -------------------------------------------------------
 
     def _get_bedrock_client(self) -> Any:
         if self._client is None:
@@ -158,8 +160,19 @@ class EmbeddingService:
         return self._client
 
     def _embed_bedrock(self, texts: list[str]) -> list[list[float]]:
-        """Bedrock Titan Embeddings — one call per text (no native batch API)."""
         client = self._get_bedrock_client()
+        model_id = self._settings.bedrock_embedding_model
+        if model_id.startswith("cohere.embed"):
+            return self._embed_bedrock_cohere(client, texts, model_id)
+        return self._embed_bedrock_titan(client, texts, model_id)
+
+    def _embed_bedrock_titan(
+        self,
+        client: Any,
+        texts: list[str],
+        model_id: str,
+    ) -> list[list[float]]:
+        """Bedrock Titan Embeddings — one call per text (no native batch API)."""
         results: list[list[float]] = []
         for text in texts:
             try:
@@ -171,7 +184,7 @@ class EmbeddingService:
                     }
                 )
                 response = client.invoke_model(
-                    modelId="amazon.titan-embed-text-v2:0",
+                    modelId=model_id,
                     contentType="application/json",
                     accept="application/json",
                     body=body,
@@ -181,6 +194,35 @@ class EmbeddingService:
             except Exception as exc:
                 raise _classify_bedrock_error(exc) from exc
         return results
+
+    def _embed_bedrock_cohere(
+        self,
+        client: Any,
+        texts: list[str],
+        model_id: str,
+    ) -> list[list[float]]:
+        """Bedrock Cohere Embeddings — multilingual batch embedding."""
+        try:
+            body = json.dumps(
+                {
+                    "texts": texts,
+                    "input_type": self._settings.bedrock_cohere_input_type,
+                    "truncate": self._settings.bedrock_cohere_truncate,
+                }
+            )
+            response = client.invoke_model(
+                modelId=model_id,
+                contentType="application/json",
+                accept="application/json",
+                body=body,
+            )
+            resp_body = json.loads(response["body"].read())
+            embeddings = resp_body.get("embeddings") or resp_body.get("embeddings_floats")
+            if not isinstance(embeddings, list) or len(embeddings) != len(texts):
+                raise ValueError("Unexpected Cohere embedding response shape")
+            return embeddings
+        except Exception as exc:
+            raise _classify_bedrock_error(exc) from exc
 
 
     # -- Typhoon Embeddings (SCB 10X) ----------------------------------------
@@ -200,6 +242,14 @@ class EmbeddingService:
             return [item.embedding for item in response.data]
         except Exception as exc:
             raise _classify_openai_error(exc) from exc
+
+    def _expected_dimensions(self) -> int:
+        if (
+            self._settings.embedding_provider == "bedrock"
+            and self._settings.bedrock_embedding_model.startswith("cohere.embed")
+        ):
+            return self._settings.bedrock_cohere_dimensions
+        return self._settings.embedding_dimensions
 
     # -- WangchanBERTa (AIResearch — Thai BERT, 768-dim) ---------------------
 

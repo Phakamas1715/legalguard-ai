@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { AlertTriangle, BadgeCheck, Database, FileSearch, Info, Scale, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import heroImage from "@/assets/hero-courthouse.jpg";
 import SearchBar, { type SearchFilters } from "@/components/SearchBar";
 import ResultCard, { type SearchResult } from "@/components/ResultCard";
 import { SkeletonList } from "@/components/SkeletonCard";
@@ -21,17 +22,17 @@ const SEARCH_WORKSPACE_STORAGE_KEY = WORKSPACE_STORAGE_KEYS.search;
 const EMPTY_SEARCH_RESULTS: SearchResult[] = [];
 const TRUST_SIGNAL_COPY = [
   {
-    title: "Semantic Search",
+    title: "ค้นหาตามบริบท",
     detail: "ค้นหาตามบริบทกฎหมายและข้อเท็จจริง ไม่ใช่เฉพาะ keyword",
     icon: FileSearch,
   },
   {
-    title: "Source Traceability",
+    title: "ที่มาโปร่งใส",
     detail: "ผลลัพธ์แสดง source code, metadata และลิงก์ต้นฉบับเมื่อมีข้อมูล",
     icon: Database,
   },
   {
-    title: "Responsible Use",
+    title: "ใช้อย่างรับผิดชอบ",
     detail: "มีระดับความเชื่อถือและคำแนะนำการใช้งานทุกผลลัพธ์",
     icon: ShieldCheck,
   },
@@ -243,21 +244,21 @@ const SearchPage = () => {
 
   const roleLabels: Record<UserRole, string> = {
     citizen: "ประชาชนทั่วไป",
-    lawyer: "ทนายความ / นักกฎหมาย",
-    government: "เจ้าหน้าที่รัฐ",
-    judge: "ตุลาการ / ผู้พิพากษา",
+    government: "เจ้าหน้าที่ศาล / ธุรการ",
+    judge: "ผู้พิพากษา / ตุลาการ",
+    it: "ผู้ดูแลระบบ / IT Admin",
   };
   const roleHeadlines: Record<UserRole, string> = {
     citizen: "ค้นคำพิพากษาและข้อมูลกฎหมายพร้อมคำอธิบายที่เข้าใจง่าย",
-    lawyer: "ค้นคำพิพากษา ข้อกฎหมาย และบริบทคดีเพื่อใช้ประกอบการทำงานทางวิชาชีพ",
-    government: "สืบค้นข้อมูลกฎหมายและแนววินิจฉัยเพื่อประกอบการกลั่นกรองและบริหารงาน",
-    judge: "ค้นคดีคล้ายกัน ประเด็นข้อกฎหมาย และแนววินิจฉัยอย่างเป็นระบบ",
+    government: "สืบค้นข้อมูลกฎหมาย จัดการสำนวน และคัดกรองคำฟ้องเพื่อสนับสนุนงานธุรการศาล",
+    judge: "สืบค้นแนวคำพิพากษา ประเด็นข้อกฎหมาย และคดีคล้ายกันเพื่อประกอบการพิจารณา",
+    it: "ตรวจสอบความปลอดภัยของข้อมูล (Data Governance) และการทำงานของระบบ AI",
   };
   const roleDescriptions: Record<UserRole, string> = {
     citizen: "ระบบจะแสดงผลพร้อมระดับความเชื่อถือ แหล่งข้อมูล และคำแนะนำการใช้งาน เพื่อช่วยให้เริ่มต้นค้นข้อกฎหมายได้อย่างมั่นใจขึ้น",
-    lawyer: "ผลลัพธ์ถูกจัดลำดับพร้อม metadata และ source traceability เพื่อช่วยตรวจทานต่อกับคำพิพากษาฉบับเต็มและเอกสารสำนวนจริง",
-    government: "ออกแบบสำหรับงานค้นคืนข้อมูลจริงในระบบ พร้อมแสดงสถานะการอ้างอิงและข้อเสนอแนะก่อนนำไปใช้ในงานราชการหรือธุรการศาล",
-    judge: "สนับสนุนการเปรียบเทียบข้อกฎหมายและคดีคล้ายกัน โดยแสดงผลลัพธ์พร้อมระดับความเชื่อถือและคำแนะนำก่อนใช้อ้างอิง",
+    government: "ออกแบบสำหรับเจ้าหน้าที่ศาลและข้าราชการธุรการ รองรับงานรับคำฟ้อง คัดกรองเอกสาร ติดตามสถานะคดี และตรวจสอบ Audit Log",
+    judge: "สนับสนุนผู้พิพากษาและตุลาการในการเปรียบเทียบแนวคำพิพากษา วิเคราะห์ประเด็นข้อกฎหมาย และยกร่างคำพิพากษาเบื้องต้น (ต้องตรวจสอบก่อนใช้)",
+    it: "ศูนย์กลางการเฝ้าระวังความปลอดภัยของข้อมูล (PII Masking) และการตรวจสอบ Audit Logs เพื่อรับประกันความถูกต้องแม่นยำระดับองค์กร",
   };
 
   const lowConfidenceResults = sortedResults.filter((r) => r.confidence < 0.7);
@@ -280,8 +281,17 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <section className="bg-hero-gradient py-10 md:py-14">
-        <div className="container mx-auto px-4">
+      <section className="relative overflow-hidden pt-10 pb-12 md:pt-14 md:pb-16 transition-all duration-500">
+        {/* Background image with high-contrast overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={heroImage}
+            alt=""
+            className="w-full h-full object-cover scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-navy/95 via-navy/85 to-navy/75 border-b border-white/10" />
+        </div>
+        <div className="container relative z-10 mx-auto px-4">
           <div className="mx-auto mb-8 max-w-5xl text-center">
             <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-3 py-1 text-sm text-primary-foreground">
               <BadgeCheck className="h-4 w-4" />
@@ -294,6 +304,12 @@ const SearchPage = () => {
               {roleDescriptions[role]}
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Main Search Experience: Moved out for prominence */}
+      <section className="relative z-20 -mt-16 container mx-auto px-4 overflow-visible mb-8">
+        <div className="max-w-5xl mx-auto">
           <SearchBar
             onSearch={handleSearch}
             role={role}
@@ -301,24 +317,10 @@ const SearchPage = () => {
             initialQuery={query}
             initialFilters={filters}
           />
-          <div className="mx-auto mt-6 grid max-w-5xl gap-3 md:grid-cols-3">
-            {TRUST_SIGNAL_COPY.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-left backdrop-blur-md"
-              >
-                <div className="mb-2 flex items-center gap-2 text-primary-foreground">
-                  <item.icon className="h-4 w-4" />
-                  <span className="text-sm font-semibold">{item.title}</span>
-                </div>
-                <p className="text-sm leading-6 text-primary-foreground/75">{item.detail}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-8 flex-1">
+      <section className="container mx-auto px-4 py-6 flex-1">
         {!isLoading && errorMessage && (
           <div className="max-w-4xl mx-auto mb-6 rounded-3xl border border-destructive/20 bg-destructive/5 p-5">
             <div className="flex items-start gap-3">
@@ -392,7 +394,7 @@ const SearchPage = () => {
               <motion.div 
                 initial={{ opacity: 0, y: -20 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                className="mb-8 rounded-[2rem] border border-white/60 bg-white/40 p-6 shadow-lg shadow-navy/5 backdrop-blur-xl"
+                className="mb-8 rounded-[2rem] border border-white/60 bg-white/50 p-6 shadow-xl shadow-navy/5 backdrop-blur-xl relative overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2 text-sm font-bold tracking-tight text-navy">
@@ -400,7 +402,7 @@ const SearchPage = () => {
                     กระบวนการตรวจสอบผลลัพธ์
                   </div>
                   <div className="rounded-full bg-navy/5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-navy">
-                    CAL-130 Protected
+                    Governed Search Flow
                   </div>
                 </div>
                 
@@ -454,19 +456,19 @@ const SearchPage = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6 mt-8">
               {highConfidenceResults.map((r, i) => (
                 <ResultCard key={r.id} result={r} index={i} role={role} query={query} isBookmarked={isBookmarked(r.id)} onToggleBookmark={() => handleToggleBookmark(r)} />
               ))}
             </div>
 
             {lowConfidenceResults.length > 0 && (
-              <div className="mt-8">
-                <div className="flex items-center gap-2 p-4 bg-gold-light border border-accent/30 rounded-xl mb-4">
+              <div className="mt-12">
+                <div className="flex items-center gap-2 p-4 bg-gold-light border border-accent/30 rounded-xl mb-6">
                   <AlertTriangle className="w-5 h-5 text-accent flex-shrink-0" />
                   <p className="text-sm text-accent-foreground"><strong>ความมั่นใจต่ำกว่า 70%</strong> — โปรดตรวจสอบข้อมูลเพิ่มเติม</p>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {lowConfidenceResults.map((r, i) => (
                     <ResultCard key={r.id} result={r} index={i + highConfidenceResults.length} role={role} query={query} isBookmarked={isBookmarked(r.id)} onToggleBookmark={() => handleToggleBookmark(r)} />
                   ))}
@@ -561,7 +563,8 @@ const TrustSummaryCard = ({
   note: string;
   icon: ReactNode;
 }) => (
-    <div className="rounded-3xl border border-border bg-card p-5 shadow-card">
+    <div className="float-card rounded-3xl border border-border/60 bg-card p-5 shadow-card relative overflow-hidden">
+    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-gold to-teal" />
     <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
       {icon}
       {title}
