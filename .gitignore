@@ -28,3 +28,4 @@ dist-ssr
 .env.local
 .env.production
 backend/.env
+\n# AI and Editor config folders\n.kiro\n.claude\n.gemini
