@@ -95,59 +95,68 @@ const SearchBar = ({ onSearch, role, isLoading, initialQuery = "", initialFilter
     <div className="w-full max-w-4xl mx-auto">
       <form onSubmit={handleSubmit}>
         <div className="relative group">
-          <div className="absolute inset-0 bg-accent/20 rounded-[1.25rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-          <div className="relative flex items-center bg-card border-2 border-border rounded-[1.25rem] shadow-card group-focus-within:border-primary group-focus-within:shadow-lg group-focus-within:shadow-primary/10 transition-all duration-300 overflow-visible gradient-border">
-            <Search className="w-6 h-6 text-muted-foreground ml-5 flex-shrink-0" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={placeholders[role]}
-              className="flex-1 bg-transparent px-4 py-5 text-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-            />
-            {query && (
+          <div className="absolute inset-0 bg-primary/10 rounded-[1.5rem] blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+          
+          <div className="relative flex items-center h-[72px] bg-white/90 backdrop-blur-md border-2 border-border/80 rounded-[1.5rem] shadow-2xl group-focus-within:border-primary group-focus-within:shadow-primary/5 transition-all duration-500 overflow-hidden">
+            {/* Search Icon & Input Area */}
+            <div className="flex flex-1 items-center h-full gap-4 px-6">
+              <Search className="w-6 h-6 text-primary/60 group-focus-within:text-primary transition-colors" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={placeholders[role]}
+                className="flex-1 bg-transparent text-lg font-medium text-navy-deep placeholder:text-muted-foreground/50 focus:outline-none"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Action Buttons Area */}
+            <div className="flex items-center h-full p-1.5 gap-1.5 border-l border-border/40">
               <button
                 type="button"
-                onClick={() => setQuery("")}
-                className="p-2 text-muted-foreground hover:text-foreground mr-1"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`relative flex items-center justify-center gap-2.5 h-full px-6 rounded-[1rem] transition-all duration-300 ${
+                  showFilters 
+                  ? "bg-navy-deep text-white shadow-lg shadow-navy-deep/20" 
+                  : "text-navy-deep/70 hover:bg-slate-100 hover:text-navy-deep"
+                }`}
               >
-                <X className="w-5 h-5" />
+                <SlidersHorizontal className={`w-4.5 h-4.5 ${showFilters ? "rotate-90" : ""} transition-transform duration-300`} />
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] hidden sm:inline mt-0.5">ตัวกรอง</span>
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gold text-navy-deep text-[10px] font-black rounded-full flex items-center justify-center shadow-md border-2 border-white ring-1 ring-gold/20">
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`relative flex items-center justify-center gap-2 h-[52px] px-5 mr-1 rounded-xl transition-all duration-300 ${
-                showFilters 
-                ? "bg-accent text-accent-foreground shadow-lg shadow-gold/20" 
-                : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              <SlidersHorizontal className={`w-4.5 h-4.5 ${showFilters ? "animate-pulse" : ""}`} />
-              <span className="text-[11px] font-black uppercase tracking-[0.15em] hidden sm:inline leading-none mt-0.5">ตัวกรอง</span>
-              {activeFilterCount > 0 && (
-                <span className="w-5 h-5 bg-navy-deep text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-lg shrink-0">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-            <button
-              type="submit"
-              disabled={!query.trim() || isLoading}
-              className="shimmer-overlay flex items-center justify-center gap-2 bg-primary text-primary-foreground h-[72px] px-10 rounded-r-[1.1rem] font-bold text-base hover:bg-navy-deep transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[-10px_0_30px_rgba(0,0,0,0.1)]"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  <span className="leading-none">ค้นหา...</span>
-                </>
-              ) : (
-                <>
-                  <Search className="w-5 h-5" />
-                  <span className="leading-none">ค้นหา</span>
-                </>
-              )}
-            </button>
+
+              <button
+                type="submit"
+                disabled={!query.trim() || isLoading}
+                className="shimmer-overlay relative flex items-center justify-center gap-2.5 bg-primary text-primary-foreground h-full px-10 rounded-[1rem] font-black text-base hover:bg-navy-deep transition-all duration-300 disabled:opacity-50 shadow-lg shadow-primary/10"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-3 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    <span className="tracking-tight">กำลังค้นหา...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-5 h-5" />
+                    <span className="tracking-tight">ค้นหา</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
